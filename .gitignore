@@ -1,0 +1,35 @@
+# Visual Studio
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+out/
+build/
+Debug/
+Release/
+
+# NuGet
+*.nupkg
+packages/
+*.snupkg
+
+# Others
+*.log
+*.cache
+*.db
+*.mdb
+*.ldf
+*.mdf
+
+# Rider / JetBrains
+.idea/
+*.DotSettings.user
+
+# WinForms auto files
+*.Designer.cs
