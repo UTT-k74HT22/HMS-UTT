@@ -1,16 +1,39 @@
-namespace HospitalManagement;
+﻿using HospitalManagement.configuration;
+using HospitalManagement.repository.impl;
+using Microsoft.Extensions.Configuration;
 
-static class Program
+internal static class Program
 {
-    [STAThread]
     static void Main()
     {
-        // To customize application configuration such as set high DPI settings or default font,
-        // see https://aka.ms/applicationconfiguration.
-        // ApplicationConfiguration.Initialize();
-        // Application.Run(new Form1());
+        var builder = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-        Console.WriteLine("Hospital Management System Started");
+        IConfiguration configuration = builder.Build();
+        var dbConfig = new DBConfig(configuration);
 
-    }    
+        try
+        {
+            var createdTables = DbInitializer.Initialize(dbConfig.ConnectionString);
+            if (createdTables.Any())
+            {
+                Console.WriteLine("Created: " + string.Join(", ", createdTables));
+            }
+            else Console.WriteLine("No new tables.");
+
+            // Quick test repository
+            var repo = new AccountRepositoryImpl(dbConfig.ConnectionString);
+            var accounts = repo.FindAll();
+            Console.WriteLine($"Accounts found: {accounts.Count}");
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error: " + ex);
+            Console.ResetColor();
+        }
+
+        Console.ReadLine();
+    }
 }
