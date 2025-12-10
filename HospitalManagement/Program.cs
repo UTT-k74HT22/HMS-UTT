@@ -1,39 +1,83 @@
-﻿using HospitalManagement.configuration;
+﻿using System;
+using System.Linq;
+using System.Windows.Forms;
+using HospitalManagement.configuration;
 using HospitalManagement.repository.impl;
+using HospitalManagement.service.impl;
+using HospitalManagement.controller;
+using HospitalManagement.view.Auth;
 using Microsoft.Extensions.Configuration;
 
-internal static class Program
+namespace HospitalManagement
 {
-    static void Main()
+    internal static class Program
     {
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-        IConfiguration configuration = builder.Build();
-        var dbConfig = new DBConfig(configuration);
-
-        try
+        [STAThread]
+        static void Main()
         {
-            var createdTables = DbInitializer.Initialize(dbConfig.ConnectionString);
-            if (createdTables.Any())
+            ApplicationConfiguration.Initialize();
+
+            Console.WriteLine("=== START SYSTEM ===");
+
+            // 1. Load configuration
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            // 2. DB Config
+            var dbConfig = new DBConfig(configuration);
+
+            try
             {
-                Console.WriteLine("Created: " + string.Join(", ", createdTables));
+                // 3. Init DB + Create tables if not exist
+                Console.WriteLine("Checking database...");
+
+                var createdTables = DbInitializer.Initialize(dbConfig.ConnectionString);
+
+                if (createdTables.Any())
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("✅ Tables created:");
+                    foreach (var table in createdTables)
+                    {
+                        Console.WriteLine(" - " + table);
+                    }
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("✅ Tables already exist.");
+                }
+
+                Console.ResetColor();
+
+                // 4. Init Repository
+                var accountRepo = new AccountRepositoryImpl(dbConfig.ConnectionString);
+
+                // 5. Init Service
+                var authService = new AuthServiceImpl(accountRepo);
+
+                // 6. Init Controller
+                var authController = new AuthController(authService);
+
+                // 7. Start UI
+                Application.Run(new LoginForm(authController));
             }
-            else Console.WriteLine("No new tables.");
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("❌ SYSTEM START FAILED:");
+                Console.WriteLine(ex.Message);
+                Console.ResetColor();
 
-            // Quick test repository
-            var repo = new AccountRepositoryImpl(dbConfig.ConnectionString);
-            var accounts = repo.FindAll();
-            Console.WriteLine($"Accounts found: {accounts.Count}");
+                MessageBox.Show(
+                    "System failed to start:\n" + ex.Message,
+                    "Startup Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
         }
-        catch (Exception ex)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Error: " + ex);
-            Console.ResetColor();
-        }
-
-        Console.ReadLine();
     }
 }
