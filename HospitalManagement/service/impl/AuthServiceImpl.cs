@@ -1,6 +1,7 @@
 using HospitalManagement.entity.dto;
 using HospitalManagement.repository;
 using HospitalManagement.entity;
+using BCrypt.Net;
 
 namespace HospitalManagement.service.impl
 {
@@ -61,10 +62,12 @@ namespace HospitalManagement.service.impl
                 throw new Exception("Fullname cannot be empty");
             }
 
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
             var user = new Account
             {
                 Username = request.Username,
-                Password = request.Password,
+                Password = passwordHash,
                 Fullname = request.Fullname,
                 Role = "ADMIN",
                 IsActive = true
