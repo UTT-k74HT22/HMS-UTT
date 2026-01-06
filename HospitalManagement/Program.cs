@@ -1,39 +1,74 @@
-﻿using HospitalManagement.configuration;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using HospitalManagement.configuration;
+using HospitalManagement.service;
+using HospitalManagement.service.impl;
+using HospitalManagement.view;
+using HospitalManagement.repository;
 using HospitalManagement.repository.impl;
-using Microsoft.Extensions.Configuration;
 
-internal static class Program
+namespace HospitalManagement
 {
-    static void Main()
+    static class Program
     {
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+        public static IServiceProvider? ServiceProvider { get; private set; }
 
-        IConfiguration configuration = builder.Build();
-        var dbConfig = new DBConfig(configuration);
-
-        try
+        /// <summary>
+        ///  The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
         {
-            var createdTables = DbInitializer.Initialize(dbConfig.ConnectionString);
-            if (createdTables.Any())
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            // 1. Xây dựng Configuration (Đọc appsettings.json)
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            IConfiguration configuration = builder.Build();
+
+            // 2. Thiết lập Dependency Injection (Service Collection)
+            var services = new ServiceCollection();
+
+            // Đăng ký Configuration để DBConfig có thể dùng
+            services.AddSingleton(configuration);
+
+            // Đăng ký DBConfig (Singleton vì cấu hình DB chỉ cần load 1 lần)
+            services.AddSingleton<DBConfig>();
+
+            // Đăng ký Repository
+            services.AddScoped<IAccountRepository>(provider =>
             {
-                Console.WriteLine("Created: " + string.Join(", ", createdTables));
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new AccountRepositoryImpl(dbConfig.ConnectionString);
+            });
+
+            // Đăng ký Service (Giả sử bạn có class AuthService triển khai IAuthService)
+            // Scoped: Tạo mới cho mỗi request (hoặc form lifetime), phù hợp logic business
+            services.AddScoped<IAuthService, AuthServiceImpl>();
+
+            // Đăng ký Form (Login)
+            // Transient: Tạo mới mỗi khi được gọi
+            services.AddTransient<LoginForm>();
+
+            // 3. Build Provider
+            ServiceProvider = services.BuildServiceProvider();
+
+            try
+            {
+                // Lấy Login form từ Service Provider (nó sẽ tự động tiêm IAuthService vào)
+                var loginForm = ServiceProvider.GetRequiredService<LoginForm>();
+                
+                // Chạy ứng dụng
+                Application.Run(loginForm);
             }
-            else Console.WriteLine("No new tables.");
-
-            // Quick test repository
-            var repo = new AccountRepositoryImpl(dbConfig.ConnectionString);
-            var accounts = repo.FindAll();
-            Console.WriteLine($"Accounts found: {accounts.Count}");
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khởi động: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
-        catch (Exception ex)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Error: " + ex);
-            Console.ResetColor();
-        }
-
-        Console.ReadLine();
     }
 }

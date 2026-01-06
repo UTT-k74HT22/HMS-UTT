@@ -58,7 +58,7 @@ namespace HospitalManagement.repository.impl
             cmd.Parameters.AddWithValue("@u", acc.Username);
             cmd.Parameters.AddWithValue("@p", acc.Password);
             cmd.Parameters.AddWithValue("@r", acc.Role);
-            cmd.Parameters.AddWithValue("@a", acc.Active);
+            cmd.Parameters.AddWithValue("@a", acc.IsActive);
 
             cmd.ExecuteNonQuery();
         }
@@ -74,7 +74,7 @@ namespace HospitalManagement.repository.impl
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@p", acc.Password);
             cmd.Parameters.AddWithValue("@r", acc.Role);
-            cmd.Parameters.AddWithValue("@a", acc.Active);
+            cmd.Parameters.AddWithValue("@a", acc.IsActive);
             cmd.Parameters.AddWithValue("@id", acc.Id);
 
             cmd.ExecuteNonQuery();
@@ -110,9 +110,8 @@ namespace HospitalManagement.repository.impl
                 Id = rs.GetInt32(rs.GetOrdinal("id")),
                 Username = rs.GetString(rs.GetOrdinal("username")),
                 Password = rs.GetString(rs.GetOrdinal("password")),
-                Fullname = rs.IsDBNull(rs.GetOrdinal("fullname")) ? "" : rs.GetString(rs.GetOrdinal("fullname")),
                 Role = rs.GetString(rs.GetOrdinal("role")),
-                Active = rs.GetBoolean(rs.GetOrdinal("is_active"))
+                IsActive = rs.GetBoolean(rs.GetOrdinal("is_active"))
             };
         }
     }

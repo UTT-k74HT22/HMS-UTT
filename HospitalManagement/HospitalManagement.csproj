@@ -18,6 +18,7 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
 		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="itext" Version="9.4.0" />
 	</ItemGroup>
@@ -28,5 +29,11 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="view\LoginForm.cs">
+	    <SubType>Form</SubType>
+	  </Compile>
+	</ItemGroup>
 
 </Project>
+

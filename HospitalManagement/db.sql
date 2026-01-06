@@ -799,3 +799,7 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'idx_payments_invoice_id' AND object_id = OBJECT_ID(N'dbo.payments'))
 CREATE INDEX idx_payments_invoice_id ON dbo.payments(invoice_id);
 GO
+
+
+INSERT INTO dbo.accounts (username, [password], role, is_active, created_at, updated_at)
+VALUES ('admin', '123456789', 'ADMIN', 1, SYSDATETIME(), SYSDATETIME());
