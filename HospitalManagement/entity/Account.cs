@@ -1,12 +1,33 @@
 namespace HospitalManagement.entity
 {
-    public class Account
+    /// <summary>
+    /// Account entity - represents user login account
+    /// </summary>
+    public class Account : BaseEntity
     {
-        public int Id { get; set; }
+        /// <summary>
+        /// Unique username for login
+        /// </summary>
         public string Username { get; set; } = "";
+
+        /// <summary>
+        /// Password hash/encrypted
+        /// </summary>
         public string Password { get; set; } = "";
-        public string Fullname { get; set; } = "";
+
+        /// <summary>
+        /// User role: ADMIN, EMPLOYEE, CUSTOMER
+        /// </summary>
         public string Role { get; set; } = "";
-        public bool Active { get; set; }
+
+        /// <summary>
+        /// Account status
+        /// </summary>
+        public bool IsActive { get; set; }
+
+        /// <summary>
+        /// Last login timestamp
+        /// </summary>
+        public DateTime? LastLoginAt { get; set; }
     }
 }
