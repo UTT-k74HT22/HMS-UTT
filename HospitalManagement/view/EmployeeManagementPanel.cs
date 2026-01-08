@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
+using HospitalManagement.controller;
+using HospitalManagement.dto.response;
 using HospitalManagement.entity;
 using HospitalManagement.view.@base;
 
@@ -15,23 +12,19 @@ namespace HospitalManagement.view
     /// - CRUD operations
     /// - Export Excel
     /// </summary>
-    public class EmployeeManagementPanel : BaseManagementPanel<EmployeeProfile>
+    public class EmployeeManagementPanel : BaseManagementPanel<EmployeeResponse>
     {
         // ========== Dependencies ==========
-        // TODO: Inject controller/service khi đã có
-        // private readonly EmployeeController _controller;
+        private readonly EmployeeController _employeeController;
 
         // ========== Filter Controls ==========
         private TextBox _searchBox = null!;
         private ComboBox _departmentFilter = null!;
 
         // ========== Constructor ==========
-        public EmployeeManagementPanel()
+        public EmployeeManagementPanel(EmployeeController employeeController)
         {
-            // TODO: Inject dependencies
-            // this._controller = controller ?? throw new ArgumentNullException(nameof(controller));
-            
-            // Load data ngay khi khởi tạo
+            this._employeeController = employeeController;
             Reload();
         }
 
@@ -55,13 +48,9 @@ namespace HospitalManagement.view
             };
         }
 
-        protected override List<EmployeeProfile> FetchData()
+        protected override List<EmployeeResponse> FetchData()
         {
-            // TODO: Replace with actual service call
-            // return _controller.GetAllEmployees();
-            
-            // Mock data for demonstration
-            return GenerateMockData();
+            return _employeeController.GetEmployees();
         }
 
         // ========== Override Optional Hooks ==========
@@ -210,24 +199,8 @@ namespace HospitalManagement.view
 
         private void OnViewDetail(object? sender, EventArgs e)
         {
-            var selected = GetSelectedItem();
-            if (selected == null)
-            {
-                MessageBox.Show("Vui lòng chọn một nhân viên!", "Thông báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            // TODO: Open Detail Dialog
-            var info = $"ID: {selected.Id}\n" +
-                      $"Profile ID: {selected.ProfileId}\n" +
-                      $"Chức vụ: {selected.Position}\n" +
-                      $"Phòng ban: {selected.Department}\n" +
-                      $"Ngày vào làm: {selected.HiredDate:dd/MM/yyyy}\n" +
-                      $"Lương: {selected.BaseSalary:N0} VNĐ";
-
-            MessageBox.Show(info, "Chi tiết nhân viên",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
+            
         }
 
         private void OnEdit(object? sender, EventArgs e)
@@ -250,30 +223,30 @@ namespace HospitalManagement.view
 
         private void OnDelete(object? sender, EventArgs e)
         {
-            var selected = GetSelectedItem();
-            if (selected == null)
-            {
-                MessageBox.Show("Vui lòng chọn một nhân viên!", "Thông báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            var result = MessageBox.Show(
-                $"Bạn có chắc chắn muốn xóa nhân viên:\n{selected.Position} - {selected.Department}?",
-                "Xác nhận xóa",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
-            {
-                // TODO: Call delete service
-                // _controller.DeleteEmployee(selected.Id);
-                
-                MessageBox.Show("Xóa thành công!", "Thông báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                
-                Reload();
-            }
+            // var selected = GetSelectedItem();
+            // if (selected == null)
+            // {
+            //     MessageBox.Show("Vui lòng chọn một nhân viên!", "Thông báo",
+            //         MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //     return;
+            // }
+            //
+            // var result = MessageBox.Show(
+            //     $"Bạn có chắc chắn muốn xóa nhân viên:\n{selected.Position} - {selected.Department}?",
+            //     "Xác nhận xóa",
+            //     MessageBoxButtons.YesNo,
+            //     MessageBoxIcon.Question);
+            //
+            // if (result == DialogResult.Yes)
+            // {
+            //     // TODO: Call delete service
+            //     // _controller.DeleteEmployee(selected.Id);
+            //     
+            //     MessageBox.Show("Xóa thành công!", "Thông báo",
+            //         MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //     
+            //     Reload();
+            // }
         }
 
         private void OnExportExcel(object? sender, EventArgs e)
@@ -281,34 +254,6 @@ namespace HospitalManagement.view
             // TODO: Implement Excel export
             MessageBox.Show("Chức năng Export Excel\n\nTODO: Implement export",
                 "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        // ========== Mock Data for Demo ==========
-
-        private List<EmployeeProfile> GenerateMockData()
-        {
-            var random = new Random();
-            var positions = new[] { "Nhân viên", "Trưởng phòng", "Phó phòng", "Giám đốc", "Kỹ sư" };
-            var departments = new[] { "Kế toán", "Kinh doanh", "Kỹ thuật", "Nhân sự" };
-            var statuses = new[] { "Đang làm", "Đã nghỉ" };
-
-            var employees = new List<EmployeeProfile>();
-
-            for (int i = 1; i <= 50; i++)
-            {
-                employees.Add(new EmployeeProfile
-                {
-                    ProfileId = 1000 + i,
-                    Position = positions[random.Next(positions.Length)],
-                    Department = departments[random.Next(departments.Length)],
-                    HiredDate = DateTime.Now.AddDays(-random.Next(1, 3650)),
-                    BaseSalary = random.Next(8, 50) * 1000000,
-                    CreatedAt = DateTime.Now.AddDays(-random.Next(1, 365)),
-                    UpdatedAt = DateTime.Now
-                });
-            }
-
-            return employees;
         }
     }
 }

@@ -56,6 +56,12 @@ namespace HospitalManagement.configuration
                 return new AccountRepositoryImpl(dbConfig.ConnectionString);
             });
 
+            services.AddScoped<EmployeeRepository>(provider =>
+            {
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new EmployeeRepositoryImpl(dbConfig.ConnectionString);
+            });
+
             // TODO: Thêm các repository khác
             // services.AddScoped<IEmployeeRepository, EmployeeRepositoryImpl>();
             // services.AddScoped<ICustomerRepository, CustomerRepositoryImpl>();
@@ -69,6 +75,9 @@ namespace HospitalManagement.configuration
 
             // Account Service
             services.AddScoped<AccountService, AccountServiceImpl>();
+            
+            // Employee Service
+            services.AddScoped<EmployeeService, EmployeeServiceImpl>();
 
             // TODO: Thêm các service khác
             // services.AddScoped<EmployeeService, EmployeeServiceImpl>();
@@ -80,6 +89,7 @@ namespace HospitalManagement.configuration
         {
             // Account Controller
             services.AddScoped<AccountController>();
+            services.AddScoped<EmployeeController>();
 
             // TODO: Thêm các controller khác
             // services.AddScoped<EmployeeController>();
