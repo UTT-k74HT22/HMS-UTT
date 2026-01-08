@@ -93,11 +93,23 @@ namespace HospitalManagement.view.@base
             return value ?? "";
         }
 
+        // ========== Designer Mode Detection ==========
+        private bool IsDesignerMode()
+        {
+            return System.ComponentModel.LicenseManager.UsageMode == 
+                   System.ComponentModel.LicenseUsageMode.Designtime;
+        }
+
         // ========== Constructor ==========
         public BaseManagementPanel()
         {
             InitializePanel();
-            BuildUI();
+            
+            // Chỉ build UI khi không phải designer mode
+            if (!IsDesignerMode())
+            {
+                BuildUI();
+            }
         }
 
         private void InitializePanel()
@@ -107,7 +119,7 @@ namespace HospitalManagement.view.@base
             Padding = new Padding(12);
         }
 
-        private void BuildUI()
+        protected void BuildUI()
         {
             // Main layout: TableLayoutPanel với 3 rows
             var layout = new TableLayoutPanel
@@ -137,45 +149,90 @@ namespace HospitalManagement.view.@base
         }
 
         // ========== Build Toolbar (Filters + Actions) ==========
+        // private Panel BuildToolbar()
+        // {
+        //     var panel = new Panel
+        //     {
+        //         Dock = DockStyle.Fill,
+        //         BackColor = Color.Transparent,
+        //         AutoSize = true,
+        //         Padding = new Padding(0, 0, 0, 12)
+        //     };
+        //
+        //     var layout = new TableLayoutPanel
+        //     {
+        //         Dock = DockStyle.Top,
+        //         AutoSize = true,
+        //         ColumnCount = 1,
+        //         RowCount = 2,
+        //         BackColor = Color.Transparent
+        //     };
+        //
+        //     layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        //     layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        //     layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        //
+        //     // Filters
+        //     var filters = BuildFilters();
+        //     if (filters != null)
+        //     {
+        //         filters.Dock = DockStyle.Top;
+        //         filters.Padding = new Padding(0, 0, 0, 8);
+        //         layout.Controls.Add(filters, 0, 0);
+        //     }
+        //
+        //     // Actions
+        //     var actions = BuildActions();
+        //     if (actions != null)
+        //     {
+        //         actions.Dock = DockStyle.Top;
+        //         layout.Controls.Add(actions, 0, 1);
+        //     }
+        //
+        //     panel.Controls.Add(layout);
+        //     return panel;
+        // }
+
         private Panel BuildToolbar()
         {
             var panel = new Panel
             {
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.Top,
                 BackColor = Color.Transparent,
                 AutoSize = true,
-                Padding = new Padding(0, 0, 0, 12)
+                Padding = new Padding(0, 0, 0, 16)
             };
 
             var layout = new TableLayoutPanel
             {
                 Dock = DockStyle.Top,
                 AutoSize = true,
-                ColumnCount = 1,
-                RowCount = 2,
+                ColumnCount = 2,
+                RowCount = 1,
                 BackColor = Color.Transparent
             };
 
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
 
-            // Filters
-            var filters = BuildFilters();
-            if (filters != null)
+            var filters = BuildFilters() ?? new Panel { Height = 1 };
+            filters.Dock = DockStyle.Fill;
+
+            var actionsWrapper = new Panel
             {
-                filters.Dock = DockStyle.Top;
-                filters.Padding = new Padding(0, 0, 0, 8);
-                layout.Controls.Add(filters, 0, 0);
-            }
-
-            // Actions
+                Dock = DockStyle.Fill,
+                BackColor = Color.Transparent
+            };
+            
             var actions = BuildActions();
             if (actions != null)
             {
-                actions.Dock = DockStyle.Top;
-                layout.Controls.Add(actions, 0, 1);
+                actions.Dock = DockStyle.Right;
+                actionsWrapper.Controls.Add(actions);
             }
+
+            layout.Controls.Add(filters, 0, 0);
+            layout.Controls.Add(actionsWrapper, 1, 0);
 
             panel.Controls.Add(layout);
             return panel;
@@ -208,7 +265,7 @@ namespace HospitalManagement.view.@base
                     Name = propertyName,
                     HeaderText = headerText,
                     DataPropertyName = propertyName,
-                    Width = width,
+                    FillWeight = Math.Max(30, width),
                     SortMode = DataGridViewColumnSortMode.Automatic
                 };
                 Table.Columns.Add(column);

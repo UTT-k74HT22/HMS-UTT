@@ -1,17 +1,25 @@
 ﻿using HospitalManagement.entity;
 using HospitalManagement.service;
+using HospitalManagement.controller;
 
 namespace HospitalManagement.view;
 public partial class LoginForm : Form
 {
-    private readonly IAuthService _authService;
-    private bool _isLoggedIn = false;
-    
-    public LoginForm(IAuthService authService)
+    private IAuthService? _authService;
+    private AccountController? _accountController;
+
+    // Constructor cho Designer
+    public LoginForm()
     {
-        _authService = authService;
         InitializeComponent();
         this.ActiveControl = tbUsername;
+    }
+
+    // Constructor cho runtime (DI)
+    public LoginForm(IAuthService authService, AccountController accountController) : this()
+    {
+        _authService = authService;
+        _accountController = accountController;
     }
 
     private void btnLogin_Click(object sender, EventArgs e)
@@ -40,12 +48,9 @@ public partial class LoginForm : Form
         {
             Account account = _authService.authenticate(username, password);
             
-            // Mark as logged in
-            _isLoggedIn = true;
-            
             // Open MainFrame
-            var mainFrame = new MainFrame(account.Username, account.Role);
-            mainFrame.FormClosed += (s, args) => Application.Exit();
+            var mainFrame = new MainFrame(account.Username, account.Role, _accountController);
+            mainFrame.FormClosed += (_, _) => Application.Exit();
             mainFrame.Show();
             
             // Hide login form
@@ -78,32 +83,5 @@ public partial class LoginForm : Form
         lblError.Text = error;
         lblError.Visible = true;
     }
+}
 
-        // // Nếu đã login thì không cần confirm
-        // if (_isLoggedIn)
-        // {
-        //     return;
-        // }
-        //
-        // if (e.CloseReason == CloseReason.UserClosing)
-        // {
-        //     var result = MessageBox.Show(
-        //         "Bạn có chắc chắn muốn thoát?", 
-        //         "Xác nhận thoát", 
-        //         MessageBoxButtons.YesNo, 
-        //         MessageBoxIcon.Question);
-        //         
-        //     if (result == DialogResult.No)
-        //     {
-        //         e.Cancel = true;
-        //     }
-        //     else
-        //     {
-        //         Application.Exit()
-        //     var result = MessageBox.Show("Are you sure you want to exit?", "Confirm Exit", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-        //     if (result == DialogResult.No)
-        //     {
-        //         e.Cancel = true;
-        //     }
-        // }
-    }

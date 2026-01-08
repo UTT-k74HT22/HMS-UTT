@@ -16,6 +16,11 @@ namespace HospitalManagement.view.layouts
         private Label _userInfoLabel = null!;
         private Button _btnProfile = null!;
 
+        // Constructor mặc định cho Designer
+        public Header() : this("Designer", "ADMIN")
+        {
+        }
+
         public Header(string username, string role)
         {
             InitializeHeader();
@@ -112,19 +117,20 @@ namespace HospitalManagement.view.layouts
             var btn = new Button
             {
                 Text = text,
-                Size = new Size(90, 30),
+                Size = new Size(90, 32),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.White,
                 ForeColor = UiTheme.PRIMARY,
-                Font = UiTheme.FONT_BASE,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
                 Cursor = Cursors.Hand
             };
 
             btn.FlatAppearance.BorderColor = UiTheme.PRIMARY;
             btn.FlatAppearance.BorderSize = 1;
-            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(240, 240, 255);
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(245, 243, 255);
+            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(235, 233, 250);
 
-            // Custom paint để bo tròn góc
+            // Custom paint for rounded corners
             btn.Paint += (sender, e) =>
             {
                 var button = sender as Button;
@@ -132,7 +138,7 @@ namespace HospitalManagement.view.layouts
 
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 
-                using (var path = GetRoundedRectangle(button.ClientRectangle, 8))
+                using (var path = GetRoundedRectangle(button.ClientRectangle, 6))
                 using (var brush = new SolidBrush(button.BackColor))
                 using (var pen = new Pen(button.Enabled ? UiTheme.PRIMARY : Color.Gray, 1))
                 {

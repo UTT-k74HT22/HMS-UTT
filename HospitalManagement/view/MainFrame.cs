@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using HospitalManagement.controller;
 using HospitalManagement.view.layouts;
 using HospitalManagement.view.@base;
 
@@ -13,16 +14,23 @@ namespace HospitalManagement.view
     {
         private readonly string _username;
         private readonly string _role;
+        private readonly AccountController? _accountController;
 
         private Sidebar _sidebar = null!;
         private Header _header = null!;
         private Footer _footer = null!;
         private Panel _contentPanel = null!;
 
-        public MainFrame(string username, string role)
+        // Constructor mặc định cho Designer (REQUIRED for WinForms designer)
+        public MainFrame() : this("Designer", "ADMIN", null!)
+        {
+        }
+
+        public MainFrame(string username, string role, AccountController accountController)
         {
             _username = username;
             _role = role;
+            _accountController = accountController;
 
             InitializeForm();
             CreateLayout();
@@ -114,7 +122,9 @@ namespace HospitalManagement.view
             Panel? panel = menuKey switch
             {
                 Sidebar.MENU_DASHBOARD => new DashboardPanel(),
-                Sidebar.MENU_ACCOUNTS => new AccountManagementPanel(),
+                Sidebar.MENU_ACCOUNTS => _accountController != null 
+                    ? new AccountManagementPanel(_accountController)
+                    : CreateComingSoonPanel("Quản lý tài khoản (Cần DI)"),
                 Sidebar.MENU_EMPLOYEE => new EmployeeManagementPanel(),
                 Sidebar.MENU_CUSTOMER => CreateComingSoonPanel("Quản lý khách hàng"),
                 Sidebar.MENU_CATEGORIES => CreateComingSoonPanel("Danh mục sản phẩm"),

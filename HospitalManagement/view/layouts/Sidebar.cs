@@ -38,6 +38,11 @@ namespace HospitalManagement.view.layouts
 
         public event EventHandler<MenuClickedEventArgs>? MenuClicked;
 
+        // Constructor mặc định cho Designer
+        public Sidebar() : this("ADMIN")
+        {
+        }
+
         public Sidebar(string role)
         {
             InitializeSidebar();
@@ -71,6 +76,8 @@ namespace HospitalManagement.view.layouts
             Controls.Add(appLabel);
             
             _menuContainer.Dock = DockStyle.Top;
+            appLabel.Dock = DockStyle.Top;
+            scrollPanel.Dock = DockStyle.Fill;
             scrollPanel.Controls.Add(_menuContainer);
             Controls.Add(scrollPanel);
 
@@ -190,16 +197,79 @@ namespace HospitalManagement.view.layouts
             AddSpacer(6);
         }
 
+        // private void AddSpacer(int height)
+        // {
+        //     var spacer = new Panel
+        //     {
+        //         Height = height,
+        //         Width = 1,
+        //         BackColor = Color.Transparent
+        //     };
+        //     _menuContainer.Controls.Add(spacer);
+        // }
+        
         private void AddSpacer(int height)
         {
-            var spacer = new Panel
+            _menuContainer.Controls.Add(new Panel
             {
                 Height = height,
-                Width = 1,
+                Width = 204, // <= sửa từ 1 lên full width
                 BackColor = Color.Transparent
-            };
-            _menuContainer.Controls.Add(spacer);
+            });
         }
+
+
+        // private Button CreateMenuButton(string text, string key)
+        // {
+        //     var btn = new Button
+        //     {
+        //         Text = text,
+        //         Size = new Size(204, 40),
+        //         FlatStyle = FlatStyle.Flat,
+        //         BackColor = Color.Transparent,
+        //         ForeColor = Color.White,
+        //         Font = new Font("Segoe UI", 11F, FontStyle.Regular),
+        //         TextAlign = ContentAlignment.MiddleLeft,
+        //         Cursor = Cursors.Hand,
+        //         Tag = key
+        //     };
+        //
+        //     btn.FlatAppearance.BorderSize = 0;
+        //     btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(255, 255, 255, 40);
+        //
+        //     btn.Click += (s, e) =>
+        //     {
+        //         SetActiveMenu(key);
+        //         MenuClicked?.Invoke(this, new MenuClickedEventArgs(key, text));
+        //     };
+        //
+        //     // Custom paint for active state
+        //     btn.Paint += (sender, e) =>
+        //     {
+        //         var button = sender as Button;
+        //         if (button == null) return;
+        //
+        //         var isActive = key == _activeKey;
+        //         
+        //         if (isActive)
+        //         {
+        //             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+        //             using (var brush = new SolidBrush(Color.FromArgb(80, 255, 255, 255)))
+        //             using (var path = GetRoundedRectangle(button.ClientRectangle, 8))
+        //             {
+        //                 e.Graphics.FillPath(brush, path);
+        //             }
+        //         }
+        //
+        //         // Draw text
+        //         TextRenderer.DrawText(e.Graphics, button.Text, button.Font,
+        //             new Rectangle(16, 0, button.Width - 16, button.Height),
+        //             button.ForeColor,
+        //             TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+        //     };
+        //
+        //     return btn;
+        // }
 
         private Button CreateMenuButton(string text, string key)
         {
@@ -210,14 +280,17 @@ namespace HospitalManagement.view.layouts
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 11F, FontStyle.Regular),
+                Font = new Font("Segoe UI", 10F, FontStyle.Regular),
                 TextAlign = ContentAlignment.MiddleLeft,
                 Cursor = Cursors.Hand,
-                Tag = key
+                Tag = key,
+                UseVisualStyleBackColor = false,
+                Padding = new Padding(16, 0, 0, 0)
             };
 
             btn.FlatAppearance.BorderSize = 0;
-            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(255, 255, 255, 40);
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(50, 255, 255, 255);
+            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(30, 255, 255, 255);
 
             btn.Click += (s, e) =>
             {
@@ -225,34 +298,21 @@ namespace HospitalManagement.view.layouts
                 MenuClicked?.Invoke(this, new MenuClickedEventArgs(key, text));
             };
 
-            // Custom paint for active state
+            // Custom paint for active state with rounded background
             btn.Paint += (sender, e) =>
             {
-                var button = sender as Button;
-                if (button == null) return;
-
                 var isActive = key == _activeKey;
-                
-                if (isActive)
-                {
-                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    using (var brush = new SolidBrush(Color.FromArgb(80, 255, 255, 255)))
-                    using (var path = GetRoundedRectangle(button.ClientRectangle, 8))
-                    {
-                        e.Graphics.FillPath(brush, path);
-                    }
-                }
+                if (!isActive) return;
 
-                // Draw text
-                TextRenderer.DrawText(e.Graphics, button.Text, button.Font,
-                    new Rectangle(16, 0, button.Width - 16, button.Height),
-                    button.ForeColor,
-                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                using var brush = new SolidBrush(Color.FromArgb(100, 255, 255, 255));
+                using var path = GetRoundedRectangle(btn.ClientRectangle, 8);
+                e.Graphics.FillPath(brush, path);
             };
 
             return btn;
         }
-
+        
         private GraphicsPath GetRoundedRectangle(Rectangle bounds, int radius)
         {
             var path = new GraphicsPath();

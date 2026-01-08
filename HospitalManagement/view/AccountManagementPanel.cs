@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using HospitalManagement.controller;
 using HospitalManagement.entity;
 using HospitalManagement.view.@base;
 
@@ -16,8 +17,7 @@ namespace HospitalManagement.view
     public class AccountManagementPanel : BaseManagementPanel<Account>
     {
         // ========== Dependencies ==========
-        // TODO: Inject controller khi đã implement
-        // private readonly AccountController _controller;
+        private readonly AccountController _accountController;
 
         // ========== Filter Controls ==========
         private TextBox _searchBox = null!;
@@ -25,10 +25,9 @@ namespace HospitalManagement.view
         private ComboBox _statusFilter = null!;
 
         // ========== Constructor ==========
-        public AccountManagementPanel()
+        public AccountManagementPanel(AccountController accountController)
         {
-            // TODO: Inject dependencies
-            // this._controller = controller ?? throw new ArgumentNullException(nameof(controller));
+            this._accountController = accountController;
             
             Reload();
         }
@@ -55,11 +54,13 @@ namespace HospitalManagement.view
 
         protected override List<Account> FetchData()
         {
-            // TODO: Replace with actual service call
-            // return _controller.GetAllAccounts();
+            // Designer mode - return empty list
+            if (_accountController == null)
+            {
+                return new List<Account>();
+            }
             
-            // Mock data
-            return GenerateMockData();
+            return _accountController.GetAccounts();
         }
 
         // ========== Override Optional Hooks ==========
@@ -120,26 +121,26 @@ namespace HospitalManagement.view
 
             var layout = new FlowLayoutPanel
             {
-                Dock = DockStyle.Top,
                 AutoSize = true,
-                FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = false,
-                BackColor = Color.Transparent
+                FlowDirection = FlowDirection.RightToLeft,
+                WrapContents = true,
+                BackColor = Color.Transparent,
+                Padding = new Padding(0)
             };
 
-            // CRUD buttons
-            layout.Controls.Add(UiFactory.CreateButton("➕ Thêm tài khoản", UiTheme.SUCCESS, OnAdd));
-            layout.Controls.Add(UiFactory.CreateButton("👁 Xem chi tiết", UiTheme.INFO, OnViewDetail));
-            layout.Controls.Add(UiFactory.CreateButton("✏️ Sửa", UiTheme.WARNING, OnEdit));
-            layout.Controls.Add(UiFactory.CreateButton("🔒 Khóa/Mở khóa", UiTheme.ORANGE, OnToggleStatus));
-            layout.Controls.Add(UiFactory.CreateButton("🗑️ Xóa", UiTheme.DANGER, OnDelete));
+            // Utility buttons (right side)
+            layout.Controls.Add(UiFactory.CreateButton("📄 Export", UiTheme.PURPLE, OnExportExcel));
+            layout.Controls.Add(UiFactory.CreateButton("🔄 Làm mới", UiTheme.SECONDARY, (s, e) => Reload()));
 
             // Spacer
-            layout.Controls.Add(new Panel { Width = 20, BackColor = Color.Transparent });
+            layout.Controls.Add(new Panel { Width = 12, Height = 1, BackColor = Color.Transparent });
 
-            // Utility buttons
-            layout.Controls.Add(UiFactory.CreateButton("🔄 Refresh", UiTheme.SECONDARY, (s, e) => Reload()));
-            layout.Controls.Add(UiFactory.CreateButton("📄 Export Excel", UiTheme.PURPLE, OnExportExcel));
+            // CRUD buttons
+            layout.Controls.Add(UiFactory.CreateButton("🗑️ Xóa", UiTheme.DANGER, OnDelete));
+            layout.Controls.Add(UiFactory.CreateButton("🔒 Khóa/Mở", UiTheme.ORANGE, OnToggleStatus));
+            layout.Controls.Add(UiFactory.CreateButton("✏️ Sửa", UiTheme.WARNING, OnEdit));
+            layout.Controls.Add(UiFactory.CreateButton("👁 Xem", UiTheme.INFO, OnViewDetail));
+            layout.Controls.Add(UiFactory.CreateButton("➕ Thêm", UiTheme.SUCCESS, OnAdd));
 
             panel.Controls.Add(layout);
             return panel;
@@ -388,62 +389,6 @@ namespace HospitalManagement.view
             // TODO: Implement Excel export
             MessageBox.Show("Chức năng Export Excel\n\nTODO: Implement export accounts to Excel",
                 "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        // ========== Mock Data ==========
-
-        private List<Account> GenerateMockData()
-        {
-            var random = new Random();
-            var roles = new[] { "ADMIN", "EMPLOYEE", "CUSTOMER" };
-            var accounts = new List<Account>();
-
-            // Admin accounts
-            accounts.Add(new Account
-            {
-                Id = 1,
-                Username = "admin",
-                Password = "hashed_password",
-                Role = "ADMIN",
-                IsActive = true,
-                LastLoginAt = DateTime.Now.AddHours(-2),
-                CreatedAt = DateTime.Now.AddMonths(-12),
-                UpdatedAt = DateTime.Now.AddHours(-2)
-            });
-
-            accounts.Add(new Account
-            {
-                Id = 2,
-                Username = "admin2",
-                Password = "hashed_password",
-                Role = "ADMIN",
-                IsActive = true,
-                LastLoginAt = DateTime.Now.AddDays(-1),
-                CreatedAt = DateTime.Now.AddMonths(-10),
-                UpdatedAt = DateTime.Now.AddDays(-1)
-            });
-
-            // Generate random accounts
-            for (int i = 3; i <= 50; i++)
-            {
-                var role = roles[random.Next(roles.Length)];
-                var isActive = random.Next(100) > 15; // 85% active
-                var hasLoggedIn = random.Next(100) > 20; // 80% đã đăng nhập
-
-                accounts.Add(new Account
-                {
-                    Id = i,
-                    Username = $"{role.ToLower()}{i:000}",
-                    Password = "hashed_password",
-                    Role = role,
-                    IsActive = isActive,
-                    LastLoginAt = hasLoggedIn ? DateTime.Now.AddDays(-random.Next(1, 90)) : null,
-                    CreatedAt = DateTime.Now.AddDays(-random.Next(30, 365)),
-                    UpdatedAt = DateTime.Now.AddDays(-random.Next(1, 30))
-                });
-            }
-
-            return accounts;
         }
     }
 }

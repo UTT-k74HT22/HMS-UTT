@@ -18,7 +18,7 @@ namespace HospitalManagement.view.@base
             var panel = new Panel
             {
                 BackColor = Color.White,
-                Padding = new Padding(16),
+                Padding = new Padding(0),
                 BorderStyle = BorderStyle.None
             };
             
@@ -29,10 +29,10 @@ namespace HospitalManagement.view.@base
                 if (p != null)
                 {
                     ControlPaint.DrawBorder(e.Graphics, p.ClientRectangle,
-                        Color.FromArgb(220, 220, 220), 1, ButtonBorderStyle.Solid,
-                        Color.FromArgb(220, 220, 220), 1, ButtonBorderStyle.Solid,
-                        Color.FromArgb(220, 220, 220), 1, ButtonBorderStyle.Solid,
-                        Color.FromArgb(220, 220, 220), 1, ButtonBorderStyle.Solid);
+                        Color.FromArgb(235, 237, 242), 1, ButtonBorderStyle.Solid,
+                        Color.FromArgb(235, 237, 242), 1, ButtonBorderStyle.Solid,
+                        Color.FromArgb(235, 237, 242), 1, ButtonBorderStyle.Solid,
+                        Color.FromArgb(235, 237, 242), 1, ButtonBorderStyle.Solid);
                 }
             };
             
@@ -180,8 +180,8 @@ namespace HospitalManagement.view.@base
         public static void ApplyZebraStripes(DataGridView table)
         {
             table.RowsDefaultCellStyle.BackColor = Color.White;
-            table.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 249, 250);
-            table.DefaultCellStyle.ForeColor = UiTheme.TEXT;
+            table.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(250, 251, 252);
+            table.DefaultCellStyle.ForeColor = Color.FromArgb(52, 58, 70);
             table.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
         }
 

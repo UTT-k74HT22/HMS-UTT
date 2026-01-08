@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿﻿﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using HospitalManagement.configuration;
 using HospitalManagement.service;
@@ -6,6 +6,7 @@ using HospitalManagement.service.impl;
 using HospitalManagement.view;
 using HospitalManagement.repository;
 using HospitalManagement.repository.impl;
+using HospitalManagement.controller;
 
 namespace HospitalManagement
 {
@@ -31,28 +32,9 @@ namespace HospitalManagement
             IConfiguration configuration = builder.Build();
 
             // 2. Thiết lập Dependency Injection (Service Collection)
+            // Sử dụng ServiceConfigurator để tránh phình to Program.cs
             var services = new ServiceCollection();
-
-            // Đăng ký Configuration để DBConfig có thể dùng
-            services.AddSingleton(configuration);
-
-            // Đăng ký DBConfig (Singleton vì cấu hình DB chỉ cần load 1 lần)
-            services.AddSingleton<DBConfig>();
-
-            // Đăng ký Repository
-            services.AddScoped<IAccountRepository>(provider =>
-            {
-                var dbConfig = provider.GetRequiredService<DBConfig>();
-                return new AccountRepositoryImpl(dbConfig.ConnectionString);
-            });
-
-            // Đăng ký Service (Giả sử bạn có class AuthService triển khai IAuthService)
-            // Scoped: Tạo mới cho mỗi request (hoặc form lifetime), phù hợp logic business
-            services.AddScoped<IAuthService, AuthServiceImpl>();
-
-            // Đăng ký Form (Login)
-            // Transient: Tạo mới mỗi khi được gọi
-            services.AddTransient<LoginForm>();
+            services.ConfigureServices(configuration);
 
             // 3. Build Provider
             ServiceProvider = services.BuildServiceProvider();
