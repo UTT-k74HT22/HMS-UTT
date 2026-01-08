@@ -32,4 +32,4 @@ packages/
 *.DotSettings.user
 
 # WinForms auto files
-*.Designer.cs
+#*.Designer.cs

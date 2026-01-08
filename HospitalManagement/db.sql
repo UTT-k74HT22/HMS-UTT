@@ -6,11 +6,11 @@ SET NOCOUNT ON;
 GO
 
 -- 1) Create DB if not exists
-IF DB_ID(N'hms') IS NULL
-    BEGIN
-        EXEC(N'CREATE DATABASE hms;');
-    END
-GO
+-- IF DB_ID(N'hms') IS NULL
+--     BEGIN
+--         EXEC(N'CREATE DATABASE hms;');
+--     END
+-- GO
 
 USE hms;
 GO

@@ -18,8 +18,8 @@ namespace HospitalManagement.view.@base
             var panel = new Panel
             {
                 BackColor = Color.White,
-                Padding = new Padding(12),
-                BorderStyle = BorderStyle.FixedSingle
+                Padding = new Padding(16),
+                BorderStyle = BorderStyle.None
             };
             
             // Custom paint để tạo border đẹp hơn
@@ -29,10 +29,10 @@ namespace HospitalManagement.view.@base
                 if (p != null)
                 {
                     ControlPaint.DrawBorder(e.Graphics, p.ClientRectangle,
-                        UiTheme.BORDER, 1, ButtonBorderStyle.Solid,
-                        UiTheme.BORDER, 1, ButtonBorderStyle.Solid,
-                        UiTheme.BORDER, 1, ButtonBorderStyle.Solid,
-                        UiTheme.BORDER, 1, ButtonBorderStyle.Solid);
+                        Color.FromArgb(220, 220, 220), 1, ButtonBorderStyle.Solid,
+                        Color.FromArgb(220, 220, 220), 1, ButtonBorderStyle.Solid,
+                        Color.FromArgb(220, 220, 220), 1, ButtonBorderStyle.Solid,
+                        Color.FromArgb(220, 220, 220), 1, ButtonBorderStyle.Solid);
                 }
             };
             
@@ -47,10 +47,9 @@ namespace HospitalManagement.view.@base
             return new TextBox
             {
                 Width = width,
-                Height = 34,
                 Font = UiTheme.FONT_BASE,
                 BorderStyle = BorderStyle.FixedSingle,
-                Padding = new Padding(8, 6, 8, 6)
+                Margin = new Padding(0, 3, 8, 3)
             };
         }
 
@@ -67,10 +66,12 @@ namespace HospitalManagement.view.@base
                 Font = UiTheme.FONT_BOLD,
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand,
-                Padding = new Padding(14, 8, 14, 8),
+                Padding = new Padding(12, 6, 12, 6),
                 AutoSize = true,
-                MinimumSize = new Size(80, 34),
-                TextAlign = ContentAlignment.MiddleCenter
+                Height = 32,
+                MinimumSize = new Size(80, 32),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Margin = new Padding(0, 0, 6, 0)
             };
 
             button.FlatAppearance.BorderSize = 0;
@@ -97,7 +98,8 @@ namespace HospitalManagement.view.@base
                 ForeColor = UiTheme.TEXT,
                 AutoSize = true,
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(0, 0, 8, 0)
+                Margin = new Padding(0, 5, 8, 5),
+                Padding = new Padding(0)
             };
         }
 
@@ -109,10 +111,10 @@ namespace HospitalManagement.view.@base
             var combo = new ComboBox
             {
                 Width = width,
-                Height = 34,
                 Font = UiTheme.FONT_BASE,
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                FlatStyle = FlatStyle.Flat
+                FlatStyle = FlatStyle.Flat,
+                Margin = new Padding(0, 3, 8, 3)
             };
 
             if (items != null && items.Length > 0)
@@ -129,12 +131,12 @@ namespace HospitalManagement.view.@base
         /// </summary>
         public static void StyleTable(DataGridView table)
         {
-            table.RowTemplate.Height = 38;
+            table.RowTemplate.Height = 40;
             table.Font = UiTheme.FONT_BASE;
-            table.GridColor = UiTheme.BORDER;
+            table.GridColor = Color.FromArgb(230, 230, 230);
             table.BackgroundColor = Color.White;
             table.BorderStyle = BorderStyle.None;
-            table.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            table.CellBorderStyle = DataGridViewCellBorderStyle.Single;
             table.RowHeadersVisible = false;
             table.AllowUserToAddRows = false;
             table.AllowUserToDeleteRows = false;
@@ -146,8 +148,11 @@ namespace HospitalManagement.view.@base
             table.EnableHeadersVisualStyles = false;
             
             // Selection colors
-            table.DefaultCellStyle.SelectionBackColor = UiTheme.SELECT;
+            table.DefaultCellStyle.SelectionBackColor = Color.FromArgb(230, 240, 255);
             table.DefaultCellStyle.SelectionForeColor = UiTheme.TEXT;
+            
+            // Better padding for cells
+            table.DefaultCellStyle.Padding = new Padding(8, 5, 8, 5);
         }
 
         /// <summary>
@@ -161,11 +166,11 @@ namespace HospitalManagement.view.@base
                 ForeColor = Color.White,
                 Font = UiTheme.FONT_BOLD,
                 Alignment = DataGridViewContentAlignment.MiddleCenter,
-                Padding = new Padding(10, 8, 10, 8)
+                Padding = new Padding(8, 10, 8, 10)
             };
 
             table.ColumnHeadersDefaultCellStyle = headerStyle;
-            table.ColumnHeadersHeight = 42;
+            table.ColumnHeadersHeight = 45;
             table.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
         }
 
@@ -175,10 +180,9 @@ namespace HospitalManagement.view.@base
         public static void ApplyZebraStripes(DataGridView table)
         {
             table.RowsDefaultCellStyle.BackColor = Color.White;
-            table.AlternatingRowsDefaultCellStyle.BackColor = UiTheme.ROW_ALT;
+            table.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 249, 250);
             table.DefaultCellStyle.ForeColor = UiTheme.TEXT;
-            table.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            table.DefaultCellStyle.Padding = new Padding(10, 0, 10, 0);
+            table.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
         }
 
         /// <summary>

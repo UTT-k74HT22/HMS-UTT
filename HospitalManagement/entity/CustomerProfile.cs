@@ -1,4 +1,4 @@
-﻿namespace HospitalManagement.entity
+﻿﻿namespace HospitalManagement.entity
 {
     /// <summary>
     /// CustomerProfile entity - extends UserProfile with customer-specific info
@@ -13,7 +13,7 @@
         /// <summary>
         /// Customer type: RETAIL, WHOLESALE
         /// </summary>
-        public string CustomerType { get; set; } 
+        public string CustomerType { get; set; } = string.Empty; 
 
         /// <summary>
         /// Tax identification code
