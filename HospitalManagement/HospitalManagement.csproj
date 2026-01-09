@@ -40,7 +40,6 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="dto\request\" />
-	  <Folder Include="dto\response\" />
 	</ItemGroup>
 
 </Project>
