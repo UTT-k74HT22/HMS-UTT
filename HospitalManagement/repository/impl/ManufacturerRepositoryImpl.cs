@@ -52,6 +52,22 @@ namespace HospitalManagement.repository.impl
                 cmd.Parameters.AddWithValue("@id", id);
             }, MapRow);
         }
+        
+        // ManufacturerRepositoryImpl.cs
+        public List<Manufacturer> SearchByCode(string code)
+        {
+            string sql = @"
+        SELECT id, code, name, country, address, phone, email, contact_person, created_at, updated_at
+        FROM manufacturers
+        WHERE code LIKE @code
+        ORDER BY id DESC";
+
+            return QueryForList(sql, cmd =>
+            {
+                cmd.Parameters.AddWithValue("@code", $"%{code}%"); // tìm gần đúng, có thể xóa % để tìm chính xác
+            }, MapRow);
+        }
+
 
         public long Insert(Manufacturer m)
         {

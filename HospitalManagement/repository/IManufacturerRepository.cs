@@ -8,6 +8,7 @@ namespace HospitalManagement.repository
     {
         List<Manufacturer> FindAll();
         Manufacturer FindById(int id);
+        List<Manufacturer> SearchByCode(string code);
         long Insert(Manufacturer m);
         void Update(Manufacturer m);
         void DeleteById(int id);

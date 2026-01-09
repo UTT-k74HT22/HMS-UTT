@@ -287,13 +287,77 @@ private void btnEdit_Click(object sender, EventArgs e)
     f.ShowDialog();
 }
 
-        private void btnDelete_Click(object sender, EventArgs e)
+private void btnDelete_Click(object sender, EventArgs e)
+{
+    if (dgvManufacturer.SelectedRows.Count == 0)
+    {
+        MessageBox.Show("Vui lòng chọn một bản ghi để xóa", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+    }
+
+    var selectedRow = dgvManufacturer.SelectedRows[0];
+    int id = Convert.ToInt32(selectedRow.Cells[1].Value);
+    string name = selectedRow.Cells[3].Value?.ToString();
+    
+    var result = MessageBox.Show(
+        $"Bạn có chắc muốn xóa nhà sản xuất \"{name}\" không?",
+        "Xác nhận xóa",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question
+    );
+
+    if (result == DialogResult.Yes)
+    {
+        try
         {
+            _controller.Delete(id);
+            LoadData();
+            MessageBox.Show("Xóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Lỗi khi xóa:\n" + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+}
+
+private void btnSearch_Click(object sender, EventArgs e)
+{
+    string code = txtSearch.Text.Trim();
+
+    if (string.IsNullOrEmpty(code))
+    {
+        LoadData();
+    }
+    try
+    {
+        List<Manufacturer> list = _controller.SearchByCode(code);
+        dgvManufacturer.Rows.Clear();
+
+        int stt = 1;
+        foreach (var m in list)
+        {
+            dgvManufacturer.Rows.Add(
+                stt++,
+                m.Id,
+                m.Code,
+                m.Name,
+                m.Country,
+                m.Address,
+                m.Phone,
+                m.Email,
+                m.ContactPerson
+            );
         }
 
-        private void btnSearch_Click(object sender, EventArgs e)
-        {
-        }
+        lblTotal.Text = $"Tổng: {list.Count}";
+        dgvManufacturer.ClearSelection();
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show("Lỗi khi tìm kiếm:\n" + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+}
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {

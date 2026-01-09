@@ -26,6 +26,11 @@ namespace HospitalManagement.service.impl
             return _manufacturerRepository.FindById(id);
         }
 
+        public List<Manufacturer> SearchByCode(string code)
+        {
+            return _manufacturerRepository.SearchByCode(code);
+        }
+
         public long Create(Manufacturer manufacturer)
         {
             return _manufacturerRepository.Insert(manufacturer);

@@ -8,6 +8,8 @@ namespace HospitalManagement.service
         List<Manufacturer> FindAll();
 
         Manufacturer FindById(int id);
+        
+        List<Manufacturer> SearchByCode(string code);
 
         long Create(Manufacturer manufacturer);
 

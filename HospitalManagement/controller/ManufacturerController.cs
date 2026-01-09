@@ -29,6 +29,11 @@ namespace HospitalManagement.Controller
             return _manufacturerService.FindById(id);
         }
 
+        public List<Manufacturer> SearchByCode(string code)
+        {
+            return _manufacturerService.SearchByCode(code);
+        }
+
         public long Create(Manufacturer manufacturer)
         {
             if (manufacturer == null)
