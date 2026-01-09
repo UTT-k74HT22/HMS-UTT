@@ -1,6 +1,7 @@
 ﻿﻿using HospitalManagement.entity;
 using HospitalManagement.service;
 using HospitalManagement.controller;
+using HospitalManagement.entity.enums;
 
 namespace HospitalManagement.view;
 public partial class LoginForm : Form
@@ -51,7 +52,7 @@ public partial class LoginForm : Form
             Account account = _authService.authenticate(username, password);
             
             // Open MainFrame
-            var mainFrame = new MainFrame(account.Username, account.Role, _accountController, _employeeController);
+            var mainFrame = new MainFrame(account.Username, (account.Role == RoleType.ADMIN).ToString(), _accountController, _employeeController);
             mainFrame.FormClosed += (_, _) => Application.Exit();
             mainFrame.Show();
             

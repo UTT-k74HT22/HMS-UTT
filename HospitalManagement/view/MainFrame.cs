@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using HospitalManagement.controller;
+using HospitalManagement.entity.enums;
 using HospitalManagement.view.layouts;
 using HospitalManagement.view.@base;
 
@@ -23,7 +24,7 @@ namespace HospitalManagement.view
         private Panel _contentPanel = null!;
 
         // Constructor mặc định cho Designer (REQUIRED for WinForms designer)
-        public MainFrame() : this("Designer", "ADMIN", null!, null!)
+        public MainFrame() : this("Designer", RoleType.ADMIN.ToString(), null!, null!)
         {
         }
 

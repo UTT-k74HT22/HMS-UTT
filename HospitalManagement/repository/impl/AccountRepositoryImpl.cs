@@ -15,37 +15,134 @@ namespace HospitalManagement.repository.impl
 
         public List<Account> FindAll()
         {
-            throw new NotImplementedException();
+            var accounts = new List<Account>();
+            string query = """
+                           SELECT id, username, password, role, is_active
+                           FROM accounts
+                           """;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using var command = new SqlCommand(query, connection);
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    accounts.Add(Map(reader));
+                }
+            }
+            return accounts;
         }
 
         public Account FindByUsername(string username)
         {
-            throw new NotImplementedException();
+            string sql = """
+                         SELECT id, username, password, role, is_active
+                         FROM accounts
+                         WHERE username = @username
+                         """;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using var command = new SqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@username", username);
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return Map(reader);
+                }
+            }
+            return null;
         }
 
         public Account FindById(long id)
         {
-            throw new NotImplementedException();
+            string sql = """
+                         SELECT id, username, password, role, is_active
+                         FROM accounts
+                         WHERE id = @id
+                         """;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using var command = new SqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@id", id);
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return Map(reader);
+                }
+            }
+            return null;        
         }
 
         public long Insert(SqlConnection conn, Account account)
         {
-            throw new NotImplementedException();
+            string sql = """
+                         INSERT INTO accounts (username, password, role, is_active, created_at, updated_at)
+                         OUTPUT INSERTED.id
+                         VALUES (@username, @password, @role, @is_active, @created_at, @updated_at);
+                         """;
+            using (var command = new SqlCommand(sql, conn))
+            {
+                command.Parameters.AddWithValue("@username", account.Username);
+                command.Parameters.AddWithValue("@password", account.Password);
+                command.Parameters.AddWithValue("@role", account.Role);
+                command.Parameters.AddWithValue("@is_active", account.IsActive);
+                command.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@updated_at", DateTime.UtcNow);
+                return (long)command.ExecuteScalar();
+            }
         }
 
         public void UpdateRoleAndStatus(long id, RoleType role, bool active)
         {
-            throw new NotImplementedException();
+            string sql = """
+                         UPDATE accounts
+                         SET role = @role, is_active = @is_active, updated_at = @updated_at
+                         WHERE id = @id
+                         """;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using var command = new SqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@role", role.ToString());
+                command.Parameters.AddWithValue("@is_active", active);
+                command.Parameters.AddWithValue("@updated_at", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@id", id);
+                command.ExecuteNonQuery();
+            }
         }
 
         public void DeleteById(long id)
         {
-            throw new NotImplementedException();
+            string query = @"
+                UPDATE account 
+                SET deleted_at = GETDATE(), active = 0
+                WHERE id = @id";
+
+            using (var connection = new SqlConnection(_connectionString))
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@id", id);
+                connection.Open();
+                command.ExecuteNonQuery();
+            }        
         }
 
         public bool ExistsByUsername(string username)
         {
-            throw new NotImplementedException();
+            string query = @"
+                SELECT COUNT(*) 
+                FROM account 
+                WHERE username = @username AND deleted_at IS NULL";
+
+            using (var connection = new SqlConnection(_connectionString))
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@username", username);
+                connection.Open();
+                return (int)command.ExecuteScalar() > 0;
+            }
         }
 
         public bool ExistsByEmail(string email)
@@ -65,19 +162,36 @@ namespace HospitalManagement.repository.impl
 
         public long? FindUserIdByAccountId(long accountId)
         {
-            throw new NotImplementedException();
+            string query = @"
+                SELECT id 
+                FROM user_profile 
+                WHERE account_id = @accountId AND deleted_at IS NULL";
+
+            using (var connection = new SqlConnection(_connectionString))
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@accountId", accountId);
+                connection.Open();
+                
+                var result = command.ExecuteScalar();
+                return result != null ? (long?)(int)result : null;
+            }
         }
         
         
-        private Account Map(SqlDataReader rs)
+        private Account Map(SqlDataReader reader)
         {
             return new Account
             {
-                Id = rs.GetInt32(rs.GetOrdinal("id")),
-                Username = rs.GetString(rs.GetOrdinal("username")),
-                Password = rs.GetString(rs.GetOrdinal("password")),
-                Role = rs.GetString(rs.GetOrdinal("role")),
-                IsActive = rs.GetBoolean(rs.GetOrdinal("is_active"))
+                Id = reader.GetInt64(reader.GetOrdinal("id")),
+                Username = reader.GetString(reader.GetOrdinal("username")),
+                Password = reader.GetString(reader.GetOrdinal("password_hash")),
+                Role = Enum.Parse<RoleType>(reader.GetString(reader.GetOrdinal("role"))),
+                IsActive = reader.GetBoolean(reader.GetOrdinal("active")),
+                CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
+                LastLoginAt = reader.IsDBNull(reader.GetOrdinal("last_login_at")) 
+                    ? null 
+                    : reader.GetDateTime(reader.GetOrdinal("last_login_at"))
             };
         }
     }

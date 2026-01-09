@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using HospitalManagement.controller;
 using HospitalManagement.entity;
+using HospitalManagement.entity.enums;
 using HospitalManagement.view.@base;
 
 namespace HospitalManagement.view
@@ -379,7 +380,7 @@ namespace HospitalManagement.view
             }
 
             // Prevent deleting ADMIN accounts
-            if (selected.Role == "ADMIN")
+            if (selected.Role == RoleType.ADMIN)
             {
                 MessageBox.Show("Không thể xóa tài khoản ADMIN!", "Cảnh báo",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);

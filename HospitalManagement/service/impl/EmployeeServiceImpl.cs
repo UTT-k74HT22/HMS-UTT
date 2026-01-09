@@ -10,14 +10,10 @@ namespace HospitalManagement.service.impl;
 /// </summary>
 public class EmployeeServiceImpl : EmployeeService, IEmployeeService
 {
-    private readonly EmployeeRepository employeeRepository;
     private readonly IEmployeeProfileRepository _employeeProfileRepository;
     
-    public EmployeeServiceImpl(
-        EmployeeRepository employeeRepository,
-        IEmployeeProfileRepository employeeProfileRepository)
+    public EmployeeServiceImpl(IEmployeeProfileRepository employeeProfileRepository)
     {
-        this.employeeRepository = employeeRepository;
         _employeeProfileRepository = employeeProfileRepository;
     }
 
@@ -60,6 +56,7 @@ public class EmployeeServiceImpl : EmployeeService, IEmployeeService
     public List<EmployeeResponse> GetEmployees()
     {
         // throw new NotImplementedException();
-        return employeeRepository.GetEmployees();
+        // return _employeeProfileRepository.Get();
+        return null;
     }
 }

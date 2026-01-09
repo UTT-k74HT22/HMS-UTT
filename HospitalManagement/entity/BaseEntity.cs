@@ -8,7 +8,7 @@
         /// <summary>
         /// Primary key identifier
         /// </summary>
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// Timestamp when the entity was created

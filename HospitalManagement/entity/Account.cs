@@ -1,3 +1,5 @@
+using HospitalManagement.entity.enums;
+
 namespace HospitalManagement.entity
 {
     /// <summary>
@@ -18,7 +20,7 @@ namespace HospitalManagement.entity
         /// <summary>
         /// User role: ADMIN, EMPLOYEE, CUSTOMER
         /// </summary>
-        public string Role { get; set; } = "";
+        public RoleType Role { get; set; } = RoleType.CUSTOMER;
 
         /// <summary>
         /// Account status

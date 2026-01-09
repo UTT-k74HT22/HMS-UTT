@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using HospitalManagement.controller;
+using HospitalManagement.dto.response;
 using HospitalManagement.repository;
 using HospitalManagement.repository.impl;
 using HospitalManagement.service;
@@ -56,7 +57,7 @@ namespace HospitalManagement.configuration
                 return new AccountRepositoryImpl(dbConfig.ConnectionString);
             });
 
-            services.AddScoped<EmployeeRepository>(provider =>
+            services.AddScoped<IEmployeeProfileRepository>(provider =>
             {
                 var dbConfig = provider.GetRequiredService<DBConfig>();
                 return new EmployeeRepositoryImpl(dbConfig.ConnectionString);
