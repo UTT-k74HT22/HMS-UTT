@@ -1,5 +1,6 @@
 ﻿using HospitalManagement.dto.response;
 using HospitalManagement.entity;
+using HospitalManagement.entity.enums;
 using HospitalManagement.repository;
 
 namespace HospitalManagement.service.impl;
@@ -40,7 +41,7 @@ public class AccountServiceImpl : AccountService, IAccountService
         throw new NotImplementedException();
     }
 
-    public void Update(long accountId, Role role, bool active)
+    public void Update(long accountId, RoleType role, bool active)
     {
         // TODO: Implement
         throw new NotImplementedException();

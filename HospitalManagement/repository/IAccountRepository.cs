@@ -1,5 +1,6 @@
 using HospitalManagement.entity;
-using MySql.Data.MySqlClient;
+using HospitalManagement.entity.enums;
+using Microsoft.Data.SqlClient;
 
 namespace HospitalManagement.repository
 {
@@ -26,12 +27,12 @@ namespace HospitalManagement.repository
         /// <summary>
         /// Chèn tài khoản mới và trả về ID đã chèn
         /// </summary>
-        long Insert(MySqlConnection conn, Account account);
+        long Insert(SqlConnection conn, Account account);
 
         /// <summary>
         /// Cập nhật vai trò và trạng thái kích hoạt của tài khoản
         /// </summary>
-        void UpdateRoleAndStatus(long id, Role role, bool active);
+        void UpdateRoleAndStatus(long id, RoleType role, bool active);
 
         /// <summary>
         /// Xóa tài khoản theo ID

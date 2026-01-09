@@ -1,4 +1,5 @@
 using HospitalManagement.entity;
+using HospitalManagement.entity.enums;
 
 namespace HospitalManagement.dto.response
 {
@@ -9,11 +10,11 @@ namespace HospitalManagement.dto.response
     {
         public long Id { get; set; }
         public string Username { get; set; }
-        public Role Role { get; set; }
+        public RoleType Role { get; set; }
         public bool Active { get; set; }
         public DateTime? LastLoginAt { get; set; }
 
-        public AccountResponse(long id, string username, Role role, bool active, DateTime? lastLoginAt)
+        public AccountResponse(long id, string username, RoleType role, bool active, DateTime? lastLoginAt)
         {
             Id = id;
             Username = username;

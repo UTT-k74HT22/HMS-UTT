@@ -1,4 +1,5 @@
 using HospitalManagement.entity;
+using HospitalManagement.entity.enums;
 
 namespace HospitalManagement.dto.request
 {
@@ -10,7 +11,7 @@ namespace HospitalManagement.dto.request
         public string Username { get; set; }
         public string Password { get; set; }
         public string ConfirmPassword { get; set; }
-        public Role Role { get; set; }
+        public RoleType Role { get; set; }
         public bool Active { get; set; }
         public string FullName { get; set; }
         public string Email { get; set; }

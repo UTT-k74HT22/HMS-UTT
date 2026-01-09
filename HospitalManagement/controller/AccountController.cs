@@ -1,6 +1,7 @@
 ﻿using HospitalManagement.dto.request;
 using HospitalManagement.dto.response;
 using HospitalManagement.entity;
+using HospitalManagement.entity.enums;
 using HospitalManagement.service;
 
 namespace HospitalManagement.controller;
@@ -62,7 +63,7 @@ public class AccountController
     /// <summary>
     /// Cập nhật tài khoản
     /// </summary>
-    public void UpdateAccount(long id, Role role, bool active)
+    public void UpdateAccount(long id, RoleType role, bool active)
     {
         // TODO: Implement
         throw new NotImplementedException();

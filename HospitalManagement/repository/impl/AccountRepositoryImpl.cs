@@ -1,4 +1,5 @@
 using HospitalManagement.entity;
+using HospitalManagement.entity.enums;
 using Microsoft.Data.SqlClient;
 
 namespace HospitalManagement.repository.impl
@@ -14,95 +15,60 @@ namespace HospitalManagement.repository.impl
 
         public List<Account> FindAll()
         {
-            var list = new List<Account>();
-            const string sql = "SELECT * FROM Accounts";
-
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new SqlCommand(sql, conn);
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                list.Add(Map(reader));
-            }
-
-            return list;
+            throw new NotImplementedException();
         }
 
-        public Account? FindByUsername(string username)
+        public Account FindByUsername(string username)
         {
-            const string sql = "SELECT * FROM Accounts WHERE username = @username";
-
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@username", username);
-
-            using var reader = cmd.ExecuteReader();
-            return reader.Read() ? Map(reader) : null;
+            throw new NotImplementedException();
         }
 
-        public void Save(Account acc)
+        public Account FindById(long id)
         {
-            const string sql =
-                @"INSERT INTO Accounts (username, password, role, is_active)
-                  VALUES (@u, @p, @r, @a)";
-
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@u", acc.Username);
-            cmd.Parameters.AddWithValue("@p", acc.Password);
-            cmd.Parameters.AddWithValue("@r", acc.Role);
-            cmd.Parameters.AddWithValue("@a", acc.IsActive);
-
-            cmd.ExecuteNonQuery();
+            throw new NotImplementedException();
         }
 
-        public void Update(Account acc)
+        public long Insert(SqlConnection conn, Account account)
         {
-            const string sql =
-                @"UPDATE Accounts SET password=@p, role=@r, is_active=@a WHERE id=@id";
-
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@p", acc.Password);
-            cmd.Parameters.AddWithValue("@r", acc.Role);
-            cmd.Parameters.AddWithValue("@a", acc.IsActive);
-            cmd.Parameters.AddWithValue("@id", acc.Id);
-
-            cmd.ExecuteNonQuery();
+            throw new NotImplementedException();
         }
 
-        public void DeleteById(int id)
+        public void UpdateRoleAndStatus(long id, RoleType role, bool active)
         {
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-            using var cmd = new SqlCommand("DELETE FROM Accounts WHERE id=@id", conn);
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.ExecuteNonQuery();
+            throw new NotImplementedException();
+        }
+
+        public void DeleteById(long id)
+        {
+            throw new NotImplementedException();
         }
 
         public bool ExistsByUsername(string username)
         {
-            const string sql = "SELECT 1 FROM Accounts WHERE username = @username";
-
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@username", username);
-
-            using var reader = cmd.ExecuteReader();
-            return reader.Read();
+            throw new NotImplementedException();
         }
 
+        public bool ExistsByEmail(string email)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdatePassword(long accountId, string hashedPassword)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateLastLogin(long accountId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public long? FindUserIdByAccountId(long accountId)
+        {
+            throw new NotImplementedException();
+        }
+        
+        
         private Account Map(SqlDataReader rs)
         {
             return new Account

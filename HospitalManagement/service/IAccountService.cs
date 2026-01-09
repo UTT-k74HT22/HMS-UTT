@@ -1,5 +1,6 @@
 using HospitalManagement.dto.response;
 using HospitalManagement.entity;
+using HospitalManagement.entity.enums;
 
 namespace HospitalManagement.service
 {
@@ -31,7 +32,7 @@ namespace HospitalManagement.service
         /// <summary>
         /// Cập nhật tài khoản
         /// </summary>
-        void Update(long accountId, Role role, bool active);
+        void Update(long accountId, RoleType role, bool active);
 
         /// <summary>
         /// Xóa tài khoản theo ID
