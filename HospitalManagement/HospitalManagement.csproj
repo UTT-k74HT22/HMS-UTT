@@ -36,8 +36,11 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="dto\request\" />
-	  <Folder Include="dto\response\" />
 	</ItemGroup>
+
+	<PropertyGroup>
+		<Nullable>disable</Nullable>
+	</PropertyGroup>
 
 </Project>
 
