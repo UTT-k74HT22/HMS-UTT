@@ -122,7 +122,6 @@ namespace HospitalManagement.view
             Control? panel = menuKey switch
             {
                 Sidebar.MENU_DASHBOARD => new DashboardPanel(),
-
                 Sidebar.MENU_ACCOUNTS => _accountController != null
                     ? new AccountManagementPanel(_accountController)
                     : CreateComingSoonPanel("Quản lý tài khoản (Cần DI)"),
@@ -131,9 +130,7 @@ namespace HospitalManagement.view
 
                 Sidebar.MENU_CUSTOMER => CreateComingSoonPanel("Quản lý khách hàng"),
                 Sidebar.MENU_CATEGORIES => CreateComingSoonPanel("Danh mục sản phẩm"),
-                Sidebar.MENU_MANUFACTURERS => CreateComingSoonPanel("Nhà sản xuất"),
-
-        
+                Sidebar.MENU_MANUFACTURERS => new ManufacturerManagementForm(),
                 Sidebar.MENU_PRODUCTS => new ProductManagementPanel(),
 
                 Sidebar.MENU_WAREHOUSES => CreateComingSoonPanel("Kho hàng"),
