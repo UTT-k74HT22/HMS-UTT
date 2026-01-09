@@ -11,21 +11,19 @@ namespace HospitalManagement.controller;
 /// </summary>
 public class AccountController
 {
-    private readonly AccountService _accountService;
-    private readonly IAccountService _newAccountService;
+    private readonly IAccountService _accountService;
     
-    public AccountController(AccountService accountService, IAccountService newAccountService)
+    public AccountController(IAccountService _accountService)
     {
-        _accountService = accountService;
-        _newAccountService = newAccountService;
+        this._accountService = _accountService;
     }
 
     /// <summary>
     /// Lấy danh sách tất cả tài khoản
     /// </summary>
-    public List<Account> GetAccounts()
+    public List<AccountResponse> GetAccounts()
     {
-        return _accountService.GetAccounts();
+        return _accountService.GetAll();
     }
 
     /// <summary>

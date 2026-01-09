@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using HospitalManagement.controller;
+using HospitalManagement.dto.response;
 using HospitalManagement.entity;
 using HospitalManagement.entity.enums;
 using HospitalManagement.view.@base;
@@ -15,7 +16,7 @@ namespace HospitalManagement.view
     /// Extends từ BaseManagementPanel để có sẵn table, filters, actions
     /// Tính năng: CRUD accounts, search/filter theo role và status
     /// </summary>
-    public class AccountManagementPanel : BaseManagementPanel<Account>
+    public class AccountManagementPanel : BaseManagementPanel<AccountResponse>
     {
         // ========== Dependencies ==========
         private readonly AccountController _accountController;
@@ -53,12 +54,12 @@ namespace HospitalManagement.view
             };
         }
 
-        protected override List<Account> FetchData()
+        protected override List<AccountResponse> FetchData()
         {
             // Designer mode - return empty list
             if (_accountController == null)
             {
-                return new List<Account>();
+                return new List<AccountResponse>();
             }
             
             return _accountController.GetAccounts();
@@ -300,27 +301,7 @@ namespace HospitalManagement.view
 
         private void OnViewDetail(object? sender, EventArgs e)
         {
-            var selected = GetSelectedItem();
-            if (selected == null)
-            {
-                MessageBox.Show("Vui lòng chọn một tài khoản!", "Thông báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            var info = $"═══════════════════════════════\n" +
-                      $"CHI TIẾT TÀI KHOẢN\n" +
-                      $"═══════════════════════════════\n\n" +
-                      $"ID: {selected.Id}\n" +
-                      $"Username: {selected.Username}\n" +
-                      $"Vai trò: {selected.Role}\n" +
-                      $"Trạng thái: {(selected.IsActive ? "✓ Hoạt động" : "✗ Khóa")}\n" +
-                      $"Đăng nhập cuối: {(selected.LastLoginAt?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa đăng nhập")}\n" +
-                      $"Ngày tạo: {selected.CreatedAt:dd/MM/yyyy HH:mm}\n" +
-                      $"Cập nhật: {selected.UpdatedAt:dd/MM/yyyy HH:mm}";
-
-            MessageBox.Show(info, "Chi tiết tài khoản",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
         }
 
         private void OnEdit(object? sender, EventArgs e)
@@ -342,31 +323,7 @@ namespace HospitalManagement.view
 
         private void OnToggleStatus(object? sender, EventArgs e)
         {
-            var selected = GetSelectedItem();
-            if (selected == null)
-            {
-                MessageBox.Show("Vui lòng chọn một tài khoản!", "Thông báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            var action = selected.IsActive ? "khóa" : "mở khóa";
-            var result = MessageBox.Show(
-                $"Bạn có chắc chắn muốn {action} tài khoản:\n{selected.Username}?",
-                $"Xác nhận {action}",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
-            {
-                // TODO: Call service to toggle status
-                // _controller.ToggleAccountStatus(selected.Id);
-                
-                MessageBox.Show($"Đã {action} tài khoản thành công!", "Thông báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                
-                Reload();
-            }
+            
         }
 
         private void OnDelete(object? sender, EventArgs e)

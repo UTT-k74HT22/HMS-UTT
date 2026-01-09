@@ -183,15 +183,15 @@ namespace HospitalManagement.repository.impl
         {
             return new Account
             {
-                Id = reader.GetInt64(reader.GetOrdinal("id")),
+                Id = reader.GetInt32(reader.GetOrdinal("id")),
                 Username = reader.GetString(reader.GetOrdinal("username")),
-                Password = reader.GetString(reader.GetOrdinal("password_hash")),
+                Password = reader.GetString(reader.GetOrdinal("password")),
                 Role = Enum.Parse<RoleType>(reader.GetString(reader.GetOrdinal("role"))),
-                IsActive = reader.GetBoolean(reader.GetOrdinal("active")),
-                CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                LastLoginAt = reader.IsDBNull(reader.GetOrdinal("last_login_at")) 
-                    ? null 
-                    : reader.GetDateTime(reader.GetOrdinal("last_login_at"))
+                IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                // CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
+                // LastLoginAt = reader.IsDBNull(reader.GetOrdinal("last_login_at")) 
+                //     ? null 
+                //     : reader.GetDateTime(reader.GetOrdinal("last_login_at"))
             };
         }
     }

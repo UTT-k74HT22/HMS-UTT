@@ -1,12 +1,7 @@
 ﻿﻿﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using HospitalManagement.configuration;
-using HospitalManagement.service;
-using HospitalManagement.service.impl;
 using HospitalManagement.view;
-using HospitalManagement.repository;
-using HospitalManagement.repository.impl;
-using HospitalManagement.controller;
 
 namespace HospitalManagement
 {
