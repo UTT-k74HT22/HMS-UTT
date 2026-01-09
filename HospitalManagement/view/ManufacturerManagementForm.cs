@@ -79,6 +79,13 @@ namespace HospitalManagement.view
                 HeaderText = "Country",
                 Width = 120
             });
+            
+            dgvManufacturer.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Address",
+                Width = 200
+            });
+
 
             dgvManufacturer.Columns.Add(new DataGridViewTextBoxColumn
             {
@@ -89,6 +96,12 @@ namespace HospitalManagement.view
             dgvManufacturer.Columns.Add(new DataGridViewTextBoxColumn
             {
                 HeaderText = "Email",
+                Width = 200
+            });
+            
+            dgvManufacturer.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Contact Person",
                 Width = 200
             });
         }
@@ -111,9 +124,11 @@ namespace HospitalManagement.view
                         m.Id,           
                         m.Code,         
                         m.Name,             
-                        m.Country,         
+                        m.Country,   
+                        m.Address,
                         m.Phone,            
-                        m.Email
+                        m.Email,
+                        m.ContactPerson
                     );
                 }
 
@@ -133,8 +148,64 @@ namespace HospitalManagement.view
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-        }
+            Form f = new Form
+            {
+                Text = "Thêm Manufacturer",
+                Size = new Size(400, 480),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.FixedDialog
+            };
 
+            // Các trường cần nhập
+            string[] labels = { "Code", "Name", "Country", "Address", "Phone", "Email", "Contact Person" };
+            TextBox[] inputs = new TextBox[labels.Length];
+
+            int leftLabel = 30;
+            int leftInput = 130;
+            int topStart = 30;
+            int heightStep = 40;
+
+            for (int i = 0; i < labels.Length; i++)
+            {
+                int top = topStart + i * heightStep;
+                var lbl = new Label { Text = labels[i], Left = leftLabel, Top = top + 3, Width = 100 };
+                var txt = new TextBox { Left = leftInput, Top = top, Width = 200 };
+                inputs[i] = txt;
+                f.Controls.Add(lbl);
+                f.Controls.Add(txt);
+            }
+            
+            Button btnSave = new Button { Text = "Lưu", Left = leftInput, Top = topStart + labels.Length * heightStep + 10, Width = 80 };
+            Button btnCancel = new Button { Text = "Hủy", Left = leftInput + 120, Top = btnSave.Top, Width = 80 };
+
+            btnCancel.Click += (_, __) => f.Close();
+            btnSave.Click += (_, __) =>
+            {
+                try
+                {
+                    _controller.Create(new Manufacturer
+                    {
+                        Code = inputs[0].Text.Trim(),
+                        Name = inputs[1].Text.Trim(),
+                        Country = inputs[2].Text.Trim(),
+                        Address = inputs[3].Text.Trim(),
+                        Phone = inputs[4].Text.Trim(),
+                        Email = inputs[5].Text.Trim(),
+                        ContactPerson = inputs[6].Text.Trim()
+                    });
+                    f.Close();
+                    LoadData();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Lỗi");
+                }
+            };
+
+            f.Controls.AddRange(new Control[] { btnSave, btnCancel });
+            f.ShowDialog();
+        }
+        
         private void btnEdit_Click(object sender, EventArgs e)
         {
         }

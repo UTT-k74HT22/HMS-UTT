@@ -28,17 +28,6 @@ namespace HospitalManagement.service.impl
 
         public long Create(Manufacturer manufacturer)
         {
-            // ===== VALIDATION (giữ logic giống Java) =====
-            if (string.IsNullOrWhiteSpace(manufacturer.Code))
-            {
-                throw new Exception("code ko được để trống");
-            }
-
-            if (string.IsNullOrWhiteSpace(manufacturer.Name))
-            {
-                throw new Exception("name ko được để trống");
-            }
-
             return _manufacturerRepository.Insert(manufacturer);
         }
 

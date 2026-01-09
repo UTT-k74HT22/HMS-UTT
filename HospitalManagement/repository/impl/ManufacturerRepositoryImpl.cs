@@ -122,7 +122,7 @@ namespace HospitalManagement.repository.impl
         public List<ManufacturerResponse> FindAllActive()
         {
             string sql = @"
-                SELECT id, code, name, country, phone, email
+                SELECT id, code, name, country, address, phone, email, contact_person
                 FROM manufacturers
                 ORDER BY name";
 
@@ -279,7 +279,7 @@ namespace HospitalManagement.repository.impl
         {
             return new ManufacturerResponse
             {
-                Id = rs.GetInt64(rs.GetOrdinal("id")),
+                Id = rs.GetInt32(rs.GetOrdinal("id")),
 
                 Code = rs.GetString(rs.GetOrdinal("code")),
                 Name = rs.GetString(rs.GetOrdinal("name")),
@@ -287,6 +287,10 @@ namespace HospitalManagement.repository.impl
                 Country = rs.IsDBNull(rs.GetOrdinal("country"))
                     ? ""
                     : rs.GetString(rs.GetOrdinal("country")),
+                
+                Address = rs.IsDBNull(rs.GetOrdinal("address"))
+                    ? null
+                    : rs.GetString(rs.GetOrdinal("address")),
 
                 Phone = rs.IsDBNull(rs.GetOrdinal("phone"))
                     ? ""
@@ -294,7 +298,11 @@ namespace HospitalManagement.repository.impl
 
                 Email = rs.IsDBNull(rs.GetOrdinal("email"))
                     ? ""
-                    : rs.GetString(rs.GetOrdinal("email"))
+                    : rs.GetString(rs.GetOrdinal("email")),
+                
+                ContactPerson = rs.IsDBNull(rs.GetOrdinal("contact_person"))
+                    ? null
+                    : rs.GetString(rs.GetOrdinal("contact_person")),
             };
         }
 

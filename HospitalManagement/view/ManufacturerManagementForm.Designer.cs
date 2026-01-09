@@ -119,7 +119,7 @@
             dgvManufacturer.Margin = new Padding(3, 4, 3, 4);
             dgvManufacturer.Name = "dgvManufacturer";
             dgvManufacturer.RowHeadersWidth = 51;
-            dgvManufacturer.Size = new Size(1119, 656);
+            dgvManufacturer.Size = new Size(1386, 656);
             dgvManufacturer.TabIndex = 7;
             // 
             // lblTotal
@@ -147,7 +147,7 @@
             Controls.Add(label1);
             Margin = new Padding(3, 4, 3, 4);
             Name = "ManufacturerManagementForm";
-            Size = new Size(1122, 772);
+            Size = new Size(1389, 772);
             ((System.ComponentModel.ISupportInitialize)dgvManufacturer).EndInit();
             ResumeLayout(false);
             PerformLayout();
