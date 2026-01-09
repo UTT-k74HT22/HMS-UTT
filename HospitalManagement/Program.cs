@@ -44,6 +44,8 @@ namespace HospitalManagement
                 // Lấy Login form từ Service Provider (nó sẽ tự động tiêm IAuthService vào)
                 var loginForm = ServiceProvider.GetRequiredService<LoginForm>();
                 
+                //TEST
+                
                 // Chạy ứng dụng
                 Application.Run(loginForm);
             }
