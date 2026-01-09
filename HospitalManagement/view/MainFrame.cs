@@ -122,10 +122,10 @@ namespace HospitalManagement.view
         {
             _contentPanel.Controls.Clear();
 
-            Panel? panel = menuKey switch
+            Control? panel = menuKey switch
             {
                 Sidebar.MENU_DASHBOARD => new DashboardPanel(),
-                Sidebar.MENU_ACCOUNTS => _accountController != null 
+                Sidebar.MENU_ACCOUNTS => _accountController != null
                     ? new AccountManagementPanel(_accountController)
                     : CreateComingSoonPanel("Quản lý tài khoản (Cần DI)"),
                 Sidebar.MENU_EMPLOYEE => _employeeController != null
@@ -133,8 +133,9 @@ namespace HospitalManagement.view
                     : CreateComingSoonPanel("Quản lý nhân viên (Cần DI)"),
                 Sidebar.MENU_CUSTOMER => CreateComingSoonPanel("Quản lý khách hàng"),
                 Sidebar.MENU_CATEGORIES => CreateComingSoonPanel("Danh mục sản phẩm"),
-                Sidebar.MENU_MANUFACTURERS => CreateComingSoonPanel("Nhà sản xuất"),
-                Sidebar.MENU_PRODUCTS => CreateComingSoonPanel("Sản phẩm"),
+                Sidebar.MENU_MANUFACTURERS => new ManufacturerManagementForm(),
+                Sidebar.MENU_PRODUCTS => new ProductManagementPanel(),
+
                 Sidebar.MENU_WAREHOUSES => CreateComingSoonPanel("Kho hàng"),
                 Sidebar.MENU_BATCHES => CreateComingSoonPanel("Lô hàng"),
                 Sidebar.MENU_INVENTORY => CreateComingSoonPanel("Tồn kho"),
@@ -144,6 +145,7 @@ namespace HospitalManagement.view
                 Sidebar.MENU_PAYMENTS => CreateComingSoonPanel("Thanh toán"),
                 Sidebar.MENU_REPORT_SUMMARY => CreateComingSoonPanel("Báo cáo tóm tắt"),
                 Sidebar.MENU_REPORT_DETAIL => CreateComingSoonPanel("Thống kê chi tiết"),
+
                 _ => new DashboardPanel()
             };
 
@@ -152,13 +154,11 @@ namespace HospitalManagement.view
                 panel.Dock = DockStyle.Fill;
                 _contentPanel.Controls.Add(panel);
 
-                // Update header title
                 _header.SetModuleTitle(GetModuleTitle(menuKey));
-                
-                // Set active menu
                 _sidebar.SetActiveMenu(menuKey);
             }
         }
+
 
         private Panel CreateComingSoonPanel(string moduleName)
         {
