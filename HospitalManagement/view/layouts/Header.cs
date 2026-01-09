@@ -1,8 +1,9 @@
+using HospitalManagement.view.@base;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
-using HospitalManagement.view.@base;
+using static iText.Kernel.Pdf.PageResizer;
 
 namespace HospitalManagement.view.layouts
 {
@@ -39,14 +40,15 @@ namespace HospitalManagement.view.layouts
 
             // Right panel (user info + buttons)
             var rightPanel = CreateRightPanel(username, role);
-            
-            Controls.Add(_moduleLabel);
+
             Controls.Add(rightPanel);
+            Controls.Add(_moduleLabel);
+
         }
 
         private void InitializeHeader()
         {
-            Height = 70;
+            Height = 100;
             Dock = DockStyle.Top;
             BackColor = Color.FromArgb(248, 249, 255);
             Padding = new Padding(0);

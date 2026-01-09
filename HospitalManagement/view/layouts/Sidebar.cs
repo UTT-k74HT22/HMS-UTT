@@ -53,33 +53,43 @@ namespace HospitalManagement.view.layouts
                 Text = "HMS - Hospital",
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 16F, FontStyle.Bold),
-                AutoSize = true,
-                Padding = new Padding(0, 0, 0, 20)
+                Dock = DockStyle.Top,
+                Height = 64,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Margin = new Padding(0, 0, 0, 12),
+                BackColor = Color.Transparent
             };
+
 
             _menuContainer = new FlowLayoutPanel
             {
+                Dock = DockStyle.Top,
                 FlowDirection = FlowDirection.TopDown,
-                AutoSize = true,
                 WrapContents = false,
-                BackColor = Color.Transparent,
-                Padding = new Padding(0)
+                AutoSize = true,
+                Margin = new Padding(0),
+                Padding = new Padding(0),
+                BackColor = Color.Transparent
             };
+
 
             var scrollPanel = new Panel
             {
                 Dock = DockStyle.Fill,
                 AutoScroll = true,
+                Padding = new Padding(0, 0, 0, 0),
                 BackColor = Color.Transparent
             };
 
-            Controls.Add(appLabel);
-            
+
+
+
             _menuContainer.Dock = DockStyle.Top;
             appLabel.Dock = DockStyle.Top;
             scrollPanel.Dock = DockStyle.Fill;
             scrollPanel.Controls.Add(_menuContainer);
             Controls.Add(scrollPanel);
+            Controls.Add(appLabel);
 
             // Build menu theo role
             BuildMenus(role);
@@ -176,7 +186,7 @@ namespace HospitalManagement.view.layouts
         private void AddSection(string title)
         {
             AddSpacer(14);
-            
+
             var label = new Label
             {
                 Text = title,
@@ -185,7 +195,7 @@ namespace HospitalManagement.view.layouts
                 AutoSize = true,
                 Padding = new Padding(0, 0, 0, 6)
             };
-            
+
             _menuContainer.Controls.Add(label);
         }
 
@@ -197,86 +207,26 @@ namespace HospitalManagement.view.layouts
             AddSpacer(6);
         }
 
-        // private void AddSpacer(int height)
-        // {
-        //     var spacer = new Panel
-        //     {
-        //         Height = height,
-        //         Width = 1,
-        //         BackColor = Color.Transparent
-        //     };
-        //     _menuContainer.Controls.Add(spacer);
-        // }
-        
+
+
         private void AddSpacer(int height)
         {
             _menuContainer.Controls.Add(new Panel
             {
                 Height = height,
-                Width = 204, // <= sửa từ 1 lên full width
+                Width = 186, // <= sửa từ 1 lên full width
                 BackColor = Color.Transparent
             });
         }
 
 
-        // private Button CreateMenuButton(string text, string key)
-        // {
-        //     var btn = new Button
-        //     {
-        //         Text = text,
-        //         Size = new Size(204, 40),
-        //         FlatStyle = FlatStyle.Flat,
-        //         BackColor = Color.Transparent,
-        //         ForeColor = Color.White,
-        //         Font = new Font("Segoe UI", 11F, FontStyle.Regular),
-        //         TextAlign = ContentAlignment.MiddleLeft,
-        //         Cursor = Cursors.Hand,
-        //         Tag = key
-        //     };
-        //
-        //     btn.FlatAppearance.BorderSize = 0;
-        //     btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(255, 255, 255, 40);
-        //
-        //     btn.Click += (s, e) =>
-        //     {
-        //         SetActiveMenu(key);
-        //         MenuClicked?.Invoke(this, new MenuClickedEventArgs(key, text));
-        //     };
-        //
-        //     // Custom paint for active state
-        //     btn.Paint += (sender, e) =>
-        //     {
-        //         var button = sender as Button;
-        //         if (button == null) return;
-        //
-        //         var isActive = key == _activeKey;
-        //         
-        //         if (isActive)
-        //         {
-        //             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-        //             using (var brush = new SolidBrush(Color.FromArgb(80, 255, 255, 255)))
-        //             using (var path = GetRoundedRectangle(button.ClientRectangle, 8))
-        //             {
-        //                 e.Graphics.FillPath(brush, path);
-        //             }
-        //         }
-        //
-        //         // Draw text
-        //         TextRenderer.DrawText(e.Graphics, button.Text, button.Font,
-        //             new Rectangle(16, 0, button.Width - 16, button.Height),
-        //             button.ForeColor,
-        //             TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
-        //     };
-        //
-        //     return btn;
-        // }
 
         private Button CreateMenuButton(string text, string key)
         {
             var btn = new Button
             {
                 Text = text,
-                Size = new Size(204, 40),
+                Size = new Size(186, 40),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
                 ForeColor = Color.White,
@@ -312,7 +262,7 @@ namespace HospitalManagement.view.layouts
 
             return btn;
         }
-        
+
         private GraphicsPath GetRoundedRectangle(Rectangle bounds, int radius)
         {
             var path = new GraphicsPath();
@@ -327,7 +277,7 @@ namespace HospitalManagement.view.layouts
             arc.X = bounds.Left;
             path.AddArc(arc, 90, 90);
             path.CloseFigure();
-            
+
             return path;
         }
 
@@ -341,7 +291,7 @@ namespace HospitalManagement.view.layouts
         public void SetActiveMenu(string key)
         {
             _activeKey = key;
-            
+
             // Refresh all buttons
             foreach (var btn in _menuButtons.Values)
             {
