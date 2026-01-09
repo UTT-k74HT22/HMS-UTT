@@ -75,10 +75,10 @@ namespace HospitalManagement.configuration
             services.AddScoped<IAuthService, AuthServiceImpl>();
 
             // Account Service
-            services.AddScoped<AccountService, AccountServiceImpl>();
+            services.AddScoped<IAccountService, AccountServiceImpl>();
             
             // Employee Service
-            services.AddScoped<EmployeeService, EmployeeServiceImpl>();
+            services.AddScoped<IEmployeeService, EmployeeServiceImpl>();
 
             // TODO: Thêm các service khác
             // services.AddScoped<EmployeeService, EmployeeServiceImpl>();

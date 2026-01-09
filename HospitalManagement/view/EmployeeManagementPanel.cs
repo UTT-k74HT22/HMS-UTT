@@ -12,7 +12,7 @@ namespace HospitalManagement.view
     /// - CRUD operations
     /// - Export Excel
     /// </summary>
-    public class EmployeeManagementPanel : BaseManagementPanel<EmployeeResponse>
+    public class EmployeeManagementPanel : BaseManagementPanel<EmployeeProfileResponse>
     {
         // ========== Dependencies ==========
         private readonly EmployeeController _employeeController;
@@ -48,9 +48,9 @@ namespace HospitalManagement.view
             };
         }
 
-        protected override List<EmployeeResponse> FetchData()
+        protected override List<EmployeeProfileResponse> FetchData()
         {
-            return _employeeController.GetEmployees();
+            return _employeeController.GetAllEmployees();
         }
 
         // ========== Override Optional Hooks ==========

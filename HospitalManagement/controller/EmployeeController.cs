@@ -1,5 +1,6 @@
 ﻿using HospitalManagement.dto.request;
 using HospitalManagement.dto.response;
+using HospitalManagement.entity;
 using HospitalManagement.service;
 
 namespace HospitalManagement.controller;
@@ -9,74 +10,137 @@ namespace HospitalManagement.controller;
 /// </summary>
 public class EmployeeController
 {
-    private readonly EmployeeService employeeService;
-    private readonly IEmployeeService _newEmployeeService;
+    private readonly IEmployeeService _employeeService;
     
-    public EmployeeController(EmployeeService employeeService, IEmployeeService newEmployeeService)
+    public EmployeeController(IEmployeeService _employeeService)
     {
-        this.employeeService = employeeService;
-        _newEmployeeService = newEmployeeService;
+        this._employeeService = _employeeService;
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả nhân viên
-    /// </summary>
-    public List<EmployeeResponse> GetEmployees()
-    {
-        return employeeService.GetEmployees();
-    }
-
-    /// <summary>
-    /// Lấy tất cả nhân viên (mới)
+    /// [CHỨC NĂNG 1] Lấy danh sách tất cả nhân viên (thông tin cơ bản)
+    /// Dùng cho: DataGridView hiển thị danh sách
     /// </summary>
     public List<EmployeeProfileResponse> GetAllEmployees()
     {
-        // TODO: Implement
-        throw new NotImplementedException();
+        try
+        {
+            return _employeeService.GetAllEmployees();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi lấy danh sách nhân viên: {ex.Message}", ex);
+        }
     }
 
     /// <summary>
-    /// Lấy tất cả chi tiết hồ sơ nhân viên
+    /// [CHỨC NĂNG 2] Lấy danh sách chi tiết tất cả nhân viên
+    /// Dùng cho: Export Excel, báo cáo
     /// </summary>
     public List<EmployeeProfileDetailResponse> GetAllProfileDetails()
     {
-        // TODO: Implement
-        throw new NotImplementedException();
+        try
+        {
+            return _employeeService.GetAllProfileDetails();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi lấy chi tiết nhân viên: {ex.Message}", ex);
+        }
     }
 
     /// <summary>
-    /// Lấy chi tiết nhân viên theo mã
+    /// [CHỨC NĂNG 3] Xem chi tiết một nhân viên
+    /// FLOW:
+    /// 1. Validate mã nhân viên
+    /// 2. Lấy thông tin từ database
+    /// 3. Trả về DTO
     /// </summary>
     public EmployeeProfileDetailResponse GetEmployeeByCode(string code)
     {
-        // TODO: Implement
-        throw new NotImplementedException();
+        try
+        {
+            if (string.IsNullOrWhiteSpace(code))
+                throw new ArgumentException("Vui lòng nhập mã nhân viên");
+
+            return _employeeService.GetEmployeeDetailByCode(code);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi lấy thông tin nhân viên: {ex.Message}", ex);
+        }
     }
 
     /// <summary>
-    /// Cập nhật thông tin nhân viên
+    /// [CHỨC NĂNG 4] Cập nhật thông tin cơ bản nhân viên
+    /// FLOW:
+    /// 1. Validate request
+    /// 2. Check nhân viên tồn tại
+    /// 3. Update user_profile + employee_profile
     /// </summary>
     public void UpdateEmployee(string code, UpdateProfileEmployeeRequest request)
     {
-        // TODO: Implement
-        throw new NotImplementedException();
+        try
+        {
+            _employeeService.UpdateProfile(code, request);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi cập nhật nhân viên: {ex.Message}", ex);
+        }
     }
 
     /// <summary>
-    /// Cập nhật chi tiết hồ sơ nhân viên
+    /// [CHỨC NĂNG 5] Cập nhật chi tiết đầy đủ nhân viên
+    /// FLOW:
+    /// 1. Validate request (họ tên, phòng ban, lương, ngày vào làm)
+    /// 2. Check nhân viên tồn tại
+    /// 3. Validate business rules (ngày vào làm không trong tương lai, lương > 0)
+    /// 4. Update cả user_profile và employee_profile
     /// </summary>
     public void UpdateEmployeeDetail(string code, UpdateEmployeeProfileDetailRequest request)
     {
-        // TODO: Implement
-        throw new NotImplementedException();
+        try
+        {
+            _employeeService.UpdateProfileDetail(code, request);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi cập nhật chi tiết nhân viên: {ex.Message}", ex);
+        }
     }
 
     /// <summary>
-    /// Xóa nhân viên (cập nhật trạng thái)
+    /// [CHỨC NĂNG 6] Vô hiệu hóa nhân viên (soft delete)
+    /// FLOW:
+    /// 1. Check nhân viên tồn tại
+    /// 2. Cập nhật status = INACTIVE
+    /// 3. Không xóa dữ liệu
     /// </summary>
     public void DeleteEmployee(string code)
     {
-        // TODO: Implement
-        throw new NotImplementedException();
+        try
+        {
+            _employeeService.Delete(code, ProfileStatus.INACTIVE);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi xóa nhân viên: {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// [CHỨC NĂNG 7] Kích hoạt lại nhân viên
+    /// </summary>
+    public void ActivateEmployee(string code)
+    {
+        try
+        {
+            _employeeService.Delete(code, ProfileStatus.ACTIVE);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi kích hoạt nhân viên: {ex.Message}", ex);
+        }
     }
 }

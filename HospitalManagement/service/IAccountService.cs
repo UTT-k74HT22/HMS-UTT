@@ -12,12 +12,7 @@ namespace HospitalManagement.service
         /// <summary>
         /// Lấy tất cả tài khoản
         /// </summary>
-        List<Account> GetAll();
-
-        /// <summary>
-        /// Lấy tất cả tài khoản với response DTO
-        /// </summary>
-        List<AccountResponse> GetAllAccount();
+        List<AccountResponse> GetAll();
 
         /// <summary>
         /// Tìm tài khoản theo tên đăng nhập
