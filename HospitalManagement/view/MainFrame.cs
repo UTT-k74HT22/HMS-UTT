@@ -5,6 +5,7 @@ using HospitalManagement.controller;
 using HospitalManagement.view.layouts;
 using HospitalManagement.view.@base;
 
+
 namespace HospitalManagement.view
 {
     /// <summary>
@@ -129,7 +130,11 @@ namespace HospitalManagement.view
                 Sidebar.MENU_EMPLOYEE => new EmployeeManagementPanel(),
 
                 Sidebar.MENU_CUSTOMER => CreateComingSoonPanel("Quản lý khách hàng"),
-                Sidebar.MENU_CATEGORIES => CreateComingSoonPanel("Danh mục sản phẩm"),
+                
+                Sidebar.MENU_CATEGORIES => new CategoryManagementPanel(),
+
+               
+                
                 Sidebar.MENU_MANUFACTURERS => new ManufacturerManagementForm(),
                 Sidebar.MENU_PRODUCTS => new ProductManagementPanel(),
 
