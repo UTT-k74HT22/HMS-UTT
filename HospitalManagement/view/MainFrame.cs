@@ -5,6 +5,7 @@ using HospitalManagement.controller;
 using HospitalManagement.view.layouts;
 using HospitalManagement.view.@base;
 
+
 namespace HospitalManagement.view
 {
     /// <summary>
@@ -119,7 +120,7 @@ namespace HospitalManagement.view
         {
             _contentPanel.Controls.Clear();
 
-            Panel? panel = menuKey switch
+            Control? panel = menuKey switch
             {
                 Sidebar.MENU_DASHBOARD => new DashboardPanel(),
                 Sidebar.MENU_ACCOUNTS => _accountController != null 
@@ -127,8 +128,9 @@ namespace HospitalManagement.view
                     : CreateComingSoonPanel("Quản lý tài khoản (Cần DI)"),
                 Sidebar.MENU_EMPLOYEE => new EmployeeManagementPanel(),
                 Sidebar.MENU_CUSTOMER => CreateComingSoonPanel("Quản lý khách hàng"),
-                Sidebar.MENU_CATEGORIES => CreateComingSoonPanel("Danh mục sản phẩm"),
                 Sidebar.MENU_MANUFACTURERS => CreateComingSoonPanel("Nhà sản xuất"),
+                Sidebar.MENU_CATEGORIES => new CategoryManagementPanel(),
+
                 Sidebar.MENU_PRODUCTS => CreateComingSoonPanel("Sản phẩm"),
                 Sidebar.MENU_WAREHOUSES => CreateComingSoonPanel("Kho hàng"),
                 Sidebar.MENU_BATCHES => CreateComingSoonPanel("Lô hàng"),
@@ -147,10 +149,7 @@ namespace HospitalManagement.view
                 panel.Dock = DockStyle.Fill;
                 _contentPanel.Controls.Add(panel);
 
-                // Update header title
                 _header.SetModuleTitle(GetModuleTitle(menuKey));
-                
-                // Set active menu
                 _sidebar.SetActiveMenu(menuKey);
             }
         }

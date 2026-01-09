@@ -4,105 +4,105 @@
     {
         private System.ComponentModel.IContainer components = null;
 
+        private void InitializeComponent()
+        {
+            this.label1 = new System.Windows.Forms.Label();
+            this.txtKeyword = new System.Windows.Forms.TextBox();
+            this.btnSearch = new System.Windows.Forms.Button();
+            this.btnAdd = new System.Windows.Forms.Button();
+            this.btnEdit = new System.Windows.Forms.Button();
+            this.btnDelete = new System.Windows.Forms.Button();
+            this.btnRefresh = new System.Windows.Forms.Button();
+            this.dgvCategory = new System.Windows.Forms.DataGridView();
+            this.lblTotal = new System.Windows.Forms.Label();
+
+            ((System.ComponentModel.ISupportInitialize)(this.dgvCategory)).BeginInit();
+            this.SuspendLayout();
+
+            // label1
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(20, 20);
+            this.label1.Text = "Từ khóa:";
+
+            // txtKeyword
+            this.txtKeyword.Location = new System.Drawing.Point(90, 16);
+            this.txtKeyword.Size = new System.Drawing.Size(260, 23);
+
+            // btnSearch
+            this.btnSearch.Location = new System.Drawing.Point(360, 15);
+            this.btnSearch.Size = new System.Drawing.Size(75, 25);
+            this.btnSearch.Text = "Tìm";
+
+            // btnAdd
+            this.btnAdd.Location = new System.Drawing.Point(20, 60);
+            this.btnAdd.Size = new System.Drawing.Size(75, 28);
+            this.btnAdd.Text = "Thêm";
+
+            // btnEdit
+            this.btnEdit.Location = new System.Drawing.Point(110, 60);
+            this.btnEdit.Size = new System.Drawing.Size(75, 28);
+            this.btnEdit.Text = "Sửa";
+
+            // btnDelete
+            this.btnDelete.Location = new System.Drawing.Point(200, 60);
+            this.btnDelete.Size = new System.Drawing.Size(75, 28);
+            this.btnDelete.Text = "Xóa";
+
+            // btnRefresh
+            this.btnRefresh.Location = new System.Drawing.Point(290, 60);
+            this.btnRefresh.Size = new System.Drawing.Size(75, 28);
+            this.btnRefresh.Text = "Refresh";
+
+            // dgvCategory
+            this.dgvCategory.Location = new System.Drawing.Point(20, 110);
+            this.dgvCategory.Size = new System.Drawing.Size(900, 450);
+            this.dgvCategory.ReadOnly = true;
+            this.dgvCategory.AllowUserToAddRows = false;
+            this.dgvCategory.AllowUserToDeleteRows = false;
+            this.dgvCategory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvCategory.MultiSelect = false;
+            this.dgvCategory.RowHeadersVisible = false;
+            this.dgvCategory.AutoGenerateColumns = false;
+
+            // lblTotal
+            this.lblTotal.AutoSize = true;
+            this.lblTotal.Location = new System.Drawing.Point(20, 580);
+            this.lblTotal.Text = "Tổng số category: 0";
+
+            // Add controls
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.txtKeyword);
+            this.Controls.Add(this.btnSearch);
+            this.Controls.Add(this.btnAdd);
+            this.Controls.Add(this.btnEdit);
+            this.Controls.Add(this.btnDelete);
+            this.Controls.Add(this.btnRefresh);
+            this.Controls.Add(this.dgvCategory);
+            this.Controls.Add(this.lblTotal);
+
+            this.Size = new System.Drawing.Size(950, 620);
+            this.Name = "CategoryManagementPanel";
+
+            ((System.ComponentModel.ISupportInitialize)(this.dgvCategory)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+        }
+
         protected override void Dispose(bool disposing)
         {
-            if (disposing && components != null)
-                components.Dispose();
+            if (disposing && (components != null)) components.Dispose();
             base.Dispose(disposing);
         }
 
-        #region Designer generated code
-
-        private void InitializeComponent()
-        {
-            label1 = new Label();
-            txtKeyword = new TextBox();
-            btnSearch = new Button();
-            btnAdd = new Button();
-            btnEdit = new Button();
-            btnDelete = new Button();
-            btnRefresh = new Button();
-            dgvCategory = new DataGridView();
-            lblTotal = new Label();
-
-            ((System.ComponentModel.ISupportInitialize)dgvCategory).BeginInit();
-            SuspendLayout();
-
-            // label1
-            label1.AutoSize = true;
-            label1.Location = new Point(20, 20);
-            label1.Text = "Từ khóa:";
-
-            // txtKeyword
-            txtKeyword.Location = new Point(90, 16);
-            txtKeyword.Size = new Size(260, 23);
-
-            // btnSearch
-            btnSearch.Location = new Point(360, 15);
-            btnSearch.Size = new Size(75, 25);
-            btnSearch.Text = "Tìm";
-
-            // btnAdd
-            btnAdd.Location = new Point(20, 60);
-            btnAdd.Size = new Size(75, 28);
-            btnAdd.Text = "Thêm";
-
-            // btnEdit
-            btnEdit.Location = new Point(110, 60);
-            btnEdit.Size = new Size(75, 28);
-            btnEdit.Text = "Sửa";
-
-            // btnDelete
-            btnDelete.Location = new Point(200, 60);
-            btnDelete.Size = new Size(75, 28);
-            btnDelete.Text = "Xóa";
-
-            // btnRefresh
-            btnRefresh.Location = new Point(290, 60);
-            btnRefresh.Size = new Size(75, 28);
-            btnRefresh.Text = "Refresh";
-
-            // dgvCategory
-            dgvCategory.Location = new Point(20, 110);
-            dgvCategory.Size = new Size(900, 450);
-            dgvCategory.ReadOnly = true;
-            dgvCategory.AllowUserToAddRows = false;
-            dgvCategory.AllowUserToDeleteRows = false;
-
-            // lblTotal
-            lblTotal.AutoSize = true;
-            lblTotal.Location = new Point(20, 580);
-            lblTotal.Text = "Tổng số category: 0";
-
-            // CategoryManagementPanel
-            Controls.Add(label1);
-            Controls.Add(txtKeyword);
-            Controls.Add(btnSearch);
-            Controls.Add(btnAdd);
-            Controls.Add(btnEdit);
-            Controls.Add(btnDelete);
-            Controls.Add(btnRefresh);
-            Controls.Add(dgvCategory);
-            Controls.Add(lblTotal);
-
-            Size = new Size(950, 620);
-            Name = "CategoryManagementPanel";
-
-            ((System.ComponentModel.ISupportInitialize)dgvCategory).EndInit();
-            ResumeLayout(false);
-            PerformLayout();
-        }
-
-        #endregion
-
-        private Label label1;
-        private TextBox txtKeyword;
-        private Button btnSearch;
-        private Button btnAdd;
-        private Button btnEdit;
-        private Button btnDelete;
-        private Button btnRefresh;
-        private DataGridView dgvCategory;
-        private Label lblTotal;
+        // Declare controls
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox txtKeyword;
+        private System.Windows.Forms.Button btnSearch;
+        private System.Windows.Forms.Button btnAdd;
+        private System.Windows.Forms.Button btnEdit;
+        private System.Windows.Forms.Button btnDelete;
+        private System.Windows.Forms.Button btnRefresh;
+        private System.Windows.Forms.DataGridView dgvCategory;
+        private System.Windows.Forms.Label lblTotal;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using HospitalManagement.dto.response.Category;
 using HospitalManagement.entity;
+
 using HospitalManagement.repository;
 using Microsoft.Data.SqlClient;
 using System;
