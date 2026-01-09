@@ -34,9 +34,6 @@
 	    <SubType>Form</SubType>
 	  </Compile>
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="dto\request\" />
-	</ItemGroup>
 
 	<PropertyGroup>
 		<Nullable>disable</Nullable>

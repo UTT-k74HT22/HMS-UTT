@@ -133,11 +133,13 @@ namespace HospitalManagement.view
                 Sidebar.MENU_CATEGORIES => CreateComingSoonPanel("Danh mục sản phẩm"),
                 Sidebar.MENU_MANUFACTURERS => CreateComingSoonPanel("Nhà sản xuất"),
 
-        
+
                 Sidebar.MENU_PRODUCTS => new ProductManagementPanel(),
 
                 Sidebar.MENU_WAREHOUSES => CreateComingSoonPanel("Kho hàng"),
-                Sidebar.MENU_BATCHES => CreateComingSoonPanel("Lô hàng"),
+
+                Sidebar.MENU_BATCHES => new BatchManagementPanel(),
+
                 Sidebar.MENU_INVENTORY => CreateComingSoonPanel("Tồn kho"),
                 Sidebar.MENU_STOCK_MOVEMENTS => CreateComingSoonPanel("Xuất/Nhập kho"),
                 Sidebar.MENU_ORDERS => CreateComingSoonPanel("Đơn hàng"),
