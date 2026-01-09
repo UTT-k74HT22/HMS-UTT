@@ -130,11 +130,11 @@ namespace HospitalManagement.view
                 Sidebar.MENU_EMPLOYEE => new EmployeeManagementPanel(),
 
                 Sidebar.MENU_CUSTOMER => CreateComingSoonPanel("Quản lý khách hàng"),
-                Sidebar.MENU_MANUFACTURERS => CreateComingSoonPanel("Nhà sản xuất"),
+                
                 Sidebar.MENU_CATEGORIES => new CategoryManagementPanel(),
 
-                Sidebar.MENU_PRODUCTS => CreateComingSoonPanel("Sản phẩm"),
-                Sidebar.MENU_CATEGORIES => CreateComingSoonPanel("Danh mục sản phẩm"),
+               
+                
                 Sidebar.MENU_MANUFACTURERS => new ManufacturerManagementForm(),
                 Sidebar.MENU_PRODUCTS => new ProductManagementPanel(),
 
