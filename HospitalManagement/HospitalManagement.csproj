@@ -42,5 +42,9 @@
 	  <Folder Include="dto\request\" />
 	</ItemGroup>
 
+	<PropertyGroup>
+		<Nullable>disable</Nullable>
+	</PropertyGroup>
+
 </Project>
 

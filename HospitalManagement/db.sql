@@ -803,3 +803,27 @@ GO
 
 INSERT INTO dbo.accounts (username, [password], role, is_active, created_at, updated_at)
 VALUES ('admin', '123456789', 'ADMIN', 1, SYSDATETIME(), SYSDATETIME());
+
+ALTER TABLE dbo.categories
+ALTER COLUMN name NVARCHAR(100) NOT NULL;
+
+ALTER TABLE dbo.manufacturers
+ALTER COLUMN name NVARCHAR(150) NOT NULL;
+
+ALTER TABLE dbo.manufacturers
+ALTER COLUMN country NVARCHAR(100);
+
+ALTER TABLE dbo.manufacturers
+ALTER COLUMN address NVARCHAR(255);
+
+ALTER TABLE dbo.manufacturers
+ALTER COLUMN contact_person NVARCHAR(100);
+
+ALTER TABLE dbo.products
+ALTER COLUMN name NVARCHAR(150) NOT NULL;
+
+ALTER TABLE dbo.products
+ALTER COLUMN dosage_form NVARCHAR(100);
+
+ALTER TABLE dbo.products
+ALTER COLUMN unit NVARCHAR(50);
