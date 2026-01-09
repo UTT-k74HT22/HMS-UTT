@@ -43,12 +43,12 @@ namespace HospitalManagement.view
         {
             return new[]
             {
-                ("Id", "ID", 60),
-                ("Username", "Tài khoản", 150),
-                ("Role", "Vai trò", 120),
-                ("IsActive", "Trạng thái", 100),
-                ("LastLoginAt", "Đăng nhập cuối", 150),
-                ("CreatedAt", "Ngày tạo", 130)
+                ("Id", "ID", 70),
+                ("Username", "Tài khoản", 180),
+                ("Role", "Vai trò", 130),
+                ("IsActive", "Trạng thái", 130),
+                ("LastLoginAt", "Đăng nhập cuối", 170),
+                ("CreatedAt", "Ngày tạo", 140)
             };
         }
 
@@ -74,9 +74,13 @@ namespace HospitalManagement.view
             {
                 Dock = DockStyle.Top,
                 AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = false,
-                BackColor = Color.Transparent
+                BackColor = Color.Transparent,
+
+                Padding = new Padding(0),
+                Margin = new Padding(0)
             };
 
             // Search box
@@ -90,7 +94,7 @@ namespace HospitalManagement.view
             layout.Controls.Add(searchBtn);
 
             // Spacer
-            layout.Controls.Add(new Panel { Width = 20, BackColor = Color.Transparent });
+            layout.Controls.Add(new Panel { Width = 10, BackColor = Color.Transparent });
 
             // Role filter
             layout.Controls.Add(UiFactory.CreateLabel("Vai trò:"));
@@ -121,26 +125,29 @@ namespace HospitalManagement.view
 
             var layout = new FlowLayoutPanel
             {
+                Dock = DockStyle.Top,
                 AutoSize = true,
-                FlowDirection = FlowDirection.RightToLeft,
-                WrapContents = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
                 BackColor = Color.Transparent,
-                Padding = new Padding(0)
+
+                Padding = new Padding(0),
+                Margin = new Padding(0)
             };
 
-            // Utility buttons (right side)
-            layout.Controls.Add(UiFactory.CreateButton("📄 Export", UiTheme.PURPLE, OnExportExcel));
-            layout.Controls.Add(UiFactory.CreateButton("🔄 Làm mới", UiTheme.SECONDARY, (s, e) => Reload()));
-
-            // Spacer
-            layout.Controls.Add(new Panel { Width = 12, Height = 1, BackColor = Color.Transparent });
-
-            // CRUD buttons
+            // CRUD buttons (left side)
+            layout.Controls.Add(UiFactory.CreateButton("➕ Thêm", UiTheme.SUCCESS, OnAdd));
+            layout.Controls.Add(UiFactory.CreateButton("✏️ Sửa", UiTheme.WARNING, OnEdit));
             layout.Controls.Add(UiFactory.CreateButton("🗑️ Xóa", UiTheme.DANGER, OnDelete));
             layout.Controls.Add(UiFactory.CreateButton("🔒 Khóa/Mở", UiTheme.ORANGE, OnToggleStatus));
-            layout.Controls.Add(UiFactory.CreateButton("✏️ Sửa", UiTheme.WARNING, OnEdit));
-            layout.Controls.Add(UiFactory.CreateButton("👁 Xem", UiTheme.INFO, OnViewDetail));
-            layout.Controls.Add(UiFactory.CreateButton("➕ Thêm", UiTheme.SUCCESS, OnAdd));
+
+            // Spacer
+            layout.Controls.Add(new Panel { Width = 20, Height = 1, BackColor = Color.Transparent });
+
+            // Utility buttons (right side)
+            layout.Controls.Add(UiFactory.CreateButton("🔄 Làm mới", UiTheme.SECONDARY, (s, e) => Reload()));
+            layout.Controls.Add(UiFactory.CreateButton("📄 Export", UiTheme.PURPLE, OnExportExcel));
 
             panel.Controls.Add(layout);
             return panel;
@@ -148,10 +155,25 @@ namespace HospitalManagement.view
 
         protected override void AfterTableCreated()
         {
+            // Căn giữa cho các cột ID, Role, IsActive, LastLoginAt, CreatedAt
+            if (Table.Columns.Contains("Id"))
+                Table.Columns["Id"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            
+            if (Table.Columns.Contains("Role"))
+                Table.Columns["Role"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            
+            if (Table.Columns.Contains("IsActive"))
+                Table.Columns["IsActive"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            
+            if (Table.Columns.Contains("LastLoginAt"))
+                Table.Columns["LastLoginAt"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            
+            if (Table.Columns.Contains("CreatedAt"))
+                Table.Columns["CreatedAt"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            
             // Format cột IsActive thành "Hoạt động"/"Khóa"
             if (Table.Columns.Contains("IsActive"))
             {
-                Table.Columns["IsActive"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 
                 // Custom cell formatting
                 Table.CellFormatting += (s, e) =>
@@ -170,7 +192,6 @@ namespace HospitalManagement.view
             if (Table.Columns.Contains("LastLoginAt"))
             {
                 Table.Columns["LastLoginAt"]!.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
-                Table.Columns["LastLoginAt"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 
                 // Handle null values
                 Table.CellFormatting += (s, e) =>
@@ -188,7 +209,6 @@ namespace HospitalManagement.view
             if (Table.Columns.Contains("CreatedAt"))
             {
                 Table.Columns["CreatedAt"]!.DefaultCellStyle.Format = "dd/MM/yyyy";
-                Table.Columns["CreatedAt"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
 
             // Format cột Role với màu sắc

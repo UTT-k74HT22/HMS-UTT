@@ -28,11 +28,11 @@ namespace HospitalManagement.view.@base
                 var p = sender as Panel;
                 if (p != null)
                 {
-                    ControlPaint.DrawBorder(e.Graphics, p.ClientRectangle,
-                        Color.FromArgb(235, 237, 242), 1, ButtonBorderStyle.Solid,
-                        Color.FromArgb(235, 237, 242), 1, ButtonBorderStyle.Solid,
-                        Color.FromArgb(235, 237, 242), 1, ButtonBorderStyle.Solid,
-                        Color.FromArgb(235, 237, 242), 1, ButtonBorderStyle.Solid);
+                    using (var pen = new Pen(Color.FromArgb(220, 223, 230), 1))
+                    {
+                        var rect = new Rectangle(0, 0, p.Width - 1, p.Height - 1);
+                        e.Graphics.DrawRectangle(pen, rect);
+                    }
                 }
             };
             
@@ -49,7 +49,7 @@ namespace HospitalManagement.view.@base
                 Width = width,
                 Font = UiTheme.FONT_BASE,
                 BorderStyle = BorderStyle.FixedSingle,
-                Margin = new Padding(0, 3, 8, 3)
+                Margin = new Padding(0, 2, 6, 2)
             };
         }
 
@@ -63,26 +63,25 @@ namespace HospitalManagement.view.@base
                 Text = text,
                 BackColor = bgColor,
                 ForeColor = Color.White,
-                Font = UiTheme.FONT_BOLD,
+                Font = new Font("Segoe UI", 9.25F, FontStyle.Bold),
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand,
-                Padding = new Padding(12, 6, 12, 6),
+                Padding = new Padding(10, 6, 10, 6),
                 AutoSize = true,
                 Height = 32,
-                MinimumSize = new Size(80, 32),
+                MinimumSize = new Size(78, 32),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Margin = new Padding(0, 0, 6, 0)
             };
 
             button.FlatAppearance.BorderSize = 0;
-            button.FlatAppearance.MouseOverBackColor = ControlPaint.Light(bgColor, 0.1f);
-            button.FlatAppearance.MouseDownBackColor = ControlPaint.Dark(bgColor, 0.1f);
 
-            if (clickHandler != null)
-            {
-                button.Click += clickHandler;
-            }
+            var hoverColor = ControlPaint.Light(bgColor, 0.2f);
+            var pressColor = ControlPaint.Dark(bgColor, 0.05f);
+            button.FlatAppearance.MouseOverBackColor = hoverColor;
+            button.FlatAppearance.MouseDownBackColor = pressColor;
 
+            if (clickHandler != null) button.Click += clickHandler;
             return button;
         }
 
@@ -98,7 +97,7 @@ namespace HospitalManagement.view.@base
                 ForeColor = UiTheme.TEXT,
                 AutoSize = true,
                 TextAlign = ContentAlignment.MiddleLeft,
-                Margin = new Padding(0, 5, 8, 5),
+                Margin = new Padding(0, 4, 6, 4),
                 Padding = new Padding(0)
             };
         }
@@ -114,7 +113,7 @@ namespace HospitalManagement.view.@base
                 Font = UiTheme.FONT_BASE,
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 FlatStyle = FlatStyle.Flat,
-                Margin = new Padding(0, 3, 8, 3)
+                Margin = new Padding(0, 2, 6, 2)
             };
 
             if (items != null && items.Length > 0)
@@ -122,7 +121,6 @@ namespace HospitalManagement.view.@base
                 combo.Items.AddRange(items);
                 combo.SelectedIndex = 0;
             }
-
             return combo;
         }
 
@@ -133,10 +131,10 @@ namespace HospitalManagement.view.@base
         {
             table.RowTemplate.Height = 40;
             table.Font = UiTheme.FONT_BASE;
-            table.GridColor = Color.FromArgb(230, 230, 230);
+            table.GridColor = Color.FromArgb(235, 237, 242);
             table.BackgroundColor = Color.White;
             table.BorderStyle = BorderStyle.None;
-            table.CellBorderStyle = DataGridViewCellBorderStyle.Single;
+            table.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             table.RowHeadersVisible = false;
             table.AllowUserToAddRows = false;
             table.AllowUserToDeleteRows = false;
@@ -144,15 +142,22 @@ namespace HospitalManagement.view.@base
             table.ReadOnly = true;
             table.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             table.MultiSelect = false;
-            table.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            table.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             table.EnableHeadersVisualStyles = false;
-            
-            // Selection colors
-            table.DefaultCellStyle.SelectionBackColor = Color.FromArgb(230, 240, 255);
-            table.DefaultCellStyle.SelectionForeColor = UiTheme.TEXT;
-            
-            // Better padding for cells
-            table.DefaultCellStyle.Padding = new Padding(8, 5, 8, 5);
+            table.ShowCellToolTips = false;
+            table.Cursor = Cursors.Hand;
+            table.DefaultCellStyle.SelectionBackColor = Color.FromArgb(232, 236, 255);
+            table.DefaultCellStyle.SelectionForeColor = Color.FromArgb(45, 45, 70);
+            table.DefaultCellStyle.WrapMode = DataGridViewTriState.False;
+            table.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            table.AdvancedCellBorderStyle.Left = DataGridViewAdvancedCellBorderStyle.None;
+            table.AdvancedCellBorderStyle.Right = DataGridViewAdvancedCellBorderStyle.None;
+            table.AdvancedCellBorderStyle.Top = DataGridViewAdvancedCellBorderStyle.None;
+            table.StandardTab = true;
+            table.DefaultCellStyle.Padding = new Padding(8, 4, 8, 4);
+            table.DefaultCellStyle.BackColor = Color.White;
+            table.DefaultCellStyle.ForeColor = Color.FromArgb(45, 45, 70);
+            table.DoubleBuffered(true);
         }
 
         /// <summary>
@@ -164,14 +169,18 @@ namespace HospitalManagement.view.@base
             {
                 BackColor = UiTheme.PRIMARY,
                 ForeColor = Color.White,
-                Font = UiTheme.FONT_BOLD,
+                Font = new Font("Segoe UI", 10.5F, FontStyle.Bold),
                 Alignment = DataGridViewContentAlignment.MiddleCenter,
-                Padding = new Padding(8, 10, 8, 10)
+                Padding = new Padding(8, 10, 8, 10),
+
+                SelectionBackColor = UiTheme.PRIMARY,
+                SelectionForeColor = Color.White
             };
 
             table.ColumnHeadersDefaultCellStyle = headerStyle;
-            table.ColumnHeadersHeight = 45;
+            table.ColumnHeadersHeight = 44;
             table.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            table.EnableHeadersVisualStyles = false;
         }
 
         /// <summary>
@@ -180,8 +189,8 @@ namespace HospitalManagement.view.@base
         public static void ApplyZebraStripes(DataGridView table)
         {
             table.RowsDefaultCellStyle.BackColor = Color.White;
-            table.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(250, 251, 252);
-            table.DefaultCellStyle.ForeColor = Color.FromArgb(52, 58, 70);
+            table.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 249, 255);
+            table.DefaultCellStyle.ForeColor = Color.FromArgb(45, 45, 70);
             table.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
         }
 
@@ -221,6 +230,16 @@ namespace HospitalManagement.view.@base
                 Dock = DockStyle.Left,
                 BackColor = Color.Transparent
             };
+        }
+        
+        /// <summary>
+        /// Enable double buffering cho control để giảm flicker
+        /// </summary>
+        private static void DoubleBuffered(this Control control, bool enable)
+        {
+            var property = typeof(Control).GetProperty("DoubleBuffered",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            property?.SetValue(control, enable, null);
         }
     }
 }

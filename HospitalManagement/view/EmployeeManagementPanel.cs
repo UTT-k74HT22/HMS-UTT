@@ -39,12 +39,12 @@ namespace HospitalManagement.view
         {
             return new[]
             {
-                ("Id", "ID", 60),
-                ("ProfileId", "Profile ID", 100),
-                ("Position", "Chức vụ", 150),
-                ("Department", "Phòng ban", 150),
-                ("HiredDate", "Ngày vào làm", 120),
-                ("BaseSalary", "Lương cơ bản", 130)
+                ("Id", "ID", 70),
+                ("ProfileId", "Profile ID", 110),
+                ("Position", "Chức vụ", 170),
+                ("Department", "Phòng ban", 160),
+                ("HiredDate", "Ngày vào làm", 140),
+                ("BaseSalary", "Lương cơ bản", 150)
             };
         }
 
