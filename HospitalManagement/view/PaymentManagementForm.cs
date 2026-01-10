@@ -97,17 +97,14 @@ private void btnAdd_Click(object sender, EventArgs e)
         dialog.Size = new Size(400, 180);
         dialog.StartPosition = FormStartPosition.CenterParent;
 
-        // Invoice ID
         Label lblInvoice = new Label { Text = "Mã hóa đơn:", Location = new Point(20, 20), AutoSize = true };
         TextBox txtInvoiceId = new TextBox { Location = new Point(120, 18), Width = 200 };
 
-        // Payment method
         Label lblMethod = new Label { Text = "Phương thức:", Location = new Point(20, 60), AutoSize = true };
         ComboBox cbMethod = new ComboBox { Location = new Point(120, 58), Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
         cbMethod.Items.AddRange(new string[] { "CASH", "BANK_TRANSFER", "CREDIT_CARD", "E_WALLET" });
         cbMethod.SelectedIndex = 0;
 
-        // Buttons
         Button btnSave = new Button { Text = "Lưu", Location = new Point(120, 100), Width = 80 };
         Button btnCancel = new Button { Text = "Hủy", Location = new Point(240, 100), Width = 80 };
 
@@ -150,10 +147,75 @@ private void btnAdd_Click(object sender, EventArgs e)
     }
 }
 
-        private void btnEdit_Click(object sender, EventArgs e)
-        {
+private void btnEdit_Click(object sender, EventArgs e)
+{
+    if (dgvPayment.SelectedRows.Count == 0)
+    {
+        MessageBox.Show("Vui lòng chọn một Payment để sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        return;
+    }
 
-        }
+    // Lấy Payment ID từ hàng chọn
+    int paymentId = Convert.ToInt32(dgvPayment.SelectedRows[0].Cells["ID"].Value);
+    Payment payment = _controller.GetById(paymentId);
+
+    if (payment == null)
+    {
+        MessageBox.Show("Không tìm thấy Payment!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return;
+    }
+
+    using (Form dialog = new Form())
+    {
+        dialog.Text = "Sửa Payment";
+        dialog.Size = new Size(400, 200);
+        dialog.StartPosition = FormStartPosition.CenterParent;
+
+        // Phương thức thanh toán
+        Label lblMethod = new Label { Text = "Phương thức:", Location = new Point(20, 20), AutoSize = true };
+        ComboBox cbMethod = new ComboBox { Location = new Point(120, 18), Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+        cbMethod.Items.AddRange(new string[] { "CASH", "BANK_TRANSFER", "CREDIT_CARD", "E_WALLET" });
+        cbMethod.SelectedItem = payment.Method;
+
+        // Trạng thái
+        Label lblStatus = new Label { Text = "Trạng thái:", Location = new Point(20, 60), AutoSize = true };
+        ComboBox cbStatus = new ComboBox { Location = new Point(120, 58), Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+        cbStatus.Items.AddRange(new string[] { "SUCCESS", "FAILED", "PENDING", "CANCELED" });
+        cbStatus.SelectedItem = payment.Status;
+
+        // Nút
+        Button btnSave = new Button { Text = "Lưu", Location = new Point(120, 100), Width = 80 };
+        Button btnCancel = new Button { Text = "Hủy", Location = new Point(240, 100), Width = 80 };
+
+        btnCancel.Click += (s, ev) => dialog.Close();
+        btnSave.Click += (s, ev) =>
+        {
+            payment.Method = cbMethod.SelectedItem.ToString();
+            payment.Status = cbStatus.SelectedItem.ToString();
+
+            try
+            {
+                _controller.Update(payment);
+                MessageBox.Show("Cập nhật Payment thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadData();
+                dialog.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi cập nhật Payment:\n" + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        };
+
+        dialog.Controls.Add(lblMethod);
+        dialog.Controls.Add(cbMethod);
+        dialog.Controls.Add(lblStatus);
+        dialog.Controls.Add(cbStatus);
+        dialog.Controls.Add(btnSave);
+        dialog.Controls.Add(btnCancel);
+
+        dialog.ShowDialog(this);
+    }
+}
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
