@@ -31,9 +31,10 @@ namespace HospitalManagement.view
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            var dbConfig = new DBConfig(config);
+            string connectionString =
+                config.GetConnectionString("DefaultConnection");
 
-            var service = new ManufacturerServiceImpl(dbConfig);
+            var service = new ManufacturerServiceImpl(connectionString);
             _controller = new ManufacturerController(service);
 
             InitGrid();

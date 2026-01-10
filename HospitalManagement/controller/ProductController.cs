@@ -1,107 +1,58 @@
 ﻿using HospitalManagement.dto.request.Product;
 using HospitalManagement.dto.response;
+using HospitalManagement.dto.response.Category;
 using HospitalManagement.dto.response.Product;
-using HospitalManagement.repository.impl;
 using HospitalManagement.service;
 using HospitalManagement.Service.Impl;
 
-namespace HospitalManagement.controller;
-
-public class ProductController
+namespace HospitalManagement.controller
 {
-        private readonly IProductService productService;
-        private readonly ProductRepositoryImpl repo = new ProductRepositoryImpl();
+    public class ProductController
+    {
+        private readonly IProductService _productService;
+
+        public ProductController(string connectionString)
+        {
+            _productService = new ProductServiceImpl(connectionString);
+        }
 
         public ProductController(IProductService productService)
         {
-            this.productService = productService;
+            _productService = productService;
         }
 
-        public ProductController()
-        {
-            productService = new ProductServiceImpl();
-
-        }
-
-
-        /// <summary>
-        /// Lấy danh sách tất cả sản phẩm.
-        /// </summary>
         public List<ProductResponse> GetAll()
-        {
-            return productService.GetAll();
-        }
+            => _productService.GetAll();
 
-        /// <summary>
-        /// Lấy sản phẩm theo mã.
-        /// </summary>
         public ProductResponse GetByCode(string code)
-        {
-            return productService.GetByCode(code);
-        }
+            => _productService.GetByCode(code);
 
-        /// <summary>
-        /// Lấy sản phẩm chi tiết theo mã.
-        /// </summary>
         public ProductDetailResponse GetDetail(string code)
-        {
-            return productService.GetDetailByCode(code);
-        }
+            => _productService.GetDetailByCode(code);
 
-        /// <summary>
-        /// Thêm mới sản phẩm.
-        /// </summary>
         public void Create(CreateProductRequest request)
-        {
-            productService.Create(request);
-        }
+            => _productService.Create(request);
 
-        /// <summary>
-        /// Cập nhật sản phẩm theo mã.
-        /// </summary>
         public void Update(string code, UpdateProductRequest request)
-        {
-            productService.Update(code, request);
-        }
+            => _productService.Update(code, request);
 
-        /// <summary>
-        /// Xóa mềm sản phẩm.
-        /// </summary>
         public void Delete(string code)
-        {
-            productService.Delete(code);
-        }
+            => _productService.Delete(code);
 
-        /// <summary>
-        /// Lấy danh sách tất cả danh mục.
-        /// </summary>
-        // public List<CategoryResponse> GetAllCategories()
-        // {
-        //     return productService.GetAllCategories();
-        // }
+        public List<CategoryResponse> GetAllCategories()
+            => _productService.GetAllCategories();
 
-        /// <summary>
-        /// Lấy danh sách tất cả nhà sản xuất.
-        /// </summary>
-        // public List<ManufacturerResponse> GetAllManufacturers()
-        // {
-        //     return productService.GetAllManufacturers();
-        // }
+        public List<ManufacturerResponse> GetAllManufacturers()
+            => _productService.GetAllManufacturers();
 
-        /// <summary>
-        /// Lấy danh sách sản phẩm theo category (phục vụ tạo đơn hàng)
-        /// </summary>
-        public List<ProductResponse> GetByCategory(long categoryId)
-        {
-            return repo.FindByCategory(categoryId);
-        }
+        // public List<ProductResponse> GetByCategory(long categoryId)
+        //     => _productService.GetByCategory(categoryId);
 
-        /// <summary>
-        /// Lấy sản phẩm đúng lô hàng
-        /// </summary>
         public List<BatchResponse> GetBatchesByProduct(long productId)
-        {
-            return repo.FindBatchesByProduct(productId);
-        }
-     
+            => _productService.GetBatchesByProduct(productId);
+
+        // public List<ProductResponse> SearchByName(string name)
+        //     => _productService.SearchByName(name);
+
+    }
 }

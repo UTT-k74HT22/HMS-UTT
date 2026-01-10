@@ -1,5 +1,6 @@
 ﻿using HospitalManagement.dto.request.Product;
 using HospitalManagement.dto.response;
+using HospitalManagement.dto.response.Category;
 using HospitalManagement.dto.response.Product;
 
 namespace HospitalManagement.service;
@@ -18,7 +19,9 @@ public interface IProductService
     
     ProductDetailResponse GetDetailByCode(string code);
 
-    // List<CategoryResponse> GetAllCategories();
-    // List<ManufacturerResponse> GetAllManufacturers();
+    List<CategoryResponse> GetAllCategories();
+    
+    List<ManufacturerResponse> GetAllManufacturers();
+    
     List<BatchResponse> GetBatchesByProduct(long productId);
 }

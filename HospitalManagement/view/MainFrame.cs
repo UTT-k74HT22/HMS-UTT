@@ -3,6 +3,7 @@ using HospitalManagement.entity.enums;
 using HospitalManagement.view.layouts;
 using HospitalManagement.view.@base;
 
+
 namespace HospitalManagement.view
 {
     /// <summary>
@@ -129,12 +130,19 @@ namespace HospitalManagement.view
                     ? new EmployeeManagementPanel(_employeeController)
                     : CreateComingSoonPanel("Quản lý nhân viên (Cần DI)"),
                 Sidebar.MENU_CUSTOMER => CreateComingSoonPanel("Quản lý khách hàng"),
-                Sidebar.MENU_CATEGORIES => CreateComingSoonPanel("Danh mục sản phẩm"),
+                
+                Sidebar.MENU_CATEGORIES => new CategoryManagementPanel(),
+
+
+               
+                
                 Sidebar.MENU_MANUFACTURERS => new ManufacturerManagementForm(),
                 Sidebar.MENU_PRODUCTS => new ProductManagementPanel(),
 
-                Sidebar.MENU_WAREHOUSES => CreateComingSoonPanel("Kho hàng"),
-                Sidebar.MENU_BATCHES => CreateComingSoonPanel("Lô hàng"),
+                Sidebar.MENU_WAREHOUSES => new WarehousesManagementPanel(),
+
+                Sidebar.MENU_BATCHES => new BatchManagementPanel(),
+
                 Sidebar.MENU_INVENTORY => CreateComingSoonPanel("Tồn kho"),
                 Sidebar.MENU_STOCK_MOVEMENTS => CreateComingSoonPanel("Xuất/Nhập kho"),
                 Sidebar.MENU_ORDERS => CreateComingSoonPanel("Đơn hàng"),
