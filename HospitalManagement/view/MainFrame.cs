@@ -15,6 +15,11 @@ namespace HospitalManagement.view
         private readonly string _role;
         private readonly AccountController? _accountController;
         private readonly EmployeeController? _employeeController;
+        private readonly InventoryController? _inventoryController;
+        private readonly WarehousesController? _warehousesController;
+        private readonly ProductController? _productController;
+        private readonly BatchController? _batchController;
+        private readonly StockMovementController? _stockMovementController;
 
         private Sidebar _sidebar = null!;
         private Header _header = null!;
@@ -22,16 +27,30 @@ namespace HospitalManagement.view
         private Panel _contentPanel = null!;
 
         // Constructor mặc định cho Designer (REQUIRED for WinForms designer)
-        public MainFrame() : this("Designer", RoleType.ADMIN.ToString(), null!, null!)
+        public MainFrame() : this("Designer", RoleType.ADMIN.ToString(), null!, null!, null!, null!, null!, null!, null!)
         {
         }
 
-        public MainFrame(string username, string role, AccountController accountController, EmployeeController employeeController)
+        public MainFrame(
+            string username, 
+            string role, 
+            AccountController accountController, 
+            EmployeeController employeeController,
+            InventoryController inventoryController,
+            WarehousesController warehousesController,
+            ProductController productController,
+            BatchController batchController,
+            StockMovementController stockMovementController)
         {
             _username = username;
             _role = role;
             _accountController = accountController;
             _employeeController = employeeController;
+            _inventoryController = inventoryController;
+            _warehousesController = warehousesController;
+            _productController = productController;
+            _batchController = batchController;
+            _stockMovementController = stockMovementController;
 
             InitializeForm();
             CreateLayout();
@@ -143,8 +162,12 @@ namespace HospitalManagement.view
 
                 Sidebar.MENU_BATCHES => new BatchManagementPanel(),
 
-                Sidebar.MENU_INVENTORY => CreateComingSoonPanel("Tồn kho"),
-                Sidebar.MENU_STOCK_MOVEMENTS => CreateComingSoonPanel("Xuất/Nhập kho"),
+                Sidebar.MENU_INVENTORY => _inventoryController != null && _warehousesController != null
+                    ? new InventoryManagementPanel(_inventoryController, _warehousesController)
+                    : CreateComingSoonPanel("Tồn kho (Cần DI)"),
+                Sidebar.MENU_STOCK_MOVEMENTS => _stockMovementController != null && _warehousesController != null && _productController != null && _batchController != null
+                    ? new StockMovementManagementPanel(_stockMovementController, _warehousesController, _productController, _batchController)
+                    : CreateComingSoonPanel("Xuất/Nhập kho (Cần DI)"),
                 Sidebar.MENU_ORDERS => CreateComingSoonPanel("Đơn hàng"),
                 Sidebar.MENU_INVOICES => CreateComingSoonPanel("Hóa đơn"),
                 Sidebar.MENU_PAYMENTS => CreateComingSoonPanel("Thanh toán"),

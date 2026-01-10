@@ -9,6 +9,11 @@ public partial class LoginForm : Form
     private IAuthService? _authService;
     private AccountController? _accountController;
     private EmployeeController? _employeeController;
+    private InventoryController? _inventoryController;
+    private WarehousesController? _warehousesController;
+    private ProductController? _productController;
+    private BatchController? _batchController;
+    private StockMovementController? _stockMovementController;
 
     // Constructor cho Designer
     public LoginForm()
@@ -18,11 +23,24 @@ public partial class LoginForm : Form
     }
 
     // Constructor cho runtime (DI)
-    public LoginForm(IAuthService authService, AccountController accountController, EmployeeController employeeController) : this()
+    public LoginForm(
+        IAuthService authService, 
+        AccountController accountController, 
+        EmployeeController employeeController,
+        InventoryController inventoryController,
+        WarehousesController warehousesController,
+        ProductController productController,
+        BatchController batchController,
+        StockMovementController stockMovementController) : this()
     {
         _authService = authService;
         _accountController = accountController;
         _employeeController = employeeController;
+        _inventoryController = inventoryController;
+        _warehousesController = warehousesController;
+        _productController = productController;
+        _batchController = batchController;
+        _stockMovementController = stockMovementController;
     }
 
     private void btnLogin_Click(object sender, EventArgs e)
@@ -62,7 +80,16 @@ public partial class LoginForm : Form
             }
             
             // Open MainFrame
-            var mainFrame = new MainFrame(account.Username, account.Role.ToString(), _accountController, _employeeController);
+            var mainFrame = new MainFrame(
+                account.Username, 
+                account.Role.ToString(), 
+                _accountController, 
+                _employeeController,
+                _inventoryController,
+                _warehousesController,
+                _productController,
+                _batchController,
+                _stockMovementController);
             mainFrame.FormClosed += (_, _) => Application.Exit();
             mainFrame.Show();
             
