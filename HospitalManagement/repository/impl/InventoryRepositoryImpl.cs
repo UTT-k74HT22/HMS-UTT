@@ -25,7 +25,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
                            p.name AS product_name,
                            p.unit,
                            b.id AS batch_id,
-                           b.code AS batch_code,
+                           b.batch_code AS batch_code,
                            b.expiry_date,
                            w.id AS warehouse_id,
                            w.code AS warehouse_code,
@@ -35,16 +35,14 @@ public class InventoryRepositoryImpl : IInventoryRepository
                            (ii.quantity_on_hand - ii.quantity_reserved) AS quantity_available,
                            ii.min_threshold,
                            ii.max_threshold,
-                           CASE WHEN ii.quantity_on_hand <= ii.min_threshold THEN 1 ELSE 0 END AS is_low_stocked,
-                           CASE WHEN ii.quantity_on_hand >= ii.max_threshold THEN 1 ELSE 0 END AS is_over_stocked,
-                           CASE WHEN b.exipry_date IS NOT NULL AND DATEIFF(MONTH, GETDATE(), b.expiry_date) <= 3 THEN 1 ELSE 0 END AS is_near_expiry,
+                           CASE WHEN ii.quantity_on_hand <= ii.min_threshold THEN 1 ELSE 0 END AS is_low_stock,
+                           CASE WHEN ii.quantity_on_hand >= ii.max_threshold THEN 1 ELSE 0 END AS is_over_stock,
+                           CASE WHEN b.expiry_date IS NOT NULL AND DATEDIFF(MONTH, GETDATE(), b.expiry_date) <= 3 THEN 1 ELSE 0 END AS is_near_expiry,
                            ii.last_stock_check
                        FROM inventory_items ii
                        INNER JOIN products p ON ii.product_id = p.id
                        LEFT JOIN batches b ON ii.batch_id = b.id
                        INNER JOIN warehouses w ON ii.warehouse_id = w.id
-                       WHERE p.deleted_at IS NULL
-                       AND w.deleted_at IS NULL
                        ORDER BY p.name, w.name ASC
                        """;
         using (var connection = new SqlConnection(_connectionString))
@@ -433,38 +431,45 @@ public class InventoryRepositoryImpl : IInventoryRepository
     {
         return new InventoryResponse
         {
-            Id = reader.GetInt64(reader.GetOrdinal("id")),
-                ProductId = reader.GetInt64(reader.GetOrdinal("product_id")),
-                ProductCode = reader.GetString(reader.GetOrdinal("product_code")),
-                ProductName = reader.GetString(reader.GetOrdinal("product_name")),
-                Unit = reader.GetString(reader.GetOrdinal("unit")),
-                BatchId = reader.IsDBNull(reader.GetOrdinal("batch_id")) 
-                    ? null 
-                    : reader.GetInt64(reader.GetOrdinal("batch_id")),
-                BatchCode = reader.IsDBNull(reader.GetOrdinal("batch_code")) 
-                    ? null 
-                    : reader.GetString(reader.GetOrdinal("batch_code")),
-                ExpiryDate = reader.IsDBNull(reader.GetOrdinal("expiry_date")) 
-                    ? null 
-                    : reader.GetDateTime(reader.GetOrdinal("expiry_date")),
-                WarehouseId = reader.GetInt64(reader.GetOrdinal("warehouse_id")),
-                WarehouseCode = reader.GetString(reader.GetOrdinal("warehouse_code")),
-                WarehouseName = reader.GetString(reader.GetOrdinal("warehouse_name")),
-                QuantityOnHand = reader.GetInt32(reader.GetOrdinal("quantity_on_hand")),
-                QuantityReserved = reader.GetInt32(reader.GetOrdinal("quantity_reserved")),
-                QuantityAvailable = reader.GetInt32(reader.GetOrdinal("quantity_available")),
-                MinThreshold = reader.IsDBNull(reader.GetOrdinal("min_threshold")) 
-                    ? null 
-                    : reader.GetInt32(reader.GetOrdinal("min_threshold")),
-                MaxThreshold = reader.IsDBNull(reader.GetOrdinal("max_threshold")) 
-                    ? null 
-                    : reader.GetInt32(reader.GetOrdinal("max_threshold")),
-                IsLowStock = reader.GetInt32(reader.GetOrdinal("is_low_stock")) == 1,
-                IsOverStock = reader.GetInt32(reader.GetOrdinal("is_over_stock")) == 1,
-                IsNearExpiry = reader.GetInt32(reader.GetOrdinal("is_near_expiry")) == 1,
-                LastStockCheck = reader.IsDBNull(reader.GetOrdinal("last_stock_check")) 
-                    ? null 
-                    : reader.GetDateTime(reader.GetOrdinal("last_stock_check"))
+            Id = reader.GetInt32(reader.GetOrdinal("id")),
+
+            ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
+            ProductCode = reader.GetString(reader.GetOrdinal("product_code")),
+            ProductName = reader.GetString(reader.GetOrdinal("product_name")),
+            Unit = reader.IsDBNull(reader.GetOrdinal("unit"))
+                ? null
+                : reader.GetString(reader.GetOrdinal("unit")),
+
+            BatchId = reader.IsDBNull(reader.GetOrdinal("batch_id"))
+                ? null
+                : reader.GetInt32(reader.GetOrdinal("batch_id")),
+
+            BatchCode = reader.IsDBNull(reader.GetOrdinal("batch_code"))
+                ? null
+                : reader.GetString(reader.GetOrdinal("batch_code")),
+
+            ExpiryDate = reader.IsDBNull(reader.GetOrdinal("expiry_date"))
+                ? null
+                : reader.GetDateTime(reader.GetOrdinal("expiry_date")),
+
+            WarehouseId = reader.GetInt32(reader.GetOrdinal("warehouse_id")),
+            WarehouseCode = reader.GetString(reader.GetOrdinal("warehouse_code")),
+            WarehouseName = reader.GetString(reader.GetOrdinal("warehouse_name")),
+
+            QuantityOnHand = reader.GetInt32(reader.GetOrdinal("quantity_on_hand")),
+            QuantityReserved = reader.GetInt32(reader.GetOrdinal("quantity_reserved")),
+            QuantityAvailable = reader.GetInt32(reader.GetOrdinal("quantity_available")),
+
+            MinThreshold = reader.GetInt32(reader.GetOrdinal("min_threshold")),
+            MaxThreshold = reader.GetInt32(reader.GetOrdinal("max_threshold")),
+
+            IsLowStock = reader.GetInt32(reader.GetOrdinal("is_low_stock")) == 1,
+            IsOverStock = reader.GetInt32(reader.GetOrdinal("is_over_stock")) == 1,
+            IsNearExpiry = reader.GetInt32(reader.GetOrdinal("is_near_expiry")) == 1,
+
+            LastStockCheck = reader.IsDBNull(reader.GetOrdinal("last_stock_check"))
+                ? null
+                : reader.GetDateTime(reader.GetOrdinal("last_stock_check"))
         };
     }
 }

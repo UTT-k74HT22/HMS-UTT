@@ -50,7 +50,7 @@ namespace HospitalManagement.view
         {
             try
             {
-                // _all = _stockMovementController.GetAll();
+                _all = _stockMovementController.GetAllMovements();
                 ApplyFilters();
             }
             catch (Exception ex)

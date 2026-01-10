@@ -35,8 +35,8 @@ namespace HospitalManagement.controller
         /// </summary>
         public List<StockMovementResponse> GetAllMovements()
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            Console.WriteLine("Fetching all stock movements");
+            return _stockMovementService.GetAll();
         }
 
         /// <summary>

@@ -33,8 +33,8 @@ namespace HospitalManagement.service.impl
 
         public List<StockMovementResponse> GetAll()
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            Console.WriteLine("Fetching all stock movements");
+            return _stockMovementRepository.GetAll();
         }
 
         public List<StockMovementResponse> GetByWarehouse(long warehouseId)

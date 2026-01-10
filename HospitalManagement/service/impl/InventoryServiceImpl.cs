@@ -18,70 +18,83 @@ namespace HospitalManagement.service.impl
 
         public List<InventoryResponse> GetAll()
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            return _inventoryRepository.GetAll();
         }
 
         public List<InventoryResponse> GetByWarehouse(long warehouseId)
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            if (warehouseId <= 0)
+            {
+                throw new ArgumentException("Warehouse ID must be greater than zero.");
+            }
+            return  _inventoryRepository.GetByWarehouse(warehouseId);
         }
 
         public List<InventoryResponse> GetByProduct(long productId)
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            if (productId <= 0)
+                throw new ArgumentException("Product ID không hợp lệ");
+
+            return _inventoryRepository.GetByProduct(productId);
         }
 
         public List<InventoryResponse> GetLowStockItems()
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            return _inventoryRepository.GetLowStockItems();
         }
 
         public List<InventoryResponse> GetNearExpiryItems()
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            return _inventoryRepository.GetNearExpiryItems();
         }
 
         public void UpdateThresholds(long inventoryItemId, UpdateInventoryThresholdRequest request)
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            // Validate
+            if (request.MinThreshold.HasValue && request.MinThreshold.Value < 0)
+                throw new ArgumentException("Ngưỡng tối thiểu không thể âm");
+
+            if (request.MaxThreshold.HasValue && request.MaxThreshold.Value < 0)
+                throw new ArgumentException("Ngưỡng tối đa không thể âm");
+
+            if (request.MinThreshold.HasValue && request.MaxThreshold.HasValue 
+                                              && request.MinThreshold.Value > request.MaxThreshold.Value)
+                throw new ArgumentException("Ngưỡng tối thiểu không thể lớn hơn ngưỡng tối đa");
+
+            _inventoryRepository.UpdateThresholds(inventoryItemId, request);
         }
 
         public int GetTotalQuantityByProduct(long productId)
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            return _inventoryRepository.GetTotalQuantityByProduct(productId);
         }
 
         public bool HasStock(long productId, long warehouseId, int requiredQuantity)
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            return _inventoryRepository.HasStock(productId, warehouseId, requiredQuantity);
         }
 
         public void UpdateStock(long productId, long batchId, long warehouseId, int newQuantity)
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            if (newQuantity < 0)
+                throw new ArgumentException("Số lượng không thể âm");
+
+            _inventoryRepository.UpdateStock(productId, batchId, warehouseId, newQuantity);
         }
 
         public void InsertStockMovement(long productId, long batchId, long warehouseId, 
-                                        int quantity, int before, int after, 
-                                        long userId, string note, string movementType)
+            int quantity, int before, int after, 
+            long userId, string note, string movementType)
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            // This is typically called from StockMovementService
+            _inventoryRepository.InsertStockMovement(productId, batchId, warehouseId, 
+                quantity, before, after, 
+                userId, note, movementType);
         }
 
         public int GetCurrentQuantity(long productId, long batchId, long warehouseId)
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            return _inventoryRepository.GetCurrentQuantity(productId, batchId, warehouseId);
         }
     }
 }

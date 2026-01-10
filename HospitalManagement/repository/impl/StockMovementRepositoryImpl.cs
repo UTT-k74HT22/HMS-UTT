@@ -60,7 +60,7 @@ public class StockMovementRepositoryImpl : IStockMovementRepository
                     p.name AS product_name,
                     p.unit,
                     b.id AS batch_id,
-                    b.code AS batch_code,
+                    b.batch_code AS batch_code,
                     w.id AS warehouse_id,
                     w.code AS warehouse_code,
                     w.name AS warehouse_name,
@@ -73,12 +73,12 @@ public class StockMovementRepositoryImpl : IStockMovementRepository
                     a.username AS performed_by_username,
                     up.full_name AS performed_by_full_name,
                     sm.note
-                FROM stock_movement sm
-                INNER JOIN product p ON sm.product_id = p.id
-                LEFT JOIN batch b ON sm.batch_id = b.id
-                INNER JOIN warehouse w ON sm.warehouse_id = w.id
-                LEFT JOIN user_profile up ON sm.performed_by_user_id = up.id
-                LEFT JOIN account a ON up.account_id = a.id
+                FROM stock_movements sm
+                INNER JOIN products p ON sm.product_id = p.id
+                LEFT JOIN batches b ON sm.batch_id = b.id
+                INNER JOIN warehouses w ON sm.warehouse_id = w.id
+                LEFT JOIN user_profiles up ON sm.performed_by_user_id = up.id
+                LEFT JOIN accounts a ON up.account_id = a.id
                 ORDER BY sm.movement_date DESC";
 
         using (var connection = new SqlConnection(_connectionString))
@@ -210,20 +210,20 @@ public class StockMovementRepositoryImpl : IStockMovementRepository
     {
         return new StockMovementResponse
         {
-            Id = reader.GetInt64(reader.GetOrdinal("id")),
+            Id = reader.GetInt32(reader.GetOrdinal("id")),
             MovementType = Enum.Parse<StockMovementType>(reader.GetString(reader.GetOrdinal("movement_type"))),
             MovementDate = reader.GetDateTime(reader.GetOrdinal("movement_date")),
-            ProductId = reader.GetInt64(reader.GetOrdinal("product_id")),
+            ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
             ProductCode = reader.GetString(reader.GetOrdinal("product_code")),
             ProductName = reader.GetString(reader.GetOrdinal("product_name")),
             Unit = reader.GetString(reader.GetOrdinal("unit")),
             BatchId = reader.IsDBNull(reader.GetOrdinal("batch_id"))
                 ? null
-                : reader.GetInt64(reader.GetOrdinal("batch_id")),
+                : reader.GetInt32(reader.GetOrdinal("batch_id")),
             BatchCode = reader.IsDBNull(reader.GetOrdinal("batch_code"))
                 ? null
                 : reader.GetString(reader.GetOrdinal("batch_code")),
-            WarehouseId = reader.GetInt64(reader.GetOrdinal("warehouse_id")),
+            WarehouseId = reader.GetInt32(reader.GetOrdinal("warehouse_id")),
             WarehouseCode = reader.GetString(reader.GetOrdinal("warehouse_code")),
             WarehouseName = reader.GetString(reader.GetOrdinal("warehouse_name")),
             Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
@@ -238,10 +238,10 @@ public class StockMovementRepositoryImpl : IStockMovementRepository
                 : reader.GetString(reader.GetOrdinal("reference_type")),
             ReferenceId = reader.IsDBNull(reader.GetOrdinal("reference_id"))
                 ? null
-                : reader.GetInt64(reader.GetOrdinal("reference_id")),
+                : reader.GetInt32(reader.GetOrdinal("reference_id")),
             PerformedByUserId = reader.IsDBNull(reader.GetOrdinal("performed_by_user_id"))
                 ? null
-                : reader.GetInt64(reader.GetOrdinal("performed_by_user_id")),
+                : reader.GetInt32(reader.GetOrdinal("performed_by_user_id")),
             PerformedByUsername = reader.IsDBNull(reader.GetOrdinal("performed_by_username"))
                 ? null
                 : reader.GetString(reader.GetOrdinal("performed_by_username")),
