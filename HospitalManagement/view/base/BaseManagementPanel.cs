@@ -116,7 +116,7 @@ namespace HospitalManagement.view.@base
         {
             Dock = DockStyle.Fill;
             BackColor = Color.Transparent;
-            Padding = new Padding(12);
+            Padding = new Padding(6);
         }
 
         protected void BuildUI()
@@ -149,93 +149,54 @@ namespace HospitalManagement.view.@base
         }
 
         // ========== Build Toolbar (Filters + Actions) ==========
-        // private Panel BuildToolbar()
-        // {
-        //     var panel = new Panel
-        //     {
-        //         Dock = DockStyle.Fill,
-        //         BackColor = Color.Transparent,
-        //         AutoSize = true,
-        //         Padding = new Padding(0, 0, 0, 12)
-        //     };
-        //
-        //     var layout = new TableLayoutPanel
-        //     {
-        //         Dock = DockStyle.Top,
-        //         AutoSize = true,
-        //         ColumnCount = 1,
-        //         RowCount = 2,
-        //         BackColor = Color.Transparent
-        //     };
-        //
-        //     layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        //     layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        //     layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        //
-        //     // Filters
-        //     var filters = BuildFilters();
-        //     if (filters != null)
-        //     {
-        //         filters.Dock = DockStyle.Top;
-        //         filters.Padding = new Padding(0, 0, 0, 8);
-        //         layout.Controls.Add(filters, 0, 0);
-        //     }
-        //
-        //     // Actions
-        //     var actions = BuildActions();
-        //     if (actions != null)
-        //     {
-        //         actions.Dock = DockStyle.Top;
-        //         layout.Controls.Add(actions, 0, 1);
-        //     }
-        //
-        //     panel.Controls.Add(layout);
-        //     return panel;
-        // }
 
         private Panel BuildToolbar()
         {
-            var panel = new Panel
+            var toolbar = new TableLayoutPanel
             {
                 Dock = DockStyle.Top,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                ColumnCount = 1,
+                RowCount = 2,
                 BackColor = Color.Transparent,
-                AutoSize = true,
-                Padding = new Padding(0, 0, 0, 16)
+                Padding = new Padding(0),
+                Margin = new Padding(0)
             };
 
-            var layout = new TableLayoutPanel
+            toolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            toolbar.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            toolbar.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+            var filters = BuildFilters();
+            if (filters != null)
             {
-                Dock = DockStyle.Top,
-                AutoSize = true,
-                ColumnCount = 2,
-                RowCount = 1,
-                BackColor = Color.Transparent
-            };
+                filters.Dock = DockStyle.Top;
+                filters.Margin = new Padding(0, 0, 0, 4);
+                filters.Padding = new Padding(0);
+                toolbar.Controls.Add(filters, 0, 0);
+            }
 
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
-
-            var filters = BuildFilters() ?? new Panel { Height = 1 };
-            filters.Dock = DockStyle.Fill;
-
-            var actionsWrapper = new Panel
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.Transparent
-            };
-            
             var actions = BuildActions();
             if (actions != null)
             {
-                actions.Dock = DockStyle.Right;
-                actionsWrapper.Controls.Add(actions);
+                actions.Dock = DockStyle.Top;
+                actions.Margin = new Padding(0, 0, 0, 10);
+                actions.Padding = new Padding(0);
+                toolbar.Controls.Add(actions, 0, 1);
             }
 
-            layout.Controls.Add(filters, 0, 0);
-            layout.Controls.Add(actionsWrapper, 1, 0);
-
-            panel.Controls.Add(layout);
-            return panel;
+            // bọc lại bằng Panel để Dock Top ổn định
+            return new Panel
+            {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                BackColor = Color.Transparent,
+                Padding = new Padding(0),
+                Margin = new Padding(0),
+                Controls = { toolbar }
+            };
         }
 
         // ========== Build Table Panel ==========
@@ -244,6 +205,7 @@ namespace HospitalManagement.view.@base
             var cardPanel = UiFactory.CreateCardPanel();
             cardPanel.Dock = DockStyle.Fill;
             cardPanel.Padding = new Padding(0);
+            cardPanel.Margin = new Padding(0, 2, 0, 8);
 
             // Create DataGridView
             Table = new DataGridView
@@ -265,12 +227,20 @@ namespace HospitalManagement.view.@base
                     Name = propertyName,
                     HeaderText = headerText,
                     DataPropertyName = propertyName,
-                    FillWeight = Math.Max(30, width),
-                    SortMode = DataGridViewColumnSortMode.Automatic
+                    Width = width,
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.None
                 };
                 Table.Columns.Add(column);
             }
-
+            
+            if (Table.Columns.Count > 0)
+            {
+                var lastCol = Table.Columns[Table.Columns.Count - 1];
+                lastCol.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                lastCol.MinimumWidth = 140; // tránh bị bóp quá nhỏ
+            }
+            
             // BindingSource for data
             BindingSource = new BindingSource();
             Table.DataSource = BindingSource;
@@ -287,10 +257,17 @@ namespace HospitalManagement.view.@base
         {
             var panel = new Panel
             {
-                Dock = DockStyle.Fill,
-                BackColor = Color.Transparent,
-                Height = 30,
-                Padding = new Padding(0, 12, 0, 0)
+                Dock = DockStyle.Bottom,
+                BackColor = Color.White,
+                Height = 45,
+                Padding = new Padding(12, 10, 12, 10)
+            };
+
+            // Vẽ border top cho footer
+            panel.Paint += (sender, e) =>
+            {
+                var pen = new Pen(Color.FromArgb(235, 237, 242), 1);
+                e.Graphics.DrawLine(pen, 0, 0, panel.Width, 0);
             };
 
             TotalLabel = new Label
@@ -299,7 +276,8 @@ namespace HospitalManagement.view.@base
                 Font = UiTheme.FONT_BOLD,
                 ForeColor = UiTheme.TEXT,
                 AutoSize = true,
-                Dock = DockStyle.Left
+                Dock = DockStyle.Left,
+                TextAlign = ContentAlignment.MiddleLeft
             };
 
             panel.Controls.Add(TotalLabel);

@@ -1,7 +1,5 @@
-using System;
-using System.Drawing;
-using System.Windows.Forms;
 using HospitalManagement.controller;
+using HospitalManagement.entity.enums;
 using HospitalManagement.view.layouts;
 using HospitalManagement.view.@base;
 
@@ -16,6 +14,7 @@ namespace HospitalManagement.view
         private readonly string _username;
         private readonly string _role;
         private readonly AccountController? _accountController;
+        private readonly EmployeeController? _employeeController;
 
         private Sidebar _sidebar = null!;
         private Header _header = null!;
@@ -23,15 +22,16 @@ namespace HospitalManagement.view
         private Panel _contentPanel = null!;
 
         // Constructor mặc định cho Designer (REQUIRED for WinForms designer)
-        public MainFrame() : this("Designer", "ADMIN", null!)
+        public MainFrame() : this("Designer", RoleType.ADMIN.ToString(), null!, null!)
         {
         }
 
-        public MainFrame(string username, string role, AccountController accountController)
+        public MainFrame(string username, string role, AccountController accountController, EmployeeController employeeController)
         {
             _username = username;
             _role = role;
             _accountController = accountController;
+            _employeeController = employeeController;
 
             InitializeForm();
             CreateLayout();
@@ -126,9 +126,9 @@ namespace HospitalManagement.view
                 Sidebar.MENU_ACCOUNTS => _accountController != null
                     ? new AccountManagementPanel(_accountController)
                     : CreateComingSoonPanel("Quản lý tài khoản (Cần DI)"),
-
-                Sidebar.MENU_EMPLOYEE => new EmployeeManagementPanel(),
-
+                Sidebar.MENU_EMPLOYEE => _employeeController != null
+                    ? new EmployeeManagementPanel(_employeeController)
+                    : CreateComingSoonPanel("Quản lý nhân viên (Cần DI)"),
                 Sidebar.MENU_CUSTOMER => CreateComingSoonPanel("Quản lý khách hàng"),
                 
                 Sidebar.MENU_CATEGORIES => new CategoryManagementPanel(),

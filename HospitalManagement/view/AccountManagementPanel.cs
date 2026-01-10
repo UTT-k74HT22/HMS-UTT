@@ -1,394 +1,342 @@
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
-using HospitalManagement.controller;
-using HospitalManagement.entity;
-using HospitalManagement.view.@base;
+﻿using HospitalManagement.controller;
+using HospitalManagement.dto.response;
+using HospitalManagement.entity.enums;
 
 namespace HospitalManagement.view
 {
-    /// <summary>
-    /// Panel quản lý tài khoản (Account Management)
-    /// Extends từ BaseManagementPanel để có sẵn table, filters, actions
-    /// Tính năng: CRUD accounts, search/filter theo role và status
-    /// </summary>
-    public class AccountManagementPanel : BaseManagementPanel<Account>
+    public partial class AccountManagementPanel : UserControl
     {
-        // ========== Dependencies ==========
-        private readonly AccountController _accountController;
+        private readonly AccountController _controller;
 
-        // ========== Filter Controls ==========
-        private TextBox _searchBox = null!;
-        private ComboBox _roleFilter = null!;
-        private ComboBox _statusFilter = null!;
+        private readonly BindingSource _bs = new();
+        private List<AccountResponse> _all = new();
 
-        // ========== Constructor ==========
-        public AccountManagementPanel(AccountController accountController)
+        public AccountManagementPanel(AccountController controller)
         {
-            this._accountController = accountController;
+            _controller = controller;
             
-            Reload();
+            InitializeComponent();
+
+            dgvAccounts.DataSource = _bs;
+
+            InitGrid();
+            InitEvents();
+
+            LoadData();
         }
 
-        // ========== Implement Abstract Methods ==========
-
-        protected override string TitleTotal()
+        private void LoadData()
         {
-            return "Tổng số tài khoản";
-        }
-
-        protected override (string PropertyName, string HeaderText, int Width)[] GetColumns()
-        {
-            return new[]
+            try
             {
-                ("Id", "ID", 60),
-                ("Username", "Tài khoản", 150),
-                ("Role", "Vai trò", 120),
-                ("IsActive", "Trạng thái", 100),
-                ("LastLoginAt", "Đăng nhập cuối", 150),
-                ("CreatedAt", "Ngày tạo", 130)
+                _all = _controller.GetAllAccounts();
+                ApplyFilters();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void InitGrid()
+        {
+            dgvAccounts.AutoGenerateColumns = false;
+            dgvAccounts.AllowUserToResizeColumns = false;
+            dgvAccounts.AllowUserToAddRows = false;
+            dgvAccounts.AllowUserToDeleteRows = false;
+            dgvAccounts.RowHeadersVisible = false;
+            dgvAccounts.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvAccounts.MultiSelect = false;
+            dgvAccounts.ReadOnly = true;
+            dgvAccounts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            dgvAccounts.Columns.Clear();
+
+            // STT (unbound)
+            dgvAccounts.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "STT",
+                HeaderText = "STT",
+                Width = 60,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            });
+
+            // ID
+            dgvAccounts.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = nameof(AccountResponse.Id),
+                DataPropertyName = nameof(AccountResponse.Id),
+                HeaderText = "ID",
+                FillWeight = 18
+            });
+
+            // Username
+            dgvAccounts.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = nameof(AccountResponse.Username),
+                DataPropertyName = nameof(AccountResponse.Username),
+                HeaderText = "Username",
+                FillWeight = 34
+            });
+
+            // Role
+            dgvAccounts.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = nameof(AccountResponse.Role),
+                DataPropertyName = nameof(AccountResponse.Role),
+                HeaderText = "Role",
+                FillWeight = 24
+            });
+
+            // Active
+            var activeCol = new DataGridViewCheckBoxColumn
+            {
+                Name = nameof(AccountResponse.Active),
+                DataPropertyName = nameof(AccountResponse.Active),
+                HeaderText = "Active",
+                FillWeight = 16
             };
-        }
+            dgvAccounts.Columns.Add(activeCol);
 
-        protected override List<Account> FetchData()
-        {
-            // Designer mode - return empty list
-            if (_accountController == null)
+            dgvAccounts.CellFormatting += (_, e) =>
             {
-                return new List<Account>();
-            }
-            
-            return _accountController.GetAccounts();
-        }
+                if (e.RowIndex < 0) return;
 
-        // ========== Override Optional Hooks ==========
-
-        protected override Panel BuildFilters()
-        {
-            var panel = UiFactory.CreateTransparentPanel();
-            panel.AutoSize = true;
-
-            var layout = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Top,
-                AutoSize = true,
-                FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = false,
-                BackColor = Color.Transparent
-            };
-
-            // Search box
-            layout.Controls.Add(UiFactory.CreateLabel("Tìm kiếm:"));
-            _searchBox = UiFactory.CreateTextField(250);
-            _searchBox.PlaceholderText = "Nhập username...";
-            layout.Controls.Add(_searchBox);
-
-            // Search button
-            var searchBtn = UiFactory.CreateButton("🔍 Tìm kiếm", UiTheme.PRIMARY, (s, e) => ApplyFilters());
-            layout.Controls.Add(searchBtn);
-
-            // Spacer
-            layout.Controls.Add(new Panel { Width = 20, BackColor = Color.Transparent });
-
-            // Role filter
-            layout.Controls.Add(UiFactory.CreateLabel("Vai trò:"));
-            _roleFilter = UiFactory.CreateComboBox(
-                new[] { "Tất cả", "ADMIN", "EMPLOYEE", "CUSTOMER" },
-                130
-            );
-            _roleFilter.SelectedIndexChanged += (s, e) => ApplyFilters();
-            layout.Controls.Add(_roleFilter);
-
-            // Status filter
-            layout.Controls.Add(UiFactory.CreateLabel("Trạng thái:"));
-            _statusFilter = UiFactory.CreateComboBox(
-                new[] { "Tất cả", "Hoạt động", "Khóa" },
-                120
-            );
-            _statusFilter.SelectedIndexChanged += (s, e) => ApplyFilters();
-            layout.Controls.Add(_statusFilter);
-
-            panel.Controls.Add(layout);
-            return panel;
-        }
-
-        protected override Panel BuildActions()
-        {
-            var panel = UiFactory.CreateTransparentPanel();
-            panel.AutoSize = true;
-
-            var layout = new FlowLayoutPanel
-            {
-                AutoSize = true,
-                FlowDirection = FlowDirection.RightToLeft,
-                WrapContents = true,
-                BackColor = Color.Transparent,
-                Padding = new Padding(0)
-            };
-
-            // Utility buttons (right side)
-            layout.Controls.Add(UiFactory.CreateButton("📄 Export", UiTheme.PURPLE, OnExportExcel));
-            layout.Controls.Add(UiFactory.CreateButton("🔄 Làm mới", UiTheme.SECONDARY, (s, e) => Reload()));
-
-            // Spacer
-            layout.Controls.Add(new Panel { Width = 12, Height = 1, BackColor = Color.Transparent });
-
-            // CRUD buttons
-            layout.Controls.Add(UiFactory.CreateButton("🗑️ Xóa", UiTheme.DANGER, OnDelete));
-            layout.Controls.Add(UiFactory.CreateButton("🔒 Khóa/Mở", UiTheme.ORANGE, OnToggleStatus));
-            layout.Controls.Add(UiFactory.CreateButton("✏️ Sửa", UiTheme.WARNING, OnEdit));
-            layout.Controls.Add(UiFactory.CreateButton("👁 Xem", UiTheme.INFO, OnViewDetail));
-            layout.Controls.Add(UiFactory.CreateButton("➕ Thêm", UiTheme.SUCCESS, OnAdd));
-
-            panel.Controls.Add(layout);
-            return panel;
-        }
-
-        protected override void AfterTableCreated()
-        {
-            // Format cột IsActive thành "Hoạt động"/"Khóa"
-            if (Table.Columns.Contains("IsActive"))
-            {
-                Table.Columns["IsActive"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                
-                // Custom cell formatting
-                Table.CellFormatting += (s, e) =>
+                // STT
+                if (dgvAccounts.Columns[e.ColumnIndex].Name == "STT")
                 {
-                    if (e.ColumnIndex == Table.Columns["IsActive"]!.Index && e.Value != null)
-                    {
-                        var isActive = (bool)e.Value;
-                        e.Value = isActive ? "✓ Hoạt động" : "✗ Khóa";
-                        e.CellStyle.ForeColor = isActive ? UiTheme.SUCCESS : UiTheme.DANGER;
-                        e.FormattingApplied = true;
-                    }
-                };
-            }
-
-            // Format cột LastLoginAt
-            if (Table.Columns.Contains("LastLoginAt"))
-            {
-                Table.Columns["LastLoginAt"]!.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
-                Table.Columns["LastLoginAt"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                
-                // Handle null values
-                Table.CellFormatting += (s, e) =>
-                {
-                    if (e.ColumnIndex == Table.Columns["LastLoginAt"]!.Index && e.Value == null)
-                    {
-                        e.Value = "Chưa đăng nhập";
-                        e.CellStyle.ForeColor = Color.Gray;
-                        e.FormattingApplied = true;
-                    }
-                };
-            }
-
-            // Format cột CreatedAt
-            if (Table.Columns.Contains("CreatedAt"))
-            {
-                Table.Columns["CreatedAt"]!.DefaultCellStyle.Format = "dd/MM/yyyy";
-                Table.Columns["CreatedAt"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            }
-
-            // Format cột Role với màu sắc
-            if (Table.Columns.Contains("Role"))
-            {
-                Table.CellFormatting += (s, e) =>
-                {
-                    if (e.ColumnIndex == Table.Columns["Role"]!.Index && e.Value != null)
-                    {
-                        var role = e.Value.ToString();
-                        e.CellStyle.ForeColor = role switch
-                        {
-                            "ADMIN" => UiTheme.DANGER,
-                            "EMPLOYEE" => UiTheme.INFO,
-                            "CUSTOMER" => UiTheme.SUCCESS,
-                            _ => UiTheme.TEXT
-                        };
-                    }
-                };
-            }
-
-            // Double click để xem chi tiết
-            Table.CellDoubleClick += (s, e) =>
-            {
-                if (e.RowIndex >= 0)
-                {
-                    OnViewDetail(s, e);
+                    e.Value = (e.RowIndex + 1).ToString().ToString();
+                    e.FormattingApplied = true;
                 }
             };
         }
 
-        protected override void ApplyFilters()
+        private void InitEvents()
         {
-            var filters = new List<string>();
+            btnSearch.Click += (_, _) => ApplyFilters();
+            btnRefresh.Click += (_, _) => { txtKeyword.Clear(); LoadData(); };
 
-            // Filter by username
-            if (!string.IsNullOrWhiteSpace(_searchBox?.Text))
-            {
-                var keyword = _searchBox.Text.Trim();
-                filters.Add($"Username LIKE '%{keyword}%'");
-            }
+            btnAdd.Click += (_, _) => CreateAccount();
+            btnEdit.Click += (_, _) => UpdateAccount();
+            btnDelete.Click += (_, _) => DeleteAccount();
+            btnDetail.Click += (_, _) => ShowDetail();
+            btnExport.Click += (_, _) => ExportToExcel();
 
-            // Filter by role
-            if (_roleFilter?.SelectedIndex > 0)
+            txtKeyword.KeyDown += (_, e) =>
             {
-                var role = _roleFilter.SelectedItem?.ToString();
-                if (!string.IsNullOrEmpty(role))
-                    filters.Add($"Role = '{role}'");
-            }
+                if (e.KeyCode == Keys.Enter)
+                {
+                    e.SuppressKeyPress = true;
+                    ApplyFilters();
+                }
+            };
+        }
 
-            // Filter by status
-            if (_statusFilter?.SelectedIndex > 0)
+        private void CreateAccount()
+        {
+            Console.WriteLine("[UI] CreateAccount: Opening dialog...");
+            var dialog = new AccountFormDialog();
+            if (dialog.ShowDialog() == DialogResult.OK && dialog.Result != null)
             {
-                var statusText = _statusFilter.SelectedItem?.ToString();
-                var isActive = statusText == "Hoạt động";
-                filters.Add($"IsActive = {isActive}");
-            }
-
-            // Apply combined filters
-            if (filters.Any())
-            {
-                ApplyTextFilter(string.Join(" AND ", filters));
+                try
+                {
+                    Console.WriteLine($"[UI] CreateAccount: Calling controller with Username={dialog.Result.Username}, Role={dialog.Result.Role}");
+                    _controller.CreateAccount(dialog.Result);
+                    Console.WriteLine("[UI] CreateAccount: Success!");
+                    MessageBox.Show("Tạo tài khoản thành công!", "Success", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadData();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[UI] CreateAccount: ERROR - {ex}");
+                    MessageBox.Show($"Lỗi: {ex.Message}\n\nChi tiết: {ex.InnerException?.Message}", "Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             else
             {
-                ClearFilter();
+                Console.WriteLine("[UI] CreateAccount: Dialog cancelled or no result");
             }
         }
 
-        // ========== Event Handlers ==========
-
-        private void OnAdd(object? sender, EventArgs e)
+        private void UpdateAccount()
         {
-            // TODO: Open Add Account Dialog
-            var message = "Chức năng Thêm tài khoản\n\n" +
-                         "Dialog sẽ bao gồm:\n" +
-                         "- Username (unique)\n" +
-                         "- Password\n" +
-                         "- Role (ADMIN/EMPLOYEE/CUSTOMER)\n" +
-                         "- IsActive\n\n" +
-                         "TODO: Implement AddAccountDialog";
-            
-            MessageBox.Show(message, "Thêm tài khoản",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-            
-            // After save: Reload();
-        }
-
-        private void OnViewDetail(object? sender, EventArgs e)
-        {
-            var selected = GetSelectedItem();
-            if (selected == null)
+            var account = GetSelected();
+            if (account == null)
             {
-                MessageBox.Show("Vui lòng chọn một tài khoản!", "Thông báo",
+                MessageBox.Show("Vui lòng chọn tài khoản cần sửa", "Warning", 
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var info = $"═══════════════════════════════\n" +
-                      $"CHI TIẾT TÀI KHOẢN\n" +
-                      $"═══════════════════════════════\n\n" +
-                      $"ID: {selected.Id}\n" +
-                      $"Username: {selected.Username}\n" +
-                      $"Vai trò: {selected.Role}\n" +
-                      $"Trạng thái: {(selected.IsActive ? "✓ Hoạt động" : "✗ Khóa")}\n" +
-                      $"Đăng nhập cuối: {(selected.LastLoginAt?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa đăng nhập")}\n" +
-                      $"Ngày tạo: {selected.CreatedAt:dd/MM/yyyy HH:mm}\n" +
-                      $"Cập nhật: {selected.UpdatedAt:dd/MM/yyyy HH:mm}";
+            Console.WriteLine($"[UI] UpdateAccount: Opening dialog for account={account.Username}");
+            var dialog = new AccountUpdateDialog(account.Username, account.Role, account.Active);
+            dialog.ShowDialog();
 
-            MessageBox.Show(info, "Chi tiết tài khoản",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (dialog.Updated)
+            {
+                try
+                {
+                    Console.WriteLine($"[UI] UpdateAccount: Updating account ID={account.Id}, Role={dialog.SelectedRole}, Active={dialog.IsActive}");
+                    _controller.UpdateAccount(account.Id, dialog.SelectedRole, dialog.IsActive);
+                    Console.WriteLine("[UI] UpdateAccount: Success!");
+                    MessageBox.Show("Cập nhật tài khoản thành công!", "Success", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadData();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[UI] UpdateAccount: ERROR - {ex}");
+                    MessageBox.Show($"Lỗi: {ex.Message}\n\nChi tiết: {ex.InnerException?.Message}", "Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                Console.WriteLine("[UI] UpdateAccount: Cancelled");
+            }
         }
 
-        private void OnEdit(object? sender, EventArgs e)
+        private void DeleteAccount()
         {
-            var selected = GetSelectedItem();
-            if (selected == null)
+            var account = GetSelected();
+            if (account == null)
             {
-                MessageBox.Show("Vui lòng chọn một tài khoản!", "Thông báo",
+                MessageBox.Show("Vui lòng chọn tài khoản cần xóa", "Warning", 
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // TODO: Open Edit Dialog
-            MessageBox.Show($"Chức năng Sửa tài khoản\n\nUsername: {selected.Username}\nTODO: Implement EditAccountDialog",
-                "Sửa tài khoản", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            
-            // After save: Reload();
+            if (MessageBox.Show($"Xác nhận xóa tài khoản [{account.Username}]?", 
+                "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                try
+                {
+                    _controller.DeleteAccount(account.Id);
+                    MessageBox.Show("Xóa tài khoản thành công!", "Success", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadData();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi: {ex.Message}", "Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
-        private void OnToggleStatus(object? sender, EventArgs e)
+        private void ShowDetail()
         {
-            var selected = GetSelectedItem();
-            if (selected == null)
+            var account = GetSelected();
+            if (account == null)
             {
-                MessageBox.Show("Vui lòng chọn một tài khoản!", "Thông báo",
+                MessageBox.Show("Vui lòng chọn tài khoản", "Warning", 
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var action = selected.IsActive ? "khóa" : "mở khóa";
-            var result = MessageBox.Show(
-                $"Bạn có chắc chắn muốn {action} tài khoản:\n{selected.Username}?",
-                $"Xác nhận {action}",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
-            {
-                // TODO: Call service to toggle status
-                // _controller.ToggleAccountStatus(selected.Id);
-                
-                MessageBox.Show($"Đã {action} tài khoản thành công!", "Thông báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                
-                Reload();
-            }
+            MessageBox.Show(
+                $"ID: {account.Id}\n" +
+                $"Username: {account.Username}\n" +
+                $"Role: {account.Role}\n" +
+                $"Active: {account.Active}\n" +
+                $"Last Login: {account.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "Chưa đăng nhập"}",
+                "Chi tiết tài khoản",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
         }
 
-        private void OnDelete(object? sender, EventArgs e)
+        private void ApplyFilters()
         {
-            var selected = GetSelectedItem();
-            if (selected == null)
-            {
-                MessageBox.Show("Vui lòng chọn một tài khoản!", "Thông báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            var kw = (txtKeyword.Text ?? "").Trim().ToLower();
 
-            // Prevent deleting ADMIN accounts
-            if (selected.Role == "ADMIN")
-            {
-                MessageBox.Show("Không thể xóa tài khoản ADMIN!", "Cảnh báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            var filtered = _all.Where(x =>
+                    string.IsNullOrEmpty(kw)
+                    || x.Username.ToLower().Contains(kw)
+                    || x.Role.ToString().Contains(kw)
+                    || x.Id.ToString().Contains(kw)
+                )
+                .ToList();
 
-            var result = MessageBox.Show(
-                $"Bạn có chắc chắn muốn XÓA tài khoản:\n{selected.Username}?\n\n⚠️ Hành động này không thể hoàn tác!",
-                "Xác nhận xóa",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning);
-
-            if (result == DialogResult.Yes)
-            {
-                // TODO: Call delete service
-                // _controller.DeleteAccount(selected.Id);
-                
-                MessageBox.Show("Xóa tài khoản thành công!", "Thông báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                
-                Reload();
-            }
+            _bs.DataSource = filtered;
+            lblTotal.Text = $"Tổng số: {filtered.Count}";
         }
 
-        private void OnExportExcel(object? sender, EventArgs e)
+        private AccountResponse? GetSelected()
+            => dgvAccounts.CurrentRow?.DataBoundItem as AccountResponse;
+
+        private void ExportToExcel()
         {
-            // TODO: Implement Excel export
-            MessageBox.Show("Chức năng Export Excel\n\nTODO: Implement export accounts to Excel",
-                "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                Console.WriteLine("[UI] ExportToExcel: Starting export...");
+
+                var saveDialog = new SaveFileDialog
+                {
+                    Filter = "Excel Files|*.xlsx",
+                    Title = "Export danh sách tài khoản",
+                    FileName = $"Accounts_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
+                };
+
+                if (saveDialog.ShowDialog() == DialogResult.OK)
+                {
+                    Console.WriteLine($"[UI] ExportToExcel: Exporting to {saveDialog.FileName}");
+
+                    using (var workbook = new ClosedXML.Excel.XLWorkbook())
+                    {
+                        var worksheet = workbook.Worksheets.Add("Tài khoản");
+
+                        // Headers
+                        worksheet.Cell(1, 1).Value = "STT";
+                        worksheet.Cell(1, 2).Value = "ID";
+                        worksheet.Cell(1, 3).Value = "Username";
+                        worksheet.Cell(1, 4).Value = "Role";
+                        worksheet.Cell(1, 5).Value = "Active";
+                        worksheet.Cell(1, 6).Value = "Last Login";
+
+                        // Style header
+                        var headerRange = worksheet.Range("A1:F1");
+                        headerRange.Style.Font.Bold = true;
+                        headerRange.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightBlue;
+                        headerRange.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+
+                        // Data
+                        int row = 2;
+                        foreach (var acc in _all)
+                        {
+                            worksheet.Cell(row, 1).Value = row - 1;
+                            worksheet.Cell(row, 2).Value = acc.Id;
+                            worksheet.Cell(row, 3).Value = acc.Username;
+                            worksheet.Cell(row, 4).Value = acc.Role.ToString();
+                            worksheet.Cell(row, 5).Value = acc.Active ? "Có" : "Không";
+                            worksheet.Cell(row, 6).Value = acc.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "Chưa đăng nhập";
+                            row++;
+                        }
+
+                        // Auto-fit columns
+                        worksheet.Columns().AdjustToContents();
+
+                        workbook.SaveAs(saveDialog.FileName);
+                    }
+
+                    Console.WriteLine("[UI] ExportToExcel: Success!");
+                    MessageBox.Show($"Export thành công!\n\nFile: {saveDialog.FileName}", "Success",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    Console.WriteLine("[UI] ExportToExcel: Cancelled");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[UI] ExportToExcel: ERROR - {ex}");
+                MessageBox.Show($"Lỗi khi export: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

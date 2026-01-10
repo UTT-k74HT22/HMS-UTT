@@ -1,12 +1,14 @@
-﻿using HospitalManagement.entity;
+﻿﻿using HospitalManagement.entity;
 using HospitalManagement.service;
 using HospitalManagement.controller;
+using HospitalManagement.entity.enums;
 
 namespace HospitalManagement.view;
 public partial class LoginForm : Form
 {
     private IAuthService? _authService;
     private AccountController? _accountController;
+    private EmployeeController? _employeeController;
 
     // Constructor cho Designer
     public LoginForm()
@@ -16,10 +18,11 @@ public partial class LoginForm : Form
     }
 
     // Constructor cho runtime (DI)
-    public LoginForm(IAuthService authService, AccountController accountController) : this()
+    public LoginForm(IAuthService authService, AccountController accountController, EmployeeController employeeController) : this()
     {
         _authService = authService;
         _accountController = accountController;
+        _employeeController = employeeController;
     }
 
     private void btnLogin_Click(object sender, EventArgs e)
@@ -48,8 +51,18 @@ public partial class LoginForm : Form
         {
             Account account = _authService.authenticate(username, password);
             
+            // Debug: Check if controllers are null
+            if (_accountController == null)
+            {
+                MessageBox.Show("WARNING: AccountController is NULL!", "Debug", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            if (_employeeController == null)
+            {
+                MessageBox.Show("WARNING: EmployeeController is NULL!", "Debug", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            
             // Open MainFrame
-            var mainFrame = new MainFrame(account.Username, account.Role, _accountController);
+            var mainFrame = new MainFrame(account.Username, account.Role.ToString(), _accountController, _employeeController);
             mainFrame.FormClosed += (_, _) => Application.Exit();
             mainFrame.Show();
             

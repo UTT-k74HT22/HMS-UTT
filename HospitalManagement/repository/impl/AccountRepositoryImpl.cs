@@ -1,4 +1,5 @@
 using HospitalManagement.entity;
+using HospitalManagement.entity.enums;
 using Microsoft.Data.SqlClient;
 
 namespace HospitalManagement.repository.impl
@@ -14,104 +15,213 @@ namespace HospitalManagement.repository.impl
 
         public List<Account> FindAll()
         {
-            var list = new List<Account>();
-            const string sql = "SELECT * FROM Accounts";
-
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new SqlCommand(sql, conn);
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
+            var accounts = new List<Account>();
+            string query = """
+                           SELECT id, username, password, role, is_active
+                           FROM accounts
+                           """;
+            using (var connection = new SqlConnection(_connectionString))
             {
-                list.Add(Map(reader));
+                connection.Open();
+                using var command = new SqlCommand(query, connection);
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    accounts.Add(Map(reader));
+                }
             }
-
-            return list;
+            return accounts;
         }
 
-        public Account? FindByUsername(string username)
+        public Account FindByUsername(string username)
         {
-            const string sql = "SELECT * FROM Accounts WHERE username = @username";
-
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@username", username);
-
-            using var reader = cmd.ExecuteReader();
-            return reader.Read() ? Map(reader) : null;
+            string sql = """
+                         SELECT id, username, password, role, is_active
+                         FROM accounts
+                         WHERE username = @username
+                         """;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using var command = new SqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@username", username);
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return Map(reader);
+                }
+            }
+            return null;
         }
 
-        public void Save(Account acc)
+        public Account FindById(long id)
         {
-            const string sql =
-                @"INSERT INTO Accounts (username, password, role, is_active)
-                  VALUES (@u, @p, @r, @a)";
-
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@u", acc.Username);
-            cmd.Parameters.AddWithValue("@p", acc.Password);
-            cmd.Parameters.AddWithValue("@r", acc.Role);
-            cmd.Parameters.AddWithValue("@a", acc.IsActive);
-
-            cmd.ExecuteNonQuery();
+            string sql = """
+                         SELECT id, username, password, role, is_active
+                         FROM accounts
+                         WHERE id = @id
+                         """;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using var command = new SqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@id", id);
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return Map(reader);
+                }
+            }
+            return null;        
         }
 
-        public void Update(Account acc)
+        public long Insert(SqlConnection conn, Account account)
         {
-            const string sql =
-                @"UPDATE Accounts SET password=@p, role=@r, is_active=@a WHERE id=@id";
-
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@p", acc.Password);
-            cmd.Parameters.AddWithValue("@r", acc.Role);
-            cmd.Parameters.AddWithValue("@a", acc.IsActive);
-            cmd.Parameters.AddWithValue("@id", acc.Id);
-
-            cmd.ExecuteNonQuery();
+            Console.WriteLine($"[Repo] Insert: Inserting account username={account.Username}");
+            string sql = """
+                         INSERT INTO accounts (username, password, role, is_active, created_at, updated_at)
+                         OUTPUT INSERTED.id
+                         VALUES (@username, @password, @role, @is_active, @created_at, @updated_at);
+                         """;
+            using (var command = new SqlCommand(sql, conn))
+            {
+                command.Parameters.AddWithValue("@username", account.Username);
+                command.Parameters.AddWithValue("@password", account.Password);
+                command.Parameters.AddWithValue("@role", account.Role.ToString());
+                command.Parameters.AddWithValue("@is_active", account.IsActive);
+                command.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@updated_at", DateTime.UtcNow);
+                
+                Console.WriteLine($"[Repo] Insert: Executing SQL insert...");
+                var result = command.ExecuteScalar();
+                long id = Convert.ToInt64(result);
+                Console.WriteLine($"[Repo] Insert: Account inserted with ID={id}");
+                return id;
+            }
+        }
+        
+        public long Insert(SqlConnection conn, SqlTransaction transaction, Account account)
+        {
+            Console.WriteLine($"[Repo] Insert (with transaction): Inserting account username={account.Username}");
+            string sql = """
+                         INSERT INTO accounts (username, password, role, is_active, created_at, updated_at)
+                         OUTPUT INSERTED.id
+                         VALUES (@username, @password, @role, @is_active, @created_at, @updated_at);
+                         """;
+            using (var command = new SqlCommand(sql, conn, transaction))
+            {
+                command.Parameters.AddWithValue("@username", account.Username);
+                command.Parameters.AddWithValue("@password", account.Password);
+                command.Parameters.AddWithValue("@role", account.Role.ToString());
+                command.Parameters.AddWithValue("@is_active", account.IsActive);
+                command.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@updated_at", DateTime.UtcNow);
+                
+                Console.WriteLine($"[Repo] Insert: Executing SQL insert with transaction...");
+                var result = command.ExecuteScalar();
+                long id = Convert.ToInt64(result);
+                Console.WriteLine($"[Repo] Insert: Account inserted with ID={id}");
+                return id;
+            }
         }
 
-        public void DeleteById(int id)
+        public void UpdateRoleAndStatus(long id, RoleType role, bool active)
         {
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-            using var cmd = new SqlCommand("DELETE FROM Accounts WHERE id=@id", conn);
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.ExecuteNonQuery();
+            string sql = """
+                         UPDATE accounts
+                         SET role = @role, is_active = @is_active, updated_at = @updated_at
+                         WHERE id = @id
+                         """;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using var command = new SqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@role", role.ToString());
+                command.Parameters.AddWithValue("@is_active", active);
+                command.Parameters.AddWithValue("@updated_at", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@id", id);
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void DeleteById(long id)
+        {
+            string query = @"
+                DELETE FROM accounts
+                WHERE id = @id";
+
+            using (var connection = new SqlConnection(_connectionString))
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@id", id);
+                connection.Open();
+                command.ExecuteNonQuery();
+            }        
         }
 
         public bool ExistsByUsername(string username)
         {
-            const string sql = "SELECT 1 FROM Accounts WHERE username = @username";
+            string query = @"
+                SELECT COUNT(*) 
+                FROM accounts 
+                WHERE username = @username";
 
-            using var conn = new SqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@username", username);
-
-            using var reader = cmd.ExecuteReader();
-            return reader.Read();
+            using (var connection = new SqlConnection(_connectionString))
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@username", username);
+                connection.Open();
+                return (int)command.ExecuteScalar() > 0;
+            }
         }
 
-        private Account Map(SqlDataReader rs)
+        public bool ExistsByEmail(string email)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdatePassword(long accountId, string hashedPassword)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateLastLogin(long accountId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public long? FindUserIdByAccountId(long accountId)
+        {
+            string query = @"
+                SELECT id 
+                FROM user_profiles 
+                WHERE account_id = @accountId";
+
+            using (var connection = new SqlConnection(_connectionString))
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@accountId", accountId);
+                connection.Open();
+                
+                var result = command.ExecuteScalar();
+                return result != null ? (long?)(int)result : null;
+            }
+        }
+        
+        
+        private Account Map(SqlDataReader reader)
         {
             return new Account
             {
-                Id = rs.GetInt32(rs.GetOrdinal("id")),
-                Username = rs.GetString(rs.GetOrdinal("username")),
-                Password = rs.GetString(rs.GetOrdinal("password")),
-                Role = rs.GetString(rs.GetOrdinal("role")),
-                IsActive = rs.GetBoolean(rs.GetOrdinal("is_active"))
+                Id = Convert.ToInt64(reader["id"]),
+                Username = reader.GetString(reader.GetOrdinal("username")),
+                Password = reader.GetString(reader.GetOrdinal("password")),
+                Role = Enum.Parse<RoleType>(reader.GetString(reader.GetOrdinal("role"))),
+                IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                // CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
+                // LastLoginAt = reader.IsDBNull(reader.GetOrdinal("last_login_at")) 
+                //     ? null 
+                //     : reader.GetDateTime(reader.GetOrdinal("last_login_at"))
             };
         }
     }
