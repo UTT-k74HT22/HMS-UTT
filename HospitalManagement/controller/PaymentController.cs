@@ -54,5 +54,11 @@ namespace HospitalManagement.Controller
             var all = _service.GetAll();
             return all.FindAll(p => p.PaymentNumber.Contains(paymentNumber, StringComparison.OrdinalIgnoreCase));
         }
+        
+        public List<int> GetAvailableInvoiceIds()
+        {
+            return _service.GetAvailableInvoiceIds();
+        }
+
     }
 }

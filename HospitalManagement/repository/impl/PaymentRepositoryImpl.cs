@@ -63,10 +63,17 @@ namespace HospitalManagement.repository.impl
         public int InsertByInvoiceId(int invoiceId, string paymentNumber, string method)
         {
             string sql = @"
-                INSERT INTO payments (invoice_id, payment_number, payment_date, amount, method, status)
-                SELECT i.id, @paymentNumber, GETDATE(), i.total_amount, @method, 'SUCCESS'
-                FROM invoices i
-                WHERE i.id = @invoiceId AND i.status = 'NEW'";
+        INSERT INTO payments (invoice_id, payment_number, payment_date, amount, method, status)
+        SELECT i.id, @paymentNumber, GETDATE(), i.total_amount, @method, 'SUCCESS'
+        FROM invoices i
+        WHERE i.id = @invoiceId
+          AND i.status = 'NEW'
+          AND NOT EXISTS (
+                SELECT 1
+                FROM payments p
+                WHERE p.invoice_id = i.id
+                  AND p.status = 'SUCCESS'
+          )";
 
             using var conn = GetConnection();
             using var cmd = new SqlCommand(sql, conn);
@@ -77,6 +84,7 @@ namespace HospitalManagement.repository.impl
             conn.Open();
             return cmd.ExecuteNonQuery();
         }
+
 
         // =================== UPDATE ===================
         public void Update(Payment p)
@@ -126,6 +134,37 @@ namespace HospitalManagement.repository.impl
             var result = cmd.ExecuteScalar();
             return result != null;
         }
+        
+        public List<int> FindAvailableInvoiceIds()
+        {
+            string sql = @"
+        SELECT i.id
+        FROM invoices i
+        WHERE i.status = 'NEW'
+          AND NOT EXISTS (
+                SELECT 1
+                FROM payments p
+                WHERE p.invoice_id = i.id
+                  AND p.status = 'SUCCESS'
+          )
+        ORDER BY i.id
+    ";
+
+            List<int> result = new List<int>();
+
+            using var conn = GetConnection();
+            using var cmd = new SqlCommand(sql, conn);
+            conn.Open();
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                result.Add(reader.GetInt32(0));
+            }
+
+            return result;
+        }
+
 
         // =================== MAPPER ===================
         private Payment MapRow(SqlDataReader rs)

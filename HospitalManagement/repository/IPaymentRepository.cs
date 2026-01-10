@@ -22,4 +22,6 @@ public interface IPaymentRepository
 
     // Kiểm tra tồn tại theo payment number
     bool ExistsByPaymentNumber(string paymentNumber);
+
+    List<int> FindAvailableInvoiceIds();
 }

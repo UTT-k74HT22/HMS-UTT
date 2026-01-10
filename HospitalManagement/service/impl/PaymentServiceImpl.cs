@@ -43,4 +43,10 @@ public class PaymentServiceImpl : IPaymentService
     {
         return _repository.ExistsByPaymentNumber(paymentNumber);
     }
+    
+    public List<int> GetAvailableInvoiceIds()
+    {
+        return _repository.FindAvailableInvoiceIds();
+    }
+
 }

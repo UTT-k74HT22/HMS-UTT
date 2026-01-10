@@ -10,4 +10,5 @@ public interface IPaymentService
     void UpdatePayment(Payment payment);
     void CancelPayment(int id);
     bool ExistsPaymentNumber(string paymentNumber);
+    List<int> GetAvailableInvoiceIds();
 }
