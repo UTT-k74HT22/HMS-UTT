@@ -139,7 +139,7 @@ namespace HospitalManagement.view
                 Sidebar.MENU_STOCK_MOVEMENTS => CreateComingSoonPanel("Xuất/Nhập kho"),
                 Sidebar.MENU_ORDERS => CreateComingSoonPanel("Đơn hàng"),
                 Sidebar.MENU_INVOICES => CreateComingSoonPanel("Hóa đơn"),
-                Sidebar.MENU_PAYMENTS => CreateComingSoonPanel("Thanh toán"),
+                Sidebar.MENU_PAYMENTS => new PaymentManagementForm(),
                 Sidebar.MENU_REPORT_SUMMARY => CreateComingSoonPanel("Báo cáo tóm tắt"),
                 Sidebar.MENU_REPORT_DETAIL => CreateComingSoonPanel("Thống kê chi tiết"),
 

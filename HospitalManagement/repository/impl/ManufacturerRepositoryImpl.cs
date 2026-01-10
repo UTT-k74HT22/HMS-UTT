@@ -53,7 +53,6 @@ namespace HospitalManagement.repository.impl
             }, MapRow);
         }
         
-        // ManufacturerRepositoryImpl.cs
         public List<Manufacturer> SearchByCode(string code)
         {
             string sql = @"
