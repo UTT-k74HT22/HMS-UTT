@@ -19,15 +19,29 @@ namespace HospitalManagement
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // 1. Xây dựng Configuration (Đọc appsettings.json)
+            // ✅ BẮT LỖI TOÀN CỤC (để thấy stacktrace thật, kể cả lỗi DataGridView)
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+
+            Application.ThreadException += (s, e) =>
+            {
+                MessageBox.Show(e.Exception.ToString(), "ThreadException",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            };
+
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                MessageBox.Show(e.ExceptionObject?.ToString() ?? "Unknown", "UnhandledException",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            };
+
+            // 1. Xây dựng Configuration
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
             IConfiguration configuration = builder.Build();
 
-            // 2. Thiết lập Dependency Injection (Service Collection)
-            // Sử dụng ServiceConfigurator để tránh phình to Program.cs
+            // 2. DI
             var services = new ServiceCollection();
             services.ConfigureServices(configuration);
 
@@ -36,17 +50,13 @@ namespace HospitalManagement
 
             try
             {
-                // Lấy Login form từ Service Provider (nó sẽ tự động tiêm IAuthService vào)
                 var loginForm = ServiceProvider.GetRequiredService<LoginForm>();
-                
-                //TEST
-                
-                // Chạy ứng dụng
                 Application.Run(loginForm);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khởi động: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi khởi động: {ex}", "Lỗi",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

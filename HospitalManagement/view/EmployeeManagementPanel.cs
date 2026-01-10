@@ -1,259 +1,249 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
 using HospitalManagement.controller;
 using HospitalManagement.dto.response;
-using HospitalManagement.entity;
-using HospitalManagement.view.@base;
 
 namespace HospitalManagement.view
 {
-    /// <summary>
-    /// Ví dụ cụ thể về cách sử dụng BaseManagementPanel
-    /// Panel quản lý danh sách nhân viên với đầy đủ tính năng:
-    /// - Search/Filter
-    /// - CRUD operations
-    /// - Export Excel
-    /// </summary>
-    public class EmployeeManagementPanel : BaseManagementPanel<EmployeeProfileResponse>
+    public partial class EmployeeManagementPanel : UserControl
     {
-        // ========== Dependencies ==========
-        private readonly EmployeeController _employeeController;
+        private readonly EmployeeController _controller;
+        private readonly BindingSource _bs = new();
+        private List<EmployeeProfileResponse> _all = new();
 
-        // ========== Filter Controls ==========
-        private TextBox _searchBox = null!;
-        private ComboBox _departmentFilter = null!;
-
-        // ========== Constructor ==========
-        public EmployeeManagementPanel(EmployeeController employeeController)
+        public EmployeeManagementPanel(EmployeeController controller)
         {
-            this._employeeController = employeeController;
-            Reload();
-        }
-
-        // ========== Implement Abstract Methods ==========
-
-        protected override string TitleTotal()
-        {
-            return "Tổng số nhân viên";
-        }
-
-        protected override (string PropertyName, string HeaderText, int Width)[] GetColumns()
-        {
-            return new[]
-            {
-                ("Id", "ID", 70),
-                ("ProfileId", "Profile ID", 110),
-                ("Position", "Chức vụ", 170),
-                ("Department", "Phòng ban", 160),
-                ("HiredDate", "Ngày vào làm", 140),
-                ("BaseSalary", "Lương cơ bản", 150)
-            };
-        }
-
-        protected override List<EmployeeProfileResponse> FetchData()
-        {
-            return _employeeController.GetAllEmployees();
-        }
-
-        // ========== Override Optional Hooks ==========
-
-        protected override Panel BuildFilters()
-        {
-            var panel = UiFactory.CreateTransparentPanel();
-            panel.AutoSize = true;
-
-            var layout = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Top,
-                AutoSize = true,
-                FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = false,
-                BackColor = Color.Transparent,
-                Padding = new Padding(0)
-            };
-
-            // Search box
-            layout.Controls.Add(UiFactory.CreateLabel("Từ khóa:"));
-            _searchBox = UiFactory.CreateTextField(250);
-            layout.Controls.Add(_searchBox);
-
-            // Search button
-            var searchBtn = UiFactory.CreateButton("🔍 Tìm kiếm", UiTheme.PRIMARY, (s, e) => ApplyFilters());
-            layout.Controls.Add(searchBtn);
-
-            // Spacer
-            layout.Controls.Add(new Panel { Width = 20, BackColor = Color.Transparent });
-
-            // Department filter
-            layout.Controls.Add(UiFactory.CreateLabel("Phòng ban:"));
-            _departmentFilter = UiFactory.CreateComboBox(
-                new[] { "Tất cả", "Kế toán", "Kinh doanh", "Kỹ thuật", "Nhân sự" },
-                150
-            );
-            _departmentFilter.SelectedIndexChanged += (s, e) => ApplyFilters();
-            layout.Controls.Add(_departmentFilter);
-
-
-
-            panel.Controls.Add(layout);
-            return panel;
-        }
-
-        protected override Panel BuildActions()
-        {
-            var panel = UiFactory.CreateTransparentPanel();
-            panel.AutoSize = true;
-
-            var layout = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Top,
-                AutoSize = true,
-                FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = false,
-                BackColor = Color.Transparent,
-                Padding = new Padding(0)
-            };
-
-            // Các action buttons
-            layout.Controls.Add(UiFactory.CreateButton("➕ Thêm mới", UiTheme.SUCCESS, OnAdd));
-            layout.Controls.Add(UiFactory.CreateButton("👁 Xem chi tiết", UiTheme.INFO, OnViewDetail));
-            layout.Controls.Add(UiFactory.CreateButton("✏️ Sửa", UiTheme.WARNING, OnEdit));
-            layout.Controls.Add(UiFactory.CreateButton("🗑️ Xóa", UiTheme.DANGER, OnDelete));
+            _controller = controller;
             
-            // Spacer
-            layout.Controls.Add(new Panel { Width = 20, BackColor = Color.Transparent });
-            
-            layout.Controls.Add(UiFactory.CreateButton("🔄 Refresh", UiTheme.SECONDARY, (s, e) => Reload()));
-            layout.Controls.Add(UiFactory.CreateButton("📄 Export Excel", UiTheme.PURPLE, OnExportExcel));
+            InitializeComponent();
 
-            panel.Controls.Add(layout);
-            return panel;
+            dgvEmployees.DataSource = _bs;
+
+            InitGrid();
+            InitEvents();
+
+            LoadData();
         }
 
-        protected override void AfterTableCreated()
+        private void LoadData()
         {
-            // Custom format cho các cột đặc biệt
-            
-            // Format cột Salary thành currency
-            if (Table.Columns.Contains("BaseSalary"))
+            try
             {
-                Table.Columns["BaseSalary"]!.DefaultCellStyle.Format = "N0";
-                Table.Columns["BaseSalary"]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                _all = _controller.GetAllEmployees();
+                ApplyFilters();
             }
-
-            // Format cột Date
-            if (Table.Columns.Contains("HiredDate"))
+            catch (Exception ex)
             {
-                Table.Columns["HiredDate"]!.DefaultCellStyle.Format = "dd/MM/yyyy";
+                MessageBox.Show($"Lỗi khi tải dữ liệu: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
 
-            // Double click để xem chi tiết
-            Table.CellDoubleClick += (s, e) =>
+        private void InitGrid()
+        {
+            dgvEmployees.AutoGenerateColumns = false;
+            dgvEmployees.AllowUserToResizeColumns = false;
+            dgvEmployees.AllowUserToAddRows = false;
+            dgvEmployees.AllowUserToDeleteRows = false;
+            dgvEmployees.RowHeadersVisible = false;
+            dgvEmployees.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvEmployees.MultiSelect = false;
+            dgvEmployees.ReadOnly = true;
+            dgvEmployees.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            dgvEmployees.Columns.Clear();
+
+            dgvEmployees.Columns.Add(new DataGridViewTextBoxColumn
             {
-                if (e.RowIndex >= 0)
+                Name = "STT",
+                HeaderText = "STT",
+                Width = 60,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            });
+
+            dgvEmployees.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = nameof(EmployeeProfileResponse.Id),
+                DataPropertyName = nameof(EmployeeProfileResponse.Id),
+                HeaderText = "ID",
+                FillWeight = 15
+            });
+
+            dgvEmployees.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = nameof(EmployeeProfileResponse.Code),
+                DataPropertyName = nameof(EmployeeProfileResponse.Code),
+                HeaderText = "Mã NV",
+                FillWeight = 18
+            });
+
+            dgvEmployees.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = nameof(EmployeeProfileResponse.FullName),
+                DataPropertyName = nameof(EmployeeProfileResponse.FullName),
+                HeaderText = "Họ tên",
+                FillWeight = 35
+            });
+
+            dgvEmployees.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = nameof(EmployeeProfileResponse.Phone),
+                DataPropertyName = nameof(EmployeeProfileResponse.Phone),
+                HeaderText = "SĐT",
+                FillWeight = 20
+            });
+
+            dgvEmployees.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = nameof(EmployeeProfileResponse.Status),
+                DataPropertyName = nameof(EmployeeProfileResponse.Status),
+                HeaderText = "Trạng thái",
+                FillWeight = 12
+            });
+
+            dgvEmployees.CellFormatting += (_, e) =>
+            {
+                if (e.RowIndex < 0) return;
+
+                if (dgvEmployees.Columns[e.ColumnIndex].Name == "STT")
                 {
-                    OnViewDetail(s, e);
+                    e.Value = (e.RowIndex + 1).ToString().ToString();
+                    e.FormattingApplied = true;
                 }
             };
         }
 
-        protected override void ApplyFilters()
+        private void InitEvents()
         {
-            var filters = new List<string>();
+            dgvEmployees.DataError += (s, e) =>
+            {
+                var colName = dgvEmployees.Columns[e.ColumnIndex].Name;
+                MessageBox.Show(
+                    $"DataError ở cột: {colName}\nRow: {e.RowIndex}\n{e.Exception.Message}",
+                    "Grid Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
 
-            // Filter by search text
-            if (!string.IsNullOrWhiteSpace(_searchBox?.Text))
-            {
-                var keyword = _searchBox.Text.Trim();
-                filters.Add($"(Position LIKE '%{keyword}%' OR Department LIKE '%{keyword}%')");
-            }
+                e.ThrowException = false;
+                e.Cancel = true; // ✅ chặn dialog mặc định
+            };
 
-            // Filter by department
-            if (_departmentFilter?.SelectedIndex > 0)
-            {
-                var dept = _departmentFilter.SelectedItem?.ToString();
-                if (!string.IsNullOrEmpty(dept))
-                    filters.Add($"Department = '{dept}'");
-            }
 
-            // Combine filters
-            if (filters.Any())
+            btnSearch.Click += (_, _) => ApplyFilters();
+            btnRefresh.Click += (_, _) => { txtKeyword.Clear(); LoadData(); };
+
+            btnDetail.Click += (_, _) => ShowDetail();
+            btnEdit.Click += (_, _) => UpdateSelected();
+            btnDelete.Click += (_, _) => DeleteSelected();
+
+            txtKeyword.KeyDown += (_, e) =>
             {
-                ApplyTextFilter(string.Join(" AND ", filters));
-            }
-            else
-            {
-                ClearFilter();
-            }
+                if (e.KeyCode == Keys.Enter)
+                {
+                    e.SuppressKeyPress = true;
+                    ApplyFilters();
+                }
+            };
+        }
+        
+        private void ApplyFilters()
+        {
+            var kw = (txtKeyword.Text ?? "").Trim().ToLower();
+
+            var filtered = _all.Where(x =>
+                    string.IsNullOrEmpty(kw)
+                    || x.Id.ToString().Contains(kw)
+                    || x.Code.ToLower().Contains(kw)
+                    || x.FullName.ToLower().Contains(kw)
+                    || x.Phone.ToLower().Contains(kw)
+                )
+                .ToList();
+
+            _bs.DataSource = filtered;
+            lblTotal.Text = $"Tổng số: {filtered.Count}";
         }
 
-        // ========== Event Handlers ==========
+        private EmployeeProfileResponse? GetSelected()
+            => dgvEmployees.CurrentRow?.DataBoundItem as EmployeeProfileResponse;
 
-        private void OnAdd(object? sender, EventArgs e)
+        private void ShowDetail()
         {
-            // TODO: Open Add Employee Dialog
-            MessageBox.Show("Chức năng Thêm nhân viên\n\nTODO: Implement dialog thêm mới",
-                "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            
-            // After save successfully:
-            // Reload();
-        }
-
-        private void OnViewDetail(object? sender, EventArgs e)
-        {
-            
-            
-        }
-
-        private void OnEdit(object? sender, EventArgs e)
-        {
-            var selected = GetSelectedItem();
-            if (selected == null)
+            var e = GetSelected();
+            if (e == null)
             {
-                MessageBox.Show("Vui lòng chọn một nhân viên!", "Thông báo",
+                MessageBox.Show("Vui lòng chọn nhân viên", "Warning", 
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // TODO: Open Edit Dialog
-            MessageBox.Show($"Chức năng Sửa nhân viên ID: {selected.Id}\n\nTODO: Implement dialog sửa",
-                "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            
-            // After save successfully:
-            // Reload();
+            try
+            {
+                var detail = _controller.GetEmployeeByCode(e.Code);
+                MessageBox.Show(
+                    $"Mã: {detail.Code}\n" +
+                    $"Họ tên: {detail.FullName}\n" +
+                    $"SĐT: {detail.Phone}\n" +
+                    $"Email: {detail.Email}\n" +
+                    $"Chức vụ: {detail.Position}\n" +
+                    $"Phòng ban: {detail.Department}\n" +
+                    $"Ngày vào: {detail.HiredDate:yyyy-MM-dd}\n" +
+                    $"Lương: {detail.Salary:N0} VNĐ\n" +
+                    $"Trạng thái: {detail.Status}",
+                    "Chi tiết nhân viên",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        private void OnDelete(object? sender, EventArgs e)
+        private void UpdateSelected()
         {
-            // var selected = GetSelectedItem();
-            // if (selected == null)
-            // {
-            //     MessageBox.Show("Vui lòng chọn một nhân viên!", "Thông báo",
-            //         MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            //     return;
-            // }
-            //
-            // var result = MessageBox.Show(
-            //     $"Bạn có chắc chắn muốn xóa nhân viên:\n{selected.Position} - {selected.Department}?",
-            //     "Xác nhận xóa",
-            //     MessageBoxButtons.YesNo,
-            //     MessageBoxIcon.Question);
-            //
-            // if (result == DialogResult.Yes)
-            // {
-            //     // TODO: Call delete service
-            //     // _controller.DeleteEmployee(selected.Id);
-            //     
-            //     MessageBox.Show("Xóa thành công!", "Thông báo",
-            //         MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //     
-            //     Reload();
-            // }
+            var e = GetSelected();
+            if (e == null)
+            {
+                MessageBox.Show("Vui lòng chọn nhân viên cần sửa", "Warning", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // TODO: mở dialog update thật
+            MessageBox.Show($"Chức năng update nhân viên [{e.Code}] đang được phát triển", 
+                "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void OnExportExcel(object? sender, EventArgs e)
+        private void DeleteSelected()
         {
-            // TODO: Implement Excel export
-            MessageBox.Show("Chức năng Export Excel\n\nTODO: Implement export",
-                "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var e = GetSelected();
+            if (e == null)
+            {
+                MessageBox.Show("Vui lòng chọn nhân viên cần xóa", "Warning", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show($"Xóa nhân viên [{e.Code}] ?", "Xác nhận",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                try
+                {
+                    // TODO: Implement delete trong controller
+                    MessageBox.Show("Chức năng xóa nhân viên đang được phát triển", 
+                        "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi: {ex.Message}", "Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
     }
 }

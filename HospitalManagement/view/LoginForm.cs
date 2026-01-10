@@ -51,8 +51,18 @@ public partial class LoginForm : Form
         {
             Account account = _authService.authenticate(username, password);
             
+            // Debug: Check if controllers are null
+            if (_accountController == null)
+            {
+                MessageBox.Show("WARNING: AccountController is NULL!", "Debug", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            if (_employeeController == null)
+            {
+                MessageBox.Show("WARNING: EmployeeController is NULL!", "Debug", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            
             // Open MainFrame
-            var mainFrame = new MainFrame(account.Username, (account.Role == RoleType.ADMIN).ToString(), _accountController, _employeeController);
+            var mainFrame = new MainFrame(account.Username, account.Role.ToString(), _accountController, _employeeController);
             mainFrame.FormClosed += (_, _) => Application.Exit();
             mainFrame.Show();
             

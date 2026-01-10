@@ -18,9 +18,9 @@ public class EmployeeRepositoryImpl : IEmployeeProfileRepository
     {
         return new EmployeeProfileDetailResponse
         {
-            AccountId = reader.GetInt64(reader.GetOrdinal("account_id")),
+            AccountId = Convert.ToInt64(reader["account_id"]),
             AccountUsername = reader.GetString(reader.GetOrdinal("account_username")),
-            ProfileId = reader.GetInt64(reader.GetOrdinal("profile_id")),
+            ProfileId = Convert.ToInt64(reader["profile_id"]),
             Code = reader.GetString(reader.GetOrdinal("code")),
             FullName = reader.GetString(reader.GetOrdinal("full_name")),
             Phone = reader.IsDBNull(reader.GetOrdinal("phone")) 
@@ -35,7 +35,7 @@ public class EmployeeRepositoryImpl : IEmployeeProfileRepository
             Position = reader.GetString(reader.GetOrdinal("position")),
             Department = reader.GetString(reader.GetOrdinal("department")),
             HiredDate = reader.GetDateTime(reader.GetOrdinal("hired_date")),
-            Salary = reader.GetDecimal(reader.GetOrdinal("salary")),
+            Salary = reader.GetDecimal(reader.GetOrdinal("base_salary")),
             Status = Enum.Parse<ProfileStatus>(reader.GetString(reader.GetOrdinal("status")))
         };
     }
@@ -60,12 +60,10 @@ var employees = new List<EmployeeProfileResponse>();
                     up.phone,
                     ep.position,
                     up.status
-                FROM account a
-                INNER JOIN user_profile up ON a.id = up.account_id
-                INNER JOIN employee_profile ep ON up.id = ep.profile_id
-                WHERE a.deleted_at IS NULL 
-                  AND up.deleted_at IS NULL
-                  AND a.role = 'EMPLOYEE'
+                FROM accounts a
+                INNER JOIN user_profiles up ON a.id = up.account_id
+                INNER JOIN employee_profiles ep ON up.id = ep.profile_id
+                WHERE a.role = 'EMPLOYEE'
                 ORDER BY up.created_at DESC";
 
             using (var connection = new SqlConnection(_connectionString))
@@ -78,9 +76,9 @@ var employees = new List<EmployeeProfileResponse>();
                     {
                         employees.Add(new EmployeeProfileResponse
                         {
-                            AccountId = reader.GetInt64(reader.GetOrdinal("account_id")),
+                            AccountId = Convert.ToInt64(reader["account_id"]),
                             AccountUsername = reader.GetString(reader.GetOrdinal("account_username")),
-                            ProfileId = reader.GetInt64(reader.GetOrdinal("profile_id")),
+                            ProfileId = Convert.ToInt64(reader["profile_id"]),
                             Code = reader.GetString(reader.GetOrdinal("code")),
                             FullName = reader.GetString(reader.GetOrdinal("full_name")),
                             Phone = reader.IsDBNull(reader.GetOrdinal("phone")) 
@@ -110,14 +108,12 @@ var employees = new List<EmployeeProfileResponse>();
                         ep.position,
                         ep.department,
                         ep.hired_date,
-                        ep.salary,
+                        ep.base_salary,
                         up.status
-                    FROM account a
-                    INNER JOIN user_profile up ON a.id = up.account_id
-                    INNER JOIN employee_profile ep ON up.id = ep.profile_id
-                    WHERE up.code = @code 
-                      AND a.deleted_at IS NULL 
-                      AND up.deleted_at IS NULL";
+                    FROM accounts a
+                    INNER JOIN user_profiles up ON a.id = up.account_id
+                    INNER JOIN employee_profiles ep ON up.id = ep.profile_id
+                    WHERE up.code = @code";
 
         using (var connection = new SqlConnection(_connectionString))
         using (var command = new SqlCommand(query, connection))
@@ -131,9 +127,9 @@ var employees = new List<EmployeeProfileResponse>();
                 {
                     return new EmployeeProfileDetailResponse
                     {
-                        AccountId = reader.GetInt64(reader.GetOrdinal("account_id")),
+                        AccountId = Convert.ToInt64(reader["account_id"]),
                         AccountUsername = reader.GetString(reader.GetOrdinal("account_username")),
-                        ProfileId = reader.GetInt64(reader.GetOrdinal("profile_id")),
+                        ProfileId = Convert.ToInt64(reader["profile_id"]),
                         Code = reader.GetString(reader.GetOrdinal("code")),
                         FullName = reader.GetString(reader.GetOrdinal("full_name")),
                         Phone = reader.IsDBNull(reader.GetOrdinal("phone"))
@@ -148,7 +144,7 @@ var employees = new List<EmployeeProfileResponse>();
                         Position = reader.GetString(reader.GetOrdinal("position")),
                         Department = reader.GetString(reader.GetOrdinal("department")),
                         HiredDate = reader.GetDateTime(reader.GetOrdinal("hired_date")),
-                        Salary = reader.GetDecimal(reader.GetOrdinal("salary")),
+                        Salary = reader.GetDecimal(reader.GetOrdinal("base_salary")),
                         Status = Enum.Parse<ProfileStatus>(reader.GetString(reader.GetOrdinal("status")))
                     };
                 }
@@ -174,14 +170,12 @@ var employees = new List<EmployeeProfileResponse>();
                     ep.position,
                     ep.department,
                     ep.hired_date,
-                    ep.salary,
+                    ep.base_salary,
                     up.status
-                FROM account a
-                INNER JOIN user_profile up ON a.id = up.account_id
-                INNER JOIN employee_profile ep ON up.id = ep.profile_id
-                WHERE a.deleted_at IS NULL 
-                  AND up.deleted_at IS NULL
-                  AND a.role = 'EMPLOYEE'
+                FROM accounts a
+                INNER JOIN user_profiles up ON a.id = up.account_id
+                INNER JOIN employee_profiles ep ON up.id = ep.profile_id
+                WHERE a.role = 'EMPLOYEE'
                 ORDER BY up.created_at DESC";
 
         using (var connection = new SqlConnection(_connectionString))
@@ -207,15 +201,15 @@ var employees = new List<EmployeeProfileResponse>();
                     up.phone = @phone,
                     up.status = @status,
                     up.updated_at = GETDATE()
-                FROM user_profile up
-                WHERE up.code = @code AND up.deleted_at IS NULL;
+                FROM user_profiles up
+                WHERE up.code = @code;
 
                 UPDATE ep
                 SET ep.position = @position,
                     ep.updated_at = GETDATE()
-                FROM employee_profile ep
-                INNER JOIN user_profile up ON ep.profile_id = up.id
-                WHERE up.code = @code AND up.deleted_at IS NULL";
+                FROM employee_profiles ep
+                INNER JOIN user_profiles up ON ep.profile_id = up.id
+                WHERE up.code = @code";
 
         using (var connection = new SqlConnection(_connectionString))
         using (var command = new SqlCommand(query, connection))
@@ -241,16 +235,16 @@ var employees = new List<EmployeeProfileResponse>();
                     up.address = @address,
                     up.status = @status,
                     up.updated_at = GETDATE()
-                FROM user_profile up
-                WHERE up.id = @profileId AND up.deleted_at IS NULL;
+                FROM user_profiles up
+                WHERE up.id = @profileId;
 
                 UPDATE ep
                 SET ep.position = @position,
                     ep.department = @department,
                     ep.hired_date = @hiredDate,
-                    ep.salary = @salary,
+                    ep.base_salary = @salary,
                     ep.updated_at = GETDATE()
-                FROM employee_profile ep
+                FROM employee_profiles ep
                 WHERE ep.profile_id = @profileId";
 
         using (var connection = new SqlConnection(_connectionString))

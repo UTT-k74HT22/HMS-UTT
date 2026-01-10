@@ -1,3 +1,4 @@
+using HospitalManagement.dto.request;
 using HospitalManagement.dto.response;
 using HospitalManagement.entity;
 using HospitalManagement.entity.enums;
@@ -23,6 +24,11 @@ namespace HospitalManagement.service
         /// Tìm tài khoản theo ID
         /// </summary>
         Account FindById(long id);
+
+        /// <summary>
+        /// Tạo tài khoản mới (cascade: Account -> UserProfile -> EmployeeProfile/CustomerProfile)
+        /// </summary>
+        void CreateAccount(CreateAccountRequest request);
 
         /// <summary>
         /// Cập nhật tài khoản

@@ -57,15 +57,28 @@ namespace HospitalManagement.configuration
                 return new AccountRepositoryImpl(dbConfig.ConnectionString);
             });
 
+            // UserProfile Repository
+            services.AddScoped<IUserProfileRepository>(provider =>
+            {
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new UserProfileRepositoryImpl(dbConfig.ConnectionString);
+            });
+
+            // EmployeeProfile Repository
             services.AddScoped<IEmployeeProfileRepository>(provider =>
             {
                 var dbConfig = provider.GetRequiredService<DBConfig>();
                 return new EmployeeRepositoryImpl(dbConfig.ConnectionString);
             });
 
+            // CustomerProfile Repository
+            services.AddScoped<ICustomerProfileRepository>(provider =>
+            {
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new CustomerProfileRepositoryImpl(dbConfig.ConnectionString);
+            });
+
             // TODO: Thêm các repository khác
-            // services.AddScoped<IEmployeeRepository, EmployeeRepositoryImpl>();
-            // services.AddScoped<ICustomerRepository, CustomerRepositoryImpl>();
             // services.AddScoped<IProductRepository, ProductRepositoryImpl>();
         }
 
@@ -74,15 +87,22 @@ namespace HospitalManagement.configuration
             // Auth Service
             services.AddScoped<IAuthService, AuthServiceImpl>();
 
-            // Account Service
-            services.AddScoped<IAccountService, AccountServiceImpl>();
+            // Account Service (with connection string for transaction)
+            services.AddScoped<IAccountService>(provider =>
+            {
+                var accountRepo = provider.GetRequiredService<IAccountRepository>();
+                var userProfileRepo = provider.GetRequiredService<IUserProfileRepository>();
+                var employeeProfileRepo = provider.GetRequiredService<IEmployeeProfileRepository>();
+                var customerProfileRepo = provider.GetRequiredService<ICustomerProfileRepository>();
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new AccountServiceImpl(accountRepo, userProfileRepo, employeeProfileRepo, 
+                    customerProfileRepo, dbConfig.ConnectionString);
+            });
             
             // Employee Service
             services.AddScoped<IEmployeeService, EmployeeServiceImpl>();
 
             // TODO: Thêm các service khác
-            // services.AddScoped<EmployeeService, EmployeeServiceImpl>();
-            // services.AddScoped<CustomerService, CustomerServiceImpl>();
             // services.AddScoped<ProductService, ProductServiceImpl>();
         }
 

@@ -13,66 +13,105 @@ public class AccountController
 {
     private readonly IAccountService _accountService;
     
-    public AccountController(IAccountService _accountService)
+    public AccountController(IAccountService accountService)
     {
-        this._accountService = _accountService;
+        _accountService = accountService;
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả tài khoản
-    /// </summary>
-    public List<AccountResponse> GetAccounts()
-    {
-        return _accountService.GetAll();
-    }
-
-    /// <summary>
-    /// Lấy tất cả tài khoản (mới)
+    /// [CHỨC NĂNG 1] Lấy danh sách tất cả tài khoản
     /// </summary>
     public List<AccountResponse> GetAllAccounts()
     {
-        // TODO: Implement
-        throw new NotImplementedException();
+        try
+        {
+            return _accountService.GetAll();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi lấy danh sách tài khoản: {ex.Message}", ex);
+        }
     }
 
     /// <summary>
-    /// Tìm tài khoản theo ID
+    /// [CHỨC NĂNG 2] Tìm tài khoản theo ID
     /// </summary>
     public Account GetAccountById(long id)
     {
-        // TODO: Implement
-        throw new NotImplementedException();
+        try
+        {
+            return _accountService.FindById(id);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi lấy tài khoản: {ex.Message}", ex);
+        }
     }
 
     /// <summary>
-    /// Tạo tài khoản mới
+    /// [CHỨC NĂNG 3] Tạo tài khoản mới
+    /// FLOW (giống Java):
+    /// 1. Validate request (username, password, email, phone)
+    /// 2. Check duplicate username/email/phone
+    /// 3. Hash password
+    /// 4. Create Account
+    /// 5. Create UserProfile
+    /// 6. Create EmployeeProfile (nếu role = STAFF) hoặc CustomerProfile (nếu role = CUSTOMER)
     /// </summary>
     public void CreateAccount(CreateAccountRequest request)
     {
-        // TODO: Implement
-        // 1. Validate request
-        // 2. Check duplicate username/email
-        // 3. Hash password
-        // 4. Create account
-        // 5. Create user profile
-        throw new NotImplementedException();
+        try
+        {
+            _accountService.CreateAccount(request);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi tạo tài khoản: {ex.Message}", ex);
+        }
     }
 
     /// <summary>
-    /// Cập nhật tài khoản
+    /// [CHỨC NĂNG 4] Cập nhật tài khoản
     /// </summary>
     public void UpdateAccount(long id, RoleType role, bool active)
     {
-        // TODO: Implement
-        throw new NotImplementedException();
+        try
+        {
+            _accountService.Update(id, role, active);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi cập nhật tài khoản: {ex.Message}", ex);
+        }
     }
 
     /// <summary>
-    /// Xóa tài khoản
+    /// [CHỨC NĂNG 5] Xóa tài khoản
     /// </summary>
     public void DeleteAccount(long id)
     {
-        // TODO: Implement
-        throw new NotImplementedException();
+        try
+        {
+            _accountService.DeleteById(id);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi xóa tài khoản: {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// [CHỨC NĂNG 6] Kiểm tra username đã tồn tại
+    /// </summary>
+    public bool ExistsByUsername(string username)
+    {
+        try
+        {
+            return _accountService.ExistsByUsername(username);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi khi kiểm tra username: {ex.Message}", ex);
+        }
     }
 }

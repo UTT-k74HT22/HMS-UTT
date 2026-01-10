@@ -116,8 +116,7 @@ namespace HospitalManagement.repository.impl
         public void DeleteById(long id)
         {
             string query = @"
-                UPDATE account 
-                SET deleted_at = GETDATE(), active = 0
+                DELETE FROM accounts
                 WHERE id = @id";
 
             using (var connection = new SqlConnection(_connectionString))
@@ -133,8 +132,8 @@ namespace HospitalManagement.repository.impl
         {
             string query = @"
                 SELECT COUNT(*) 
-                FROM account 
-                WHERE username = @username AND deleted_at IS NULL";
+                FROM accounts 
+                WHERE username = @username";
 
             using (var connection = new SqlConnection(_connectionString))
             using (var command = new SqlCommand(query, connection))
@@ -164,8 +163,8 @@ namespace HospitalManagement.repository.impl
         {
             string query = @"
                 SELECT id 
-                FROM user_profile 
-                WHERE account_id = @accountId AND deleted_at IS NULL";
+                FROM user_profiles 
+                WHERE account_id = @accountId";
 
             using (var connection = new SqlConnection(_connectionString))
             using (var command = new SqlCommand(query, connection))
@@ -183,7 +182,7 @@ namespace HospitalManagement.repository.impl
         {
             return new Account
             {
-                Id = reader.GetInt32(reader.GetOrdinal("id")),
+                Id = Convert.ToInt64(reader["id"]),
                 Username = reader.GetString(reader.GetOrdinal("username")),
                 Password = reader.GetString(reader.GetOrdinal("password")),
                 Role = Enum.Parse<RoleType>(reader.GetString(reader.GetOrdinal("role"))),
