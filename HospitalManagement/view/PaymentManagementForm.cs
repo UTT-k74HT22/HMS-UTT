@@ -155,7 +155,6 @@ private void btnEdit_Click(object sender, EventArgs e)
         return;
     }
 
-    // Lấy Payment ID từ hàng chọn
     int paymentId = Convert.ToInt32(dgvPayment.SelectedRows[0].Cells["ID"].Value);
     Payment payment = _controller.GetById(paymentId);
 
@@ -171,19 +170,16 @@ private void btnEdit_Click(object sender, EventArgs e)
         dialog.Size = new Size(400, 200);
         dialog.StartPosition = FormStartPosition.CenterParent;
 
-        // Phương thức thanh toán
         Label lblMethod = new Label { Text = "Phương thức:", Location = new Point(20, 20), AutoSize = true };
         ComboBox cbMethod = new ComboBox { Location = new Point(120, 18), Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
         cbMethod.Items.AddRange(new string[] { "CASH", "BANK_TRANSFER", "CREDIT_CARD", "E_WALLET" });
         cbMethod.SelectedItem = payment.Method;
 
-        // Trạng thái
         Label lblStatus = new Label { Text = "Trạng thái:", Location = new Point(20, 60), AutoSize = true };
         ComboBox cbStatus = new ComboBox { Location = new Point(120, 58), Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
         cbStatus.Items.AddRange(new string[] { "SUCCESS", "FAILED", "PENDING", "CANCELED" });
         cbStatus.SelectedItem = payment.Status;
-
-        // Nút
+        
         Button btnSave = new Button { Text = "Lưu", Location = new Point(120, 100), Width = 80 };
         Button btnCancel = new Button { Text = "Hủy", Location = new Point(240, 100), Width = 80 };
 
@@ -217,19 +213,77 @@ private void btnEdit_Click(object sender, EventArgs e)
     }
 }
 
-        private void btnDelete_Click(object sender, EventArgs e)
-        {
+private void btnDelete_Click(object sender, EventArgs e)
+{
+    if (dgvPayment.SelectedRows.Count == 0)
+    {
+        MessageBox.Show("Vui lòng chọn một Payment để xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        return;
+    }
 
+    int paymentId = Convert.ToInt32(dgvPayment.SelectedRows[0].Cells["ID"].Value);
+    string paymentNumber = dgvPayment.SelectedRows[0].Cells["PaymentNumber"].Value.ToString();
+
+    DialogResult dr = MessageBox.Show(
+        $"Bạn có chắc muốn xóa Payment {paymentNumber} (ID: {paymentId}) không?",
+        "Xác nhận xóa",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Warning
+    );
+
+    if (dr == DialogResult.Yes)
+    {
+        try
+        {
+            _controller.Cancel(paymentId);
+            MessageBox.Show("Xóa Payment thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            LoadData();
         }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Lỗi xóa Payment:\n" + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+}
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
-
+            LoadData();
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
-
+            string keyword = txtSearch.Text.Trim();
+            if (string.IsNullOrEmpty(keyword))
+            {
+                LoadData(); 
+                return;
+            }
+            try
+            {
+                List<Payment> list = _controller.SearchByPaymentNumber(keyword);
+                dgvPayment.Rows.Clear();
+                int stt = 1;
+                foreach (var p in list)
+                {
+                    dgvPayment.Rows.Add(
+                        stt++,
+                        p.Id,
+                        p.InvoiceId,
+                        p.PaymentNumber,
+                        p.PaymentDate.ToString("yyyy-MM-dd HH:mm"),
+                        p.Amount,
+                        p.Method,
+                        p.Status
+                    );
+                }
+                lblTotal.Text = $"Tổng: {list.Count}";
+                dgvPayment.ClearSelection();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tìm kiếm Payment:\n" + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
