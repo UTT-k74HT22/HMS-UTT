@@ -9,9 +9,13 @@ namespace HospitalManagement.repository.impl;
 
 public class ProductRepositoryImpl : IProductRepository
 {
-         private readonly string _connectionString =
-            "Server=localhost;Database=hms;User Id=sa;Password=123456789;TrustServerCertificate=True;";
+    private readonly string _connectionString;
 
+    public ProductRepositoryImpl(string connectionString)
+    {
+        _connectionString = connectionString;
+    }
+    
         // ================= INSERT =================
         public long Insert(CreateProductRequest request)
         {
@@ -84,6 +88,45 @@ public class ProductRepositoryImpl : IProductRepository
 
             conn.Open();
             cmd.ExecuteNonQuery();
+        }
+        public List<ProductResponse> FindByName(string name)
+        {
+                    const string sql = @"
+                SELECT
+                    id,
+                    code,
+                    name,
+                    standard_price,
+                    requires_prescription,
+                    status
+                FROM products
+                WHERE name LIKE @name
+                ORDER BY name
+            ";
+
+            var list = new List<ProductResponse>();
+
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@name", $"%{name}%");
+
+            conn.Open();
+            using var rs = cmd.ExecuteReader();
+
+            while (rs.Read())
+            {
+                list.Add(new ProductResponse
+                {
+                    Id = Convert.ToInt64(rs["id"]),
+                    Code = rs["code"].ToString(),
+                    Name = rs["name"].ToString(),
+                    StandardPrice = (decimal)rs["standard_price"],
+                    RequiresPrescription = (bool)rs["requires_prescription"],
+                    Status = Enum.Parse<ProductStatus>(rs["status"].ToString())
+                });
+            }
+
+            return list;
         }
 
         // ================= SOFT DELETE =================

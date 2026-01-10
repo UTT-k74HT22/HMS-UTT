@@ -1,6 +1,6 @@
-﻿
-using HospitalManagement.dto.request.Product;
+﻿using HospitalManagement.dto.request.Product;
 using HospitalManagement.dto.response;
+using HospitalManagement.dto.response.Category; 
 using HospitalManagement.dto.response.Product;
 using HospitalManagement.entity.enums;
 using HospitalManagement.repository;
@@ -14,97 +14,76 @@ namespace HospitalManagement.Service.Impl
     /// </summary>
     public class ProductServiceImpl : IProductService
     {
-        private readonly IProductRepository productRepository = new ProductRepositoryImpl();
-        // private readonly ICategoryRepository categoryRepository = new CategoryRepositoryImpl();
-        // private readonly IManufacturerRepository manufacturerRepository = new ManufacturerRepositoryImpl();
+        private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IManufacturerRepository _manufacturerRepository;
 
-        /// <summary>
-        /// Tạo mới sản phẩm.
-        /// </summary>
+        public ProductServiceImpl(string connectionString)
+        {
+            _productRepository = new ProductRepositoryImpl(connectionString);
+            _categoryRepository = new CategoryRepositoryImpl(connectionString);
+            _manufacturerRepository = new ManufacturerRepositoryImpl(connectionString);
+        }
+
+        // ================= CRUD =================
+
         public void Create(CreateProductRequest request)
         {
-            if (productRepository.ExistsByCode(request.Code))
-            {
+            if (_productRepository.ExistsByCode(request.Code))
                 throw new ArgumentException(
                     "Product code already exists: " + request.Code
                 );
-            }
 
-            productRepository.Insert(request);
+            _productRepository.Insert(request);
         }
 
-        /// <summary>
-        /// Cập nhật sản phẩm theo code.
-        /// </summary>
         public void Update(string code, UpdateProductRequest request)
         {
             ProductResponse existing =
-                productRepository.FindByCode(code)
+                _productRepository.FindByCode(code)
                 ?? throw new ArgumentException(
                     "Product not found with code: " + code
                 );
 
             if (existing.Status == ProductStatus.DISCONTINUED)
-            {
                 throw new InvalidOperationException(
                     "Cannot update discontinued product"
                 );
-            }
 
-            productRepository.UpdateByCode(code, request);
+            _productRepository.UpdateByCode(code, request);
         }
 
-        /// <summary>
-        /// Xóa mềm sản phẩm.
-        /// </summary>
         public void Delete(string code)
         {
-            productRepository.SoftDeleteByCode(code);
+            _productRepository.SoftDeleteByCode(code);
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả sản phẩm.
-        /// </summary>
+        // ================= QUERY =================
+
         public List<ProductResponse> GetAll()
-        {
-            return productRepository.GetAll();
-        }
+            => _productRepository.GetAll();
 
-        /// <summary>
-        /// Lấy sản phẩm theo code.
-        /// </summary>
         public ProductResponse GetByCode(string code)
-        {
-            return productRepository.FindByCode(code)
-                   ?? throw new ArgumentException(
-                       "Product not found with code: " + code
-                   );
-        }
+            => _productRepository.FindByCode(code)
+               ?? throw new ArgumentException(
+                   "Product not found with code: " + code
+               );
 
         public ProductDetailResponse GetDetailByCode(string code)
-        {
-            return productRepository.FindDetailByCode(code)
-                   ?? throw new ArgumentException(
-                       "Product not found with code: " + code
-                   );
-        }
+            => _productRepository.FindDetailByCode(code)
+               ?? throw new ArgumentException(
+                   "Product not found with code: " + code
+               );
 
-        // public List<CategoryResponse> GetAllCategories()
-        // {
-        //     return categoryRepository.FindAllActive();
-        // }
+        public List<CategoryResponse> GetAllCategories()
+            => _categoryRepository.FindAllActive();
+
+        public List<ManufacturerResponse> GetAllManufacturers()
+            => _manufacturerRepository.FindAllActive();
 
         public List<BatchResponse> GetBatchesByProduct(long productId)
-        {
-            return productRepository.FindBatchesByProduct(productId);
-        }
+            => _productRepository.FindBatchesByProduct(productId);
 
-        /// <summary>
-        /// Lấy toàn bộ nhà sản xuất.
-        /// </summary>
-        // public List<ManufacturerResponse> GetAllManufacturers()
-        // {
-        //     return manufacturerRepository.FindAllActive();
-        // }
     }
+
 }

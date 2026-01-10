@@ -1,16 +1,28 @@
-﻿using System.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using HospitalManagement.dto.request.Batch;
 using HospitalManagement.dto.response;
 using Microsoft.Data.SqlClient;
 
-namespace HospitalManagement.repository.impl;
-
-public class BatchRepositoryImpl : IBatchRepository
+namespace HospitalManagement.repository.impl
 {
-    
- private readonly string _connectionString =
-            "Server=localhost;Database=hms;User Id=sa;Password=123456789;TrustServerCertificate=True;";
- 
+    public class BatchRepositoryImpl : IBatchRepository
+    {
+        // =====================================================
+        // CONNECTION
+        // =====================================================
+        private readonly string _connectionString;
+
+        public BatchRepositoryImpl(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
+
+        private SqlConnection GetConnection()
+        {
+            return new SqlConnection(_connectionString);
+        }
 
         // ================= INSERT =================
         public long Insert(CreateBatchRequest request)
@@ -19,17 +31,17 @@ public class BatchRepositoryImpl : IBatchRepository
                 throw new Exception($"Batch code already exists: {request.BatchCode}");
 
             const string sql = @"
-        INSERT INTO batches
-        (batch_code, product_id, import_price,
-         manufacture_date, expiry_date, supplier_name, status)
-        VALUES
-        (@batchCode, @productId, @importPrice,
-         @manufactureDate, @expiryDate, @supplierName, @status);
+                INSERT INTO batches
+                (batch_code, product_id, import_price,
+                 manufacture_date, expiry_date, supplier_name, status)
+                VALUES
+                (@batchCode, @productId, @importPrice,
+                 @manufactureDate, @expiryDate, @supplierName, @status);
 
-        SELECT SCOPE_IDENTITY();
-    ";
+                SELECT SCOPE_IDENTITY();
+            ";
 
-            using var conn = new SqlConnection(_connectionString);
+            using var conn = GetConnection();
             using var cmd = new SqlCommand(sql, conn);
 
             cmd.Parameters.AddWithValue("@batchCode", request.BatchCode);
@@ -47,8 +59,6 @@ public class BatchRepositoryImpl : IBatchRepository
             return Convert.ToInt64(cmd.ExecuteScalar());
         }
 
-        
-
         // ================= UPDATE =================
         public void Update(long batchId, UpdateBatchRequest request)
         {
@@ -59,7 +69,7 @@ public class BatchRepositoryImpl : IBatchRepository
                 WHERE id = @id
             ";
 
-            using var conn = new SqlConnection(_connectionString);
+            using var conn = GetConnection();
             using var cmd = new SqlCommand(sql, conn);
 
             cmd.Parameters.AddWithValue("@expiryDate",
@@ -74,11 +84,12 @@ public class BatchRepositoryImpl : IBatchRepository
                 throw new Exception($"Batch not found with id: {batchId}");
         }
 
+        // ================= EXISTS =================
         public bool ExistsBatchCode(string batchCode)
         {
             const string sql = "SELECT 1 FROM batches WHERE batch_code = @code";
 
-            using var conn = new SqlConnection(_connectionString);
+            using var conn = GetConnection();
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@code", batchCode);
 
@@ -95,9 +106,8 @@ public class BatchRepositoryImpl : IBatchRepository
                 WHERE id = @id
             ";
 
-            using var conn = new SqlConnection(_connectionString);
+            using var conn = GetConnection();
             using var cmd = new SqlCommand(sql, conn);
-
             cmd.Parameters.AddWithValue("@id", batchId);
 
             conn.Open();
@@ -142,7 +152,7 @@ public class BatchRepositoryImpl : IBatchRepository
                 WHERE b.id = @id
             ";
 
-            using var conn = new SqlConnection(_connectionString);
+            using var conn = GetConnection();
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@id", id);
 
@@ -174,31 +184,29 @@ public class BatchRepositoryImpl : IBatchRepository
 
             return QueryList(sql, ("@productId", productId));
         }
+
+        // ================= FIND BY BATCH CODE =================
         public List<BatchResponse> FindByBatchCode(string keyword)
         {
             const string sql = @"
-        SELECT
-            b.id,
-            b.batch_code,
-            b.product_id,
-            p.name AS productName,
-            b.import_price,
-            b.manufacture_date,
-            b.expiry_date,
-            b.supplier_name,
-            b.status
-        FROM batches b
-        JOIN products p ON b.product_id = p.id
-        WHERE b.batch_code LIKE @code
-        ORDER BY b.expiry_date
-    ";
+                SELECT
+                    b.id,
+                    b.batch_code,
+                    b.product_id,
+                    p.name AS productName,
+                    b.import_price,
+                    b.manufacture_date,
+                    b.expiry_date,
+                    b.supplier_name,
+                    b.status
+                FROM batches b
+                JOIN products p ON b.product_id = p.id
+                WHERE b.batch_code LIKE @code
+                ORDER BY b.expiry_date
+            ";
 
-            return QueryList(
-                sql,
-                ("@code", $"%{keyword}%")
-            );
+            return QueryList(sql, ("@code", $"%{keyword}%"));
         }
-
 
         // ================= FIND DETAIL =================
         public BatchResponse? FindDetail(long batchId)
@@ -219,7 +227,7 @@ public class BatchRepositoryImpl : IBatchRepository
                 WHERE b.id = @id
             ";
 
-            using var conn = new SqlConnection(_connectionString);
+            using var conn = GetConnection();
             using var cmd = new SqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@id", batchId);
 
@@ -236,7 +244,7 @@ public class BatchRepositoryImpl : IBatchRepository
         {
             var list = new List<BatchResponse>();
 
-            using var conn = new SqlConnection(_connectionString);
+            using var conn = GetConnection();
             using var cmd = new SqlCommand(sql, conn);
 
             foreach (var (name, value) in parameters)
@@ -262,15 +270,17 @@ public class BatchRepositoryImpl : IBatchRepository
                     : Convert.ToInt64(rs["product_id"]),
                 ProductName = rs["productName"]?.ToString(),
                 ImportPrice = rs["import_price"] == DBNull.Value
-                    ? 0 : Convert.ToDecimal(rs["import_price"]),
+                    ? 0
+                    : Convert.ToDecimal(rs["import_price"]),
                 ManufactureDate = rs["manufacture_date"] == DBNull.Value
-                    ? null : Convert.ToDateTime(rs["manufacture_date"]),
-
+                    ? null
+                    : Convert.ToDateTime(rs["manufacture_date"]),
                 ExpiryDate = rs["expiry_date"] == DBNull.Value
-                    ? null : Convert.ToDateTime(rs["expiry_date"]),
+                    ? null
+                    : Convert.ToDateTime(rs["expiry_date"]),
                 SupplierName = rs["supplier_name"]?.ToString(),
                 Status = rs["status"]?.ToString()
             };
         }
-
     }
+}
