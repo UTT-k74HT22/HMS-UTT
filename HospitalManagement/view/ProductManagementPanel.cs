@@ -11,6 +11,7 @@ using HospitalManagement.dto.response.Product;
 using HospitalManagement.entity.enums;
 using HospitalManagement.Service.Impl;
 using Microsoft.Extensions.Configuration;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace HospitalManagement.view
 {
@@ -30,14 +31,13 @@ namespace HospitalManagement.view
         {
             InitializeComponent();
 
-            // ===== Load appsettings.json =====
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
                 .Build();
 
             string connectionString =
                 config.GetConnectionString("DefaultConnection");
-            // ===== Khởi tạo service + controller =====
+
             var productService = new ProductServiceImpl(connectionString);
             _controller = new ProductController(productService);
 
@@ -45,13 +45,28 @@ namespace HospitalManagement.view
 
             InitGrid();
             InitStatusCombo();
-            InitEvents();
         }
 
         private void ProductManagementPanel_Load(object sender, EventArgs e)
         {
+            Panel footerPanel = new Panel
+            {
+                Dock = DockStyle.Bottom,
+                Height = 30,
+                BackColor = Color.WhiteSmoke
+            };
+
+            lblTotal.Dock = DockStyle.Left;
+            lblTotal.Padding = new Padding(8, 7, 0, 0);
+
+            footerPanel.Controls.Add(lblTotal);
+            Controls.Add(footerPanel);
+
+            footerPanel.BringToFront();
+
             LoadData();
         }
+
 
         // ================= INIT =================
 
@@ -84,18 +99,6 @@ namespace HospitalManagement.view
             cbStatus.Items.Add("ALL");
             cbStatus.Items.AddRange(Enum.GetNames(typeof(ProductStatus)));
             cbStatus.SelectedIndex = 0;
-        }
-
-        private void InitEvents()
-        {
-            btnSearch.Click += (_, _) => ApplyFilters();
-            btnRefresh.Click += (_, _) => LoadData();
-            cbStatus.SelectedIndexChanged += (_, _) => ApplyFilters();
-
-            btnAdd.Click += (_, _) => OpenAddEditDialog(null);
-            btnEdit.Click += (_, _) => OpenAddEditDialog(GetSelected());
-            btnDelete.Click += (_, _) => DeleteSelected();
-            btnDetail.Click += (_, _) => ShowDetail();
         }
 
         // ================= LOAD DATA =================
@@ -157,10 +160,14 @@ namespace HospitalManagement.view
         private void DeleteSelected()
         {
             var p = GetSelected();
-            if (p == null) return;
+            if (p == null)
+            {
+                MessageBox.Show("Vui lòng chọn sản phẩm để xóa");
+                return;
+            }
 
             if (MessageBox.Show($"Xóa [{p.Code}] ?", "Xác nhận",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 _controller.Delete(p.Code);
                 LoadData();
@@ -199,6 +206,12 @@ namespace HospitalManagement.view
         {
             bool isEdit = edit != null;
 
+            ProductDetailResponse? detail = null;
+
+            if (isEdit)
+            {
+                detail = _controller.GetDetail(edit!.Code);
+            }
             var dlg = new Form
             {
                 Text = isEdit ? "Sửa sản phẩm" : "Thêm sản phẩm",
@@ -238,7 +251,7 @@ namespace HospitalManagement.view
 
             var cbCategory = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
             var cbManufacturer = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
-            var cbStatus = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
+            var cbStatusDlg = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
 
             cbCategory.DataSource = _categories;
             cbCategory.DisplayMember = nameof(CategoryResponse.Name);
@@ -248,7 +261,7 @@ namespace HospitalManagement.view
             cbManufacturer.DisplayMember = nameof(ManufacturerResponse.Name);
             cbManufacturer.ValueMember = nameof(ManufacturerResponse.Id);
 
-            cbStatus.Items.AddRange(Enum.GetNames(typeof(ProductStatus)));
+            cbStatusDlg.Items.AddRange(Enum.GetNames(typeof(ProductStatus)));
 
             AddRow("Mã *", txtCode);
             AddRow("Tên *", txtName);
@@ -258,27 +271,38 @@ namespace HospitalManagement.view
             AddRow("Dạng bào chế", txtDosage);
             AddRow("Đơn vị", txtUnit);
             AddRow("Giá *", txtPrice);
-            AddRow("Trạng thái", cbStatus);
+            AddRow("Trạng thái", cbStatusDlg);
             AddRow("", chkRx);
             AddRow("Mô tả", txtDesc);
 
-            if (isEdit)
+            if (isEdit && detail != null)
             {
-                txtCode.Text = edit!.Code;
+                txtCode.Text = detail.Code;
                 txtCode.Enabled = false;
 
-                txtName.Text = edit.Name;
-                txtPrice.Text = edit.StandardPrice.ToString();
-                chkRx.Checked = edit.RequiresPrescription;
-                cbStatus.SelectedItem = edit.Status.ToString();
+                txtName.Text = detail.Name;
+                txtPrice.Text = detail.StandardPrice.ToString();
+                txtBarcode.Text = detail.Barcode;
+                txtDosage.Text = detail.DosageForm;
+                txtUnit.Text = detail.Unit;
+                txtDesc.Text = detail.Description;
+
+                chkRx.Checked = detail.RequiresPrescription;
+                cbStatusDlg.SelectedItem = detail.Status.ToString();
+
+                cbCategory.SelectedValue = detail.CategoryId;
+                cbManufacturer.SelectedValue = detail.ManufacturerId;
             }
             else
             {
-                cbStatus.SelectedIndex = 0;
+                cbStatusDlg.SelectedIndex = 0;
             }
 
             var btnSave = new Button { Text = "Lưu", Width = 90 };
-            btnSave.Click += (_, _) =>
+            var btnCancel = new Button { Text = "Hủy", Width = 90 };
+
+            btnCancel.Click += (s, e) => dlg.Close();
+            btnSave.Click += (s, e) =>
             {
                 if (!decimal.TryParse(txtPrice.Text, out var price))
                 {
@@ -297,7 +321,7 @@ namespace HospitalManagement.view
                         Description = txtDesc.Text.Trim(),
                         StandardPrice = price,
                         RequiresPrescription = chkRx.Checked,
-                        Status = Enum.Parse<ProductStatus>(cbStatus.SelectedItem!.ToString()!),
+                        Status = Enum.Parse<ProductStatus>(cbStatusDlg.SelectedItem!.ToString()!),
                         CategoryId = (long)cbCategory.SelectedValue,
                         ManufacturerId = (long?)cbManufacturer.SelectedValue
                     });
@@ -314,7 +338,7 @@ namespace HospitalManagement.view
                         Description = txtDesc.Text.Trim(),
                         StandardPrice = price,
                         RequiresPrescription = chkRx.Checked,
-                        Status = Enum.Parse<ProductStatus>(cbStatus.SelectedItem!.ToString()!),
+                        Status = Enum.Parse<ProductStatus>(cbStatusDlg.SelectedItem!.ToString()!),
                         CategoryId = (long)cbCategory.SelectedValue,
                         ManufacturerId = (long?)cbManufacturer.SelectedValue
                     });
@@ -324,15 +348,13 @@ namespace HospitalManagement.view
                 LoadData();
             };
 
-            var btnCancel = new Button { Text = "Hủy", Width = 90 };
-            btnCancel.Click += (_, _) => dlg.Close();
-
             var btnPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Bottom,
                 FlowDirection = FlowDirection.RightToLeft,
                 Height = 50
             };
+
             btnPanel.Controls.Add(btnCancel);
             btnPanel.Controls.Add(btnSave);
 
@@ -340,5 +362,15 @@ namespace HospitalManagement.view
             dlg.Controls.Add(btnPanel);
             dlg.ShowDialog(this);
         }
+
+        private void btnSearch_Click(object sender, EventArgs e) => ApplyFilters();
+        private void btnRefresh_Click(object sender, EventArgs e) => LoadData();
+        private void cbStatus_SelectedIndexChanged(object sender, EventArgs e) => ApplyFilters();
+        private void btnAdd_Click(object sender, EventArgs e) => OpenAddEditDialog(null);
+        private void btnEdit_Click(object sender, EventArgs e) => OpenAddEditDialog(GetSelected());
+        private void btnDelete_Click(object sender, EventArgs e) => DeleteSelected();
+        private void btnDetail_Click(object sender, EventArgs e) => ShowDetail();
+
+   
     }
 }
