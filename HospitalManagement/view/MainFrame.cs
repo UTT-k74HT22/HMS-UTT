@@ -139,7 +139,7 @@ namespace HospitalManagement.view
                 Sidebar.MENU_MANUFACTURERS => new ManufacturerManagementForm(),
                 Sidebar.MENU_PRODUCTS => new ProductManagementPanel(),
 
-                Sidebar.MENU_WAREHOUSES => CreateComingSoonPanel("Kho hàng"),
+                Sidebar.MENU_WAREHOUSES => new WarehousesManagementPanel(),
 
                 Sidebar.MENU_BATCHES => new BatchManagementPanel(),
 
