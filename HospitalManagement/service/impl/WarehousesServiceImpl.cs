@@ -122,7 +122,7 @@ namespace HospitalManagement.service.impl
         {
             return new WarehouseResponse
             {
-                Id = w.Id,
+                Id = (int)w.Id,
                 Code = w.Code,
                 Name = w.Name,
                 Address = w.Address,
