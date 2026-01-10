@@ -94,50 +94,63 @@ private void btnAdd_Click(object sender, EventArgs e)
     using (Form dialog = new Form())
     {
         dialog.Text = "Thêm Payment";
-        dialog.Size = new Size(400, 180);
+        dialog.Size = new Size(400, 200);
         dialog.StartPosition = FormStartPosition.CenterParent;
 
         Label lblInvoice = new Label { Text = "Mã hóa đơn:", Location = new Point(20, 20), AutoSize = true };
-        TextBox txtInvoiceId = new TextBox { Location = new Point(120, 18), Width = 200 };
+        ComboBox cbInvoiceId = new ComboBox
+        {
+            Location = new Point(120, 18),
+            Width = 200,
+            DropDownStyle = ComboBoxStyle.DropDownList
+        };
+
+        var invoiceIds = _controller.GetAvailableInvoiceIds();
+        if (invoiceIds.Count == 0)
+        {
+            MessageBox.Show("Không có hóa đơn khả dụng để thanh toán!",
+                "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+        cbInvoiceId.DataSource = invoiceIds;
 
         Label lblMethod = new Label { Text = "Phương thức:", Location = new Point(20, 60), AutoSize = true };
-        ComboBox cbMethod = new ComboBox { Location = new Point(120, 58), Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+        ComboBox cbMethod = new ComboBox
+        {
+            Location = new Point(120, 58),
+            Width = 200,
+            DropDownStyle = ComboBoxStyle.DropDownList
+        };
         cbMethod.Items.AddRange(new string[] { "CASH", "BANK_TRANSFER", "CREDIT_CARD", "E_WALLET" });
         cbMethod.SelectedIndex = 0;
 
-        Button btnSave = new Button { Text = "Lưu", Location = new Point(120, 100), Width = 80 };
-        Button btnCancel = new Button { Text = "Hủy", Location = new Point(240, 100), Width = 80 };
+        Button btnSave = new Button { Text = "Lưu", Location = new Point(120, 110), Width = 80 };
+        Button btnCancel = new Button { Text = "Hủy", Location = new Point(240, 110), Width = 80 };
 
         btnCancel.Click += (s, ev) => dialog.Close();
         btnSave.Click += (s, ev) =>
         {
-            if (!int.TryParse(txtInvoiceId.Text.Trim(), out int invoiceId))
-            {
-                MessageBox.Show("Mã hóa đơn không hợp lệ!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
+            int invoiceId = (int)cbInvoiceId.SelectedItem;
             string method = cbMethod.SelectedItem.ToString();
             string paymentNumber = "PAY" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
             try
             {
-                int newId = _controller.CreatePaymentByInvoice(invoiceId, paymentNumber, method);
-
-                MessageBox.Show($"Tạo Payment thành công!\nPayment ID: {newId}\nPayment Number: {paymentNumber}",
+                _controller.CreatePaymentByInvoice(invoiceId, paymentNumber, method);
+                MessageBox.Show("Tạo Payment thành công!",
                     "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                 LoadData();
                 dialog.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi thêm Payment:\n" + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi thêm Payment:\n" + ex.Message,
+                    "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         };
 
         dialog.Controls.Add(lblInvoice);
-        dialog.Controls.Add(txtInvoiceId);
+        dialog.Controls.Add(cbInvoiceId);
         dialog.Controls.Add(lblMethod);
         dialog.Controls.Add(cbMethod);
         dialog.Controls.Add(btnSave);
@@ -146,6 +159,7 @@ private void btnAdd_Click(object sender, EventArgs e)
         dialog.ShowDialog(this);
     }
 }
+
 
 private void btnEdit_Click(object sender, EventArgs e)
 {
