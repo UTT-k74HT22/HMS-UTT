@@ -128,7 +128,7 @@ namespace HospitalManagement.view
                 );
 
                 e.ThrowException = false;
-                e.Cancel = true; // ✅ chặn dialog mặc định
+                e.Cancel = true; 
             };
 
 
@@ -138,6 +138,7 @@ namespace HospitalManagement.view
             btnDetail.Click += (_, _) => ShowDetail();
             btnEdit.Click += (_, _) => UpdateSelected();
             btnDelete.Click += (_, _) => DeleteSelected();
+            btnExport.Click += (_, _) => ExportToExcel();
 
             txtKeyword.KeyDown += (_, e) =>
             {
@@ -214,9 +215,50 @@ namespace HospitalManagement.view
                 return;
             }
 
-            // TODO: mở dialog update thật
-            MessageBox.Show($"Chức năng update nhân viên [{e.Code}] đang được phát triển", 
-                "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                Console.WriteLine($"[UI] UpdateEmployee: Loading detail for code={e.Code}");
+                
+                // Lấy chi tiết đầy đủ của nhân viên
+                var detail = _controller.GetEmployeeByCode(e.Code);
+                
+                Console.WriteLine($"[UI] UpdateEmployee: Opening dialog for employee={detail.Code}");
+                var dialog = new EmployeeUpdateDialog(
+                    detail.Code,
+                    detail.FullName,
+                    detail.Phone ?? "",
+                    detail.Email ?? "",
+                    detail.Address ?? "",
+                    detail.Position,
+                    detail.Department,
+                    detail.HiredDate,
+                    detail.Salary,
+                    detail.Status
+                );
+                
+                dialog.ShowDialog();
+
+                if (dialog.Updated && dialog.Result != null)
+                {
+                    Console.WriteLine($"[UI] UpdateEmployee: Updating employee code={e.Code}");
+                    _controller.UpdateEmployeeDetail(e.Code, dialog.Result);
+                    Console.WriteLine("[UI] UpdateEmployee: Success!");
+                    
+                    MessageBox.Show("Cập nhật nhân viên thành công!", "Success", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadData();
+                }
+                else
+                {
+                    Console.WriteLine("[UI] UpdateEmployee: Cancelled");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[UI] UpdateEmployee: ERROR - {ex}");
+                MessageBox.Show($"Lỗi: {ex.Message}\n\nChi tiết: {ex.InnerException?.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void DeleteSelected()
@@ -243,6 +285,91 @@ namespace HospitalManagement.view
                     MessageBox.Show($"Lỗi: {ex.Message}", "Error", 
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+        }
+
+        private void ExportToExcel()
+        {
+            try
+            {
+                Console.WriteLine("[UI] ExportToExcel: Starting export...");
+
+                var saveDialog = new SaveFileDialog
+                {
+                    Filter = "Excel Files|*.xlsx",
+                    Title = "Export danh sách nhân viên",
+                    FileName = $"NhanVien_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
+                };
+
+                if (saveDialog.ShowDialog() == DialogResult.OK)
+                {
+                    Console.WriteLine($"[UI] ExportToExcel: Exporting to {saveDialog.FileName}");
+
+                    // Lấy dữ liệu chi tiết đầy đủ
+                    var details = _controller.GetAllProfileDetails();
+                    Console.WriteLine($"[UI] ExportToExcel: Got {details.Count} records");
+
+                    using (var workbook = new ClosedXML.Excel.XLWorkbook())
+                    {
+                        var worksheet = workbook.Worksheets.Add("Nhân viên");
+
+                        // Headers
+                        worksheet.Cell(1, 1).Value = "STT";
+                        worksheet.Cell(1, 2).Value = "Mã NV";
+                        worksheet.Cell(1, 3).Value = "Họ tên";
+                        worksheet.Cell(1, 4).Value = "SĐT";
+                        worksheet.Cell(1, 5).Value = "Email";
+                        worksheet.Cell(1, 6).Value = "Địa chỉ";
+                        worksheet.Cell(1, 7).Value = "Chức vụ";
+                        worksheet.Cell(1, 8).Value = "Phòng ban";
+                        worksheet.Cell(1, 9).Value = "Ngày vào";
+                        worksheet.Cell(1, 10).Value = "Lương";
+                        worksheet.Cell(1, 11).Value = "Trạng thái";
+
+                        // Style header
+                        var headerRange = worksheet.Range("A1:K1");
+                        headerRange.Style.Font.Bold = true;
+                        headerRange.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightBlue;
+                        headerRange.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+
+                        // Data
+                        int row = 2;
+                        foreach (var emp in details)
+                        {
+                            worksheet.Cell(row, 1).Value = row - 1;
+                            worksheet.Cell(row, 2).Value = emp.Code;
+                            worksheet.Cell(row, 3).Value = emp.FullName;
+                            worksheet.Cell(row, 4).Value = emp.Phone ?? "";
+                            worksheet.Cell(row, 5).Value = emp.Email ?? "";
+                            worksheet.Cell(row, 6).Value = emp.Address ?? "";
+                            worksheet.Cell(row, 7).Value = emp.Position;
+                            worksheet.Cell(row, 8).Value = emp.Department;
+                            worksheet.Cell(row, 9).Value = emp.HiredDate.ToString("yyyy-MM-dd");
+                            worksheet.Cell(row, 10).Value = emp.Salary;
+                            worksheet.Cell(row, 11).Value = emp.Status.ToString();
+                            row++;
+                        }
+
+                        // Auto-fit columns
+                        worksheet.Columns().AdjustToContents();
+
+                        workbook.SaveAs(saveDialog.FileName);
+                    }
+
+                    Console.WriteLine("[UI] ExportToExcel: Success!");
+                    MessageBox.Show($"Export thành công!\n\nFile: {saveDialog.FileName}", "Success",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    Console.WriteLine("[UI] ExportToExcel: Cancelled");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[UI] ExportToExcel: ERROR - {ex}");
+                MessageBox.Show($"Lỗi khi export: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

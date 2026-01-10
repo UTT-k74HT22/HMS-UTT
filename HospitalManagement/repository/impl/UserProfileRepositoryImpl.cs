@@ -14,6 +14,7 @@ namespace HospitalManagement.repository.impl
 
         public long Insert(SqlConnection conn, UserProfile profile)
         {
+            Console.WriteLine($"[UserProfileRepo] Insert: Inserting profile code={profile.Code}");
             string sql = """
                 INSERT INTO user_profiles (account_id, code, full_name, phone, email, address, status, created_at, updated_at)
                 OUTPUT INSERTED.id
@@ -31,7 +32,36 @@ namespace HospitalManagement.repository.impl
             command.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
             command.Parameters.AddWithValue("@updated_at", DateTime.UtcNow);
 
-            return (long)(int)command.ExecuteScalar();
+            var result = command.ExecuteScalar();
+            long id = Convert.ToInt64(result);
+            Console.WriteLine($"[UserProfileRepo] Insert: Profile inserted with ID={id}");
+            return id;
+        }
+        
+        public long Insert(SqlConnection conn, SqlTransaction transaction, UserProfile profile)
+        {
+            Console.WriteLine($"[UserProfileRepo] Insert (with transaction): Inserting profile code={profile.Code}");
+            string sql = """
+                INSERT INTO user_profiles (account_id, code, full_name, phone, email, address, status, created_at, updated_at)
+                OUTPUT INSERTED.id
+                VALUES (@account_id, @code, @full_name, @phone, @email, @address, @status, @created_at, @updated_at)
+                """;
+
+            using var command = new SqlCommand(sql, conn, transaction);
+            command.Parameters.AddWithValue("@account_id", profile.AccountId);
+            command.Parameters.AddWithValue("@code", profile.Code);
+            command.Parameters.AddWithValue("@full_name", profile.FullName);
+            command.Parameters.AddWithValue("@phone", (object?)profile.Phone ?? DBNull.Value);
+            command.Parameters.AddWithValue("@email", (object?)profile.Email ?? DBNull.Value);
+            command.Parameters.AddWithValue("@address", (object?)profile.Address ?? DBNull.Value);
+            command.Parameters.AddWithValue("@status", profile.Status);
+            command.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
+            command.Parameters.AddWithValue("@updated_at", DateTime.UtcNow);
+
+            var result = command.ExecuteScalar();
+            long id = Convert.ToInt64(result);
+            Console.WriteLine($"[UserProfileRepo] Insert: Profile inserted with ID={id}");
+            return id;
         }
 
         public UserProfile? FindByAccountId(long accountId)

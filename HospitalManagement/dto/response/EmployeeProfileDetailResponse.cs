@@ -10,8 +10,8 @@ namespace HospitalManagement.dto.response
         public string Email { get; set; }
         public string Address { get; set; }
         public string Department { get; set; }
-        public DateTime? HiredDate { get; set; }
-        public decimal? Salary { get; set; }
+        public DateTime HiredDate { get; set; }
+        public decimal Salary { get; set; }
 
         public EmployeeProfileDetailResponse() { }
 
@@ -34,8 +34,8 @@ namespace HospitalManagement.dto.response
             Email = email;
             Address = address;
             Department = department;
-            HiredDate = hiredDate;
-            Salary = salary;
+            HiredDate = (DateTime)hiredDate;
+            Salary = (decimal)salary;
         }
     }
 }

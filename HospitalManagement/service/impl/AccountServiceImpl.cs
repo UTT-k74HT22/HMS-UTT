@@ -69,26 +69,43 @@ public class AccountServiceImpl : IAccountService
 
     /// <summary>
     /// Tạo tài khoản mới với cascade: Account -> UserProfile -> EmployeeProfile/CustomerProfile
-    /// Logic giống Java AccountServiceImpl
     /// </summary>
     public void CreateAccount(CreateAccountRequest request)
     {
+        Console.WriteLine($"[Service] CreateAccount: Starting for user={request.Username}");
+        
         // 1. Validate request
+        Console.WriteLine("[Service] Step 1: Validating request...");
         ValidateCreateRequest(request);
+        Console.WriteLine("[Service] Step 1: Validation passed");
 
         // 2. Check duplicate
+        Console.WriteLine("[Service] Step 2: Checking duplicates...");
         if (_accountRepository.ExistsByUsername(request.Username))
+        {
+            Console.WriteLine($"[Service] ERROR: Username [{request.Username}] already exists");
             throw new Exception($"Username [{request.Username}] đã tồn tại");
+        }
 
         if (!string.IsNullOrEmpty(request.Email) && _userProfileRepository.ExistsByEmail(request.Email))
+        {
+            Console.WriteLine($"[Service] ERROR: Email [{request.Email}] already exists");
             throw new Exception($"Email [{request.Email}] đã tồn tại");
+        }
 
         if (!string.IsNullOrEmpty(request.Phone) && _userProfileRepository.ExistsByPhone(request.Phone))
+        {
+            Console.WriteLine($"[Service] ERROR: Phone [{request.Phone}] already exists");
             throw new Exception($"SĐT [{request.Phone}] đã tồn tại");
+        }
+        Console.WriteLine("[Service] Step 2: No duplicates found");
 
         // 3. Hash password (simplified, nên dùng BCrypt trong production)
+        Console.WriteLine("[Service] Step 3: Hashing password...");
         string hashedPassword = HashPassword(request.Password);
+        Console.WriteLine("[Service] Step 3: Password hashed");
 
+        Console.WriteLine("[Service] Step 4: Opening DB connection and transaction...");
         using var connection = new SqlConnection(_connectionString);
         connection.Open();
         using var transaction = connection.BeginTransaction();
@@ -96,6 +113,7 @@ public class AccountServiceImpl : IAccountService
         try
         {
             // 4. Create Account
+            Console.WriteLine("[Service] Step 4: Creating Account entity...");
             var account = new Account
             {
                 Username = request.Username,
@@ -104,11 +122,15 @@ public class AccountServiceImpl : IAccountService
                 IsActive = request.Active
             };
 
-            long accountId = _accountRepository.Insert(connection, account);
+            Console.WriteLine($"[Service] Step 4: Inserting account into DB (username={account.Username}, role={account.Role})...");
+            long accountId = _accountRepository.Insert(connection, transaction, account);
+            Console.WriteLine($"[Service] Step 4: Account created with ID={accountId}");
 
             // 5. Create UserProfile
+            Console.WriteLine("[Service] Step 5: Creating UserProfile...");
             string codePrefix = request.Role == RoleType.EMPLOYEE ? "EMP" : "CUS";
             string code = _userProfileRepository.GenerateCode(codePrefix);
+            Console.WriteLine($"[Service] Step 5: Generated code={code}");
 
             var userProfile = new UserProfile
             {
@@ -121,38 +143,49 @@ public class AccountServiceImpl : IAccountService
                 Status = ProfileStatus.ACTIVE.ToString()
             };
 
-            long profileId = _userProfileRepository.Insert(connection, userProfile);
+            Console.WriteLine($"[Service] Step 5: Inserting UserProfile (accountId={accountId}, code={code})...");
+            long profileId = _userProfileRepository.Insert(connection, transaction, userProfile);
+            Console.WriteLine($"[Service] Step 5: UserProfile created with ID={profileId}");
 
             // 6. Create EmployeeProfile or CustomerProfile based on role
+            Console.WriteLine($"[Service] Step 6: Creating role-specific profile (role={request.Role})...");
             if (request.Role == RoleType.EMPLOYEE)
             {
                 // Create EmployeeProfile with default values
+                Console.WriteLine("[Service] Step 6: Creating EmployeeProfile...");
                 _employeeProfileRepository.Insert(
                     connection,
+                    transaction,
                     profileId,
                     position: "Nhân viên",
                     department: "Chưa phân bộ phận",
                     hiredDate: DateTime.Now,
                     baseSalary: 0
                 );
+                Console.WriteLine("[Service] Step 6: EmployeeProfile created");
             }
             else if (request.Role == RoleType.CUSTOMER)
             {
                 // Create CustomerProfile with default values
+                Console.WriteLine("[Service] Step 6: Creating CustomerProfile...");
                 var customerProfile = new CustomerProfile
                 {
                     ProfileId = (int)profileId,
                     CustomerType = "RETAIL",
                     TaxCode = null
                 };
-                _customerProfileRepository.Insert(connection, customerProfile);
+                _customerProfileRepository.Insert(connection, transaction, customerProfile);
+                Console.WriteLine("[Service] Step 6: CustomerProfile created");
             }
 
+            Console.WriteLine("[Service] Committing transaction...");
             transaction.Commit();
-            Console.WriteLine($"✓ Tạo tài khoản thành công: {request.Username} ({request.Role})");
+            Console.WriteLine($"[Service] ✓ Tạo tài khoản thành công: {request.Username} ({request.Role})");
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[Service] ✗ ERROR during account creation: {ex}");
+            Console.WriteLine("[Service] Rolling back transaction...");
             transaction.Rollback();
             throw new Exception($"Lỗi khi tạo tài khoản: {ex.Message}", ex);
         }
@@ -188,27 +221,51 @@ public class AccountServiceImpl : IAccountService
 
     public void Update(long accountId, RoleType role, bool active)
     {
-        Console.WriteLine("Updating account");
+        Console.WriteLine($"[Service] Update: Updating account ID={accountId}, newRole={role}, newActive={active}");
         var account = _accountRepository.FindById(accountId);
         if (account == null)
         {
+            Console.WriteLine($"[Service] Update: ERROR - Account ID={accountId} not found");
             throw new Exception("Account not found");
         }
 
-        if (role == RoleType.ADMIN && !active)
+        Console.WriteLine($"[Service] Update: Current state - role={account.Role}, active={account.IsActive}");
+
+        // RULE 1: Không cho deactivate ADMIN cuối cùng
+        if (account.Role == RoleType.ADMIN && account.IsActive && !active)
         {
-            // Kiểm tra nếu có ít nhất một tài khoản ADMIN khác đang hoạt động
-            var adminAccount = _accountRepository.FindAll()
+            Console.WriteLine("[Service] Update: Checking if can deactivate ADMIN...");
+            var otherActiveAdmins = _accountRepository.FindAll()
                 .Where(a => a.Role == RoleType.ADMIN && a.IsActive && a.Id != accountId)
                 .ToList();
 
-            if (adminAccount.Count == 0)
+            if (otherActiveAdmins.Count == 0)
             {
-                throw new Exception("Cannot deactivate the last active ADMIN account");
+                Console.WriteLine("[Service] Update: ERROR - Cannot deactivate the last active ADMIN");
+                throw new Exception("Không thể vô hiệu hóa tài khoản ADMIN cuối cùng");
             }
+            Console.WriteLine($"[Service] Update: OK - Found {otherActiveAdmins.Count} other active ADMINs");
         }
-        
+
+        // RULE 2: Không cho đổi role của ADMIN cuối cùng sang role khác
+        if (account.Role == RoleType.ADMIN && role != RoleType.ADMIN)
+        {
+            Console.WriteLine("[Service] Update: Checking if can change ADMIN role...");
+            var otherAdmins = _accountRepository.FindAll()
+                .Where(a => a.Role == RoleType.ADMIN && a.Id != accountId)
+                .ToList();
+
+            if (otherAdmins.Count == 0)
+            {
+                Console.WriteLine("[Service] Update: ERROR - Cannot change role of the last ADMIN");
+                throw new Exception("Không thể thay đổi vai trò của tài khoản ADMIN cuối cùng");
+            }
+            Console.WriteLine($"[Service] Update: OK - Found {otherAdmins.Count} other ADMINs");
+        }
+
+        Console.WriteLine("[Service] Update: Executing update...");
         _accountRepository.UpdateRoleAndStatus(accountId, role, active);
+        Console.WriteLine("[Service] Update: Success!");
     }
 
     public void DeleteById(long id)

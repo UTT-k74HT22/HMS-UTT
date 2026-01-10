@@ -40,17 +40,58 @@ public class EmployeeRepositoryImpl : IEmployeeProfileRepository
         };
     }
 
-    public void Insert(SqlConnection conn, long profileId, string position, string department, DateTime hiredDate,
-        decimal baseSalary)
+    public void Insert(SqlConnection conn, long profileId, string position, 
+        string department, DateTime hiredDate, decimal baseSalary)
     {
-        throw new NotImplementedException();
+        Console.WriteLine($"[EmployeeProfileRepo] Insert: Inserting employee profile_id={profileId}");
+        string query = @"
+                INSERT INTO employee_profiles 
+                    (profile_id, position, department, hired_date, base_salary, created_at)
+                VALUES 
+                    (@profileId, @position, @department, @hiredDate, @baseSalary, GETDATE())";
+
+        using (var command = new SqlCommand(query, conn))
+        {
+            command.Parameters.AddWithValue("@profileId", profileId);
+            command.Parameters.AddWithValue("@position", position);
+            command.Parameters.AddWithValue("@department", department);
+            command.Parameters.AddWithValue("@hiredDate", hiredDate);
+            command.Parameters.AddWithValue("@baseSalary", baseSalary);
+
+            command.ExecuteNonQuery();
+            Console.WriteLine($"[EmployeeProfileRepo] Insert: Employee profile inserted");
+        }
     }
+    
+    public void Insert(SqlConnection conn, SqlTransaction transaction, long profileId, string position, 
+        string department, DateTime hiredDate, decimal baseSalary)
+    {
+        Console.WriteLine($"[EmployeeProfileRepo] Insert (with transaction): Inserting employee profile_id={profileId}");
+        string query = @"
+                INSERT INTO employee_profiles 
+                    (profile_id, position, department, hired_date, base_salary, created_at)
+                VALUES 
+                    (@profileId, @position, @department, @hiredDate, @baseSalary, GETDATE())";
+
+        using (var command = new SqlCommand(query, conn, transaction))
+        {
+            command.Parameters.AddWithValue("@profileId", profileId);
+            command.Parameters.AddWithValue("@position", position);
+            command.Parameters.AddWithValue("@department", department);
+            command.Parameters.AddWithValue("@hiredDate", hiredDate);
+            command.Parameters.AddWithValue("@baseSalary", baseSalary);
+
+            command.ExecuteNonQuery();
+            Console.WriteLine($"[EmployeeProfileRepo] Insert: Employee profile inserted");
+        }
+    }
+
 
     public List<EmployeeProfileResponse> GetAllProfiles()
     {
-var employees = new List<EmployeeProfileResponse>();
-            
-            string query = @"
+        var employees = new List<EmployeeProfileResponse>();
+
+        string query = @"
                 SELECT 
                     a.id AS account_id,
                     a.username AS account_username,
@@ -66,31 +107,32 @@ var employees = new List<EmployeeProfileResponse>();
                 WHERE a.role = 'EMPLOYEE'
                 ORDER BY up.created_at DESC";
 
-            using (var connection = new SqlConnection(_connectionString))
-            using (var command = new SqlCommand(query, connection))
+        using (var connection = new SqlConnection(_connectionString))
+        using (var command = new SqlCommand(query, connection))
+        {
+            connection.Open();
+            using (var reader = command.ExecuteReader())
             {
-                connection.Open();
-                using (var reader = command.ExecuteReader())
+                while (reader.Read())
                 {
-                    while (reader.Read())
+                    employees.Add(new EmployeeProfileResponse
                     {
-                        employees.Add(new EmployeeProfileResponse
-                        {
-                            AccountId = Convert.ToInt64(reader["account_id"]),
-                            AccountUsername = reader.GetString(reader.GetOrdinal("account_username")),
-                            ProfileId = Convert.ToInt64(reader["profile_id"]),
-                            Code = reader.GetString(reader.GetOrdinal("code")),
-                            FullName = reader.GetString(reader.GetOrdinal("full_name")),
-                            Phone = reader.IsDBNull(reader.GetOrdinal("phone")) 
-                                ? null 
-                                : reader.GetString(reader.GetOrdinal("phone")),
-                            Position = reader.GetString(reader.GetOrdinal("position")),
-                            Status = Enum.Parse<ProfileStatus>(reader.GetString(reader.GetOrdinal("status")))
-                        });
-                    }
+                        AccountId = Convert.ToInt64(reader["account_id"]),
+                        AccountUsername = reader.GetString(reader.GetOrdinal("account_username")),
+                        ProfileId = Convert.ToInt64(reader["profile_id"]),
+                        Code = reader.GetString(reader.GetOrdinal("code")),
+                        FullName = reader.GetString(reader.GetOrdinal("full_name")),
+                        Phone = reader.IsDBNull(reader.GetOrdinal("phone"))
+                            ? null
+                            : reader.GetString(reader.GetOrdinal("phone")),
+                        Position = reader.GetString(reader.GetOrdinal("position")),
+                        Status = Enum.Parse<ProfileStatus>(reader.GetString(reader.GetOrdinal("status")))
+                    });
                 }
             }
-            return employees;
+        }
+
+        return employees;
     }
 
     public EmployeeProfileDetailResponse GetProfileDetailByCode(string code)

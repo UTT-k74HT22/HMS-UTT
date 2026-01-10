@@ -11,9 +11,15 @@ namespace HospitalManagement.repository
     public interface IEmployeeProfileRepository
     {
         /// <summary>
-        /// Chèn hồ sơ nhân viên mới
+        /// Chèn hồ sơ nhân viên mới (không có transaction)
         /// </summary>
         void Insert(SqlConnection conn, long profileId, string position, string department,
+                    DateTime hiredDate, decimal baseSalary);
+        
+        /// <summary>
+        /// Chèn hồ sơ nhân viên mới (có transaction)
+        /// </summary>
+        void Insert(SqlConnection conn, SqlTransaction transaction, long profileId, string position, string department,
                     DateTime hiredDate, decimal baseSalary);
 
         /// <summary>

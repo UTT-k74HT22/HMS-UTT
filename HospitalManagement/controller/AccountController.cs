@@ -62,10 +62,13 @@ public class AccountController
     {
         try
         {
+            Console.WriteLine($"[Controller] CreateAccount: Starting for user={request.Username}");
             _accountService.CreateAccount(request);
+            Console.WriteLine($"[Controller] CreateAccount: Completed for user={request.Username}");
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[Controller] CreateAccount: ERROR - {ex}");
             throw new Exception($"Lỗi khi tạo tài khoản: {ex.Message}", ex);
         }
     }

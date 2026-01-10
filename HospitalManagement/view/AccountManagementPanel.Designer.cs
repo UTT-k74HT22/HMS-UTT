@@ -15,7 +15,7 @@
         private void InitializeComponent()
         {
             pnlRoot = new TableLayoutPanel();
-            pnlToolbar = new Panel();
+            pnlToolbar = new TableLayoutPanel();
             pnlFilters = new FlowLayoutPanel();
             lblKeyword = new Label();
             txtKeyword = new TextBox();
@@ -26,6 +26,7 @@
             btnDelete = new Button();
             btnEdit = new Button();
             btnAdd = new Button();
+            btnExport = new Button();
             dgvAccounts = new DataGridView();
             pnlFooter = new Panel();
             lblTotal = new Label();
@@ -49,7 +50,7 @@
             pnlRoot.Name = "pnlRoot";
             pnlRoot.Padding = new Padding(16);
             pnlRoot.RowCount = 3;
-            pnlRoot.RowStyles.Add(new RowStyle(SizeType.Absolute, 56F));
+            pnlRoot.RowStyles.Add(new RowStyle(SizeType.Absolute, 92F));
             pnlRoot.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             pnlRoot.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
             pnlRoot.Size = new Size(1137, 600);
@@ -57,13 +58,18 @@
             // 
             // pnlToolbar
             // 
-            pnlToolbar.Controls.Add(pnlFilters);
-            pnlToolbar.Controls.Add(pnlActions);
+            pnlToolbar.ColumnCount = 1;
+            pnlToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            pnlToolbar.Controls.Add(pnlFilters, 0, 0);
+            pnlToolbar.Controls.Add(pnlActions, 0, 1);
             pnlToolbar.Dock = DockStyle.Fill;
             pnlToolbar.Location = new Point(16, 16);
             pnlToolbar.Margin = new Padding(0, 0, 0, 12);
             pnlToolbar.Name = "pnlToolbar";
-            pnlToolbar.Size = new Size(1105, 44);
+            pnlToolbar.RowCount = 2;
+            pnlToolbar.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            pnlToolbar.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            pnlToolbar.Size = new Size(1105, 80);
             pnlToolbar.TabIndex = 0;
             // 
             // pnlFilters
@@ -73,11 +79,12 @@
             pnlFilters.Controls.Add(txtKeyword);
             pnlFilters.Controls.Add(btnSearch);
             pnlFilters.Controls.Add(btnRefresh);
-            pnlFilters.Dock = DockStyle.Left;
+            pnlFilters.Dock = DockStyle.Fill;
             pnlFilters.Location = new Point(0, 0);
+            pnlFilters.Margin = new Padding(0);
             pnlFilters.Name = "pnlFilters";
-            pnlFilters.Padding = new Padding(0, 8, 0, 0);
-            pnlFilters.Size = new Size(475, 44);
+            pnlFilters.Padding = new Padding(0, 6, 0, 0);
+            pnlFilters.Size = new Size(1105, 40);
             pnlFilters.TabIndex = 0;
             pnlFilters.WrapContents = false;
             // 
@@ -122,66 +129,78 @@
             // pnlActions
             // 
             pnlActions.AutoSize = true;
-            pnlActions.Controls.Add(btnDetail);
-            pnlActions.Controls.Add(btnDelete);
-            pnlActions.Controls.Add(btnEdit);
             pnlActions.Controls.Add(btnAdd);
-            pnlActions.Dock = DockStyle.Right;
-            pnlActions.FlowDirection = FlowDirection.RightToLeft;
-            pnlActions.Location = new Point(693, 0);
+            pnlActions.Controls.Add(btnEdit);
+            pnlActions.Controls.Add(btnDelete);
+            pnlActions.Controls.Add(btnDetail);
+            pnlActions.Controls.Add(btnExport);
+            pnlActions.Dock = DockStyle.Fill;
+            pnlActions.FlowDirection = FlowDirection.LeftToRight;
+            pnlActions.Location = new Point(0, 40);
+            pnlActions.Margin = new Padding(0);
             pnlActions.Name = "pnlActions";
-            pnlActions.Padding = new Padding(0, 8, 0, 0);
-            pnlActions.Size = new Size(412, 44);
+            pnlActions.Padding = new Padding(0, 6, 0, 0);
+            pnlActions.Size = new Size(1105, 40);
             pnlActions.TabIndex = 1;
             pnlActions.WrapContents = false;
             // 
-            // btnDetail
+            // btnAdd
             // 
-            btnDetail.Location = new Point(317, 14);
-            btnDetail.Margin = new Padding(8, 6, 0, 0);
-            btnDetail.Name = "btnDetail";
-            btnDetail.Size = new Size(95, 26);
-            btnDetail.TabIndex = 0;
-            btnDetail.Text = "Chi tiết";
-            btnDetail.UseVisualStyleBackColor = true;
-            // 
-            // btnDelete
-            // 
-            btnDelete.Location = new Point(214, 14);
-            btnDelete.Margin = new Padding(8, 6, 0, 0);
-            btnDelete.Name = "btnDelete";
-            btnDelete.Size = new Size(95, 26);
-            btnDelete.TabIndex = 1;
-            btnDelete.Text = "Xóa";
-            btnDelete.UseVisualStyleBackColor = true;
+            btnAdd.Location = new Point(0, 12);
+            btnAdd.Margin = new Padding(0, 6, 8, 0);
+            btnAdd.Name = "btnAdd";
+            btnAdd.Size = new Size(95, 26);
+            btnAdd.TabIndex = 0;
+            btnAdd.Text = "Thêm";
+            btnAdd.UseVisualStyleBackColor = true;
             // 
             // btnEdit
             // 
-            btnEdit.Location = new Point(111, 14);
-            btnEdit.Margin = new Padding(8, 6, 0, 0);
+            btnEdit.Location = new Point(103, 12);
+            btnEdit.Margin = new Padding(0, 6, 8, 0);
             btnEdit.Name = "btnEdit";
             btnEdit.Size = new Size(95, 26);
-            btnEdit.TabIndex = 2;
+            btnEdit.TabIndex = 1;
             btnEdit.Text = "Sửa";
             btnEdit.UseVisualStyleBackColor = true;
             // 
-            // btnAdd
+            // btnDelete
             // 
-            btnAdd.Location = new Point(8, 14);
-            btnAdd.Margin = new Padding(8, 6, 0, 0);
-            btnAdd.Name = "btnAdd";
-            btnAdd.Size = new Size(95, 26);
-            btnAdd.TabIndex = 3;
-            btnAdd.Text = "Thêm";
-            btnAdd.UseVisualStyleBackColor = true;
+            btnDelete.Location = new Point(206, 12);
+            btnDelete.Margin = new Padding(0, 6, 8, 0);
+            btnDelete.Name = "btnDelete";
+            btnDelete.Size = new Size(95, 26);
+            btnDelete.TabIndex = 2;
+            btnDelete.Text = "Xóa";
+            btnDelete.UseVisualStyleBackColor = true;
+            // 
+            // btnDetail
+            // 
+            btnDetail.Location = new Point(309, 12);
+            btnDetail.Margin = new Padding(0, 6, 8, 0);
+            btnDetail.Name = "btnDetail";
+            btnDetail.Size = new Size(95, 26);
+            btnDetail.TabIndex = 3;
+            btnDetail.Text = "Chi tiết";
+            btnDetail.UseVisualStyleBackColor = true;
+            // 
+            // btnExport
+            // 
+            btnExport.Location = new Point(412, 12);
+            btnExport.Margin = new Padding(0, 6, 0, 0);
+            btnExport.Name = "btnExport";
+            btnExport.Size = new Size(95, 26);
+            btnExport.TabIndex = 4;
+            btnExport.Text = "Export Excel";
+            btnExport.UseVisualStyleBackColor = true;
             // 
             // dgvAccounts
             // 
             dgvAccounts.Dock = DockStyle.Fill;
-            dgvAccounts.Location = new Point(16, 72);
+            dgvAccounts.Location = new Point(16, 120);
             dgvAccounts.Margin = new Padding(0);
             dgvAccounts.Name = "dgvAccounts";
-            dgvAccounts.Size = new Size(1105, 472);
+            dgvAccounts.Size = new Size(1105, 424);
             dgvAccounts.TabIndex = 1;
             // 
             // pnlFooter
@@ -229,7 +248,7 @@
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel pnlRoot;
-        private System.Windows.Forms.Panel pnlToolbar;
+        private System.Windows.Forms.TableLayoutPanel pnlToolbar;
         private System.Windows.Forms.FlowLayoutPanel pnlFilters;
         private System.Windows.Forms.Label lblKeyword;
         private System.Windows.Forms.TextBox txtKeyword;
@@ -241,6 +260,7 @@
         private System.Windows.Forms.Button btnEdit;
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.Button btnDetail;
+        private System.Windows.Forms.Button btnExport;
 
         private System.Windows.Forms.DataGridView dgvAccounts;
 

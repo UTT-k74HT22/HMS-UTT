@@ -77,6 +77,7 @@ namespace HospitalManagement.repository.impl
 
         public long Insert(SqlConnection conn, Account account)
         {
+            Console.WriteLine($"[Repo] Insert: Inserting account username={account.Username}");
             string sql = """
                          INSERT INTO accounts (username, password, role, is_active, created_at, updated_at)
                          OUTPUT INSERTED.id
@@ -86,11 +87,41 @@ namespace HospitalManagement.repository.impl
             {
                 command.Parameters.AddWithValue("@username", account.Username);
                 command.Parameters.AddWithValue("@password", account.Password);
-                command.Parameters.AddWithValue("@role", account.Role);
+                command.Parameters.AddWithValue("@role", account.Role.ToString());
                 command.Parameters.AddWithValue("@is_active", account.IsActive);
                 command.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
                 command.Parameters.AddWithValue("@updated_at", DateTime.UtcNow);
-                return (long)command.ExecuteScalar();
+                
+                Console.WriteLine($"[Repo] Insert: Executing SQL insert...");
+                var result = command.ExecuteScalar();
+                long id = Convert.ToInt64(result);
+                Console.WriteLine($"[Repo] Insert: Account inserted with ID={id}");
+                return id;
+            }
+        }
+        
+        public long Insert(SqlConnection conn, SqlTransaction transaction, Account account)
+        {
+            Console.WriteLine($"[Repo] Insert (with transaction): Inserting account username={account.Username}");
+            string sql = """
+                         INSERT INTO accounts (username, password, role, is_active, created_at, updated_at)
+                         OUTPUT INSERTED.id
+                         VALUES (@username, @password, @role, @is_active, @created_at, @updated_at);
+                         """;
+            using (var command = new SqlCommand(sql, conn, transaction))
+            {
+                command.Parameters.AddWithValue("@username", account.Username);
+                command.Parameters.AddWithValue("@password", account.Password);
+                command.Parameters.AddWithValue("@role", account.Role.ToString());
+                command.Parameters.AddWithValue("@is_active", account.IsActive);
+                command.Parameters.AddWithValue("@created_at", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@updated_at", DateTime.UtcNow);
+                
+                Console.WriteLine($"[Repo] Insert: Executing SQL insert with transaction...");
+                var result = command.ExecuteScalar();
+                long id = Convert.ToInt64(result);
+                Console.WriteLine($"[Repo] Insert: Account inserted with ID={id}");
+                return id;
             }
         }
 

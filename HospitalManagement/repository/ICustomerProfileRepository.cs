@@ -9,9 +9,14 @@ namespace HospitalManagement.repository
     public interface ICustomerProfileRepository
     {
         /// <summary>
-        /// Chèn hồ sơ khách hàng mới
+        /// Chèn hồ sơ khách hàng mới (không có transaction)
         /// </summary>
         void Insert(SqlConnection conn, CustomerProfile profile);
+        
+        /// <summary>
+        /// Chèn hồ sơ khách hàng mới (có transaction)
+        /// </summary>
+        void Insert(SqlConnection conn, SqlTransaction transaction, CustomerProfile profile);
 
         /// <summary>
         /// Tìm hồ sơ khách hàng theo Profile ID

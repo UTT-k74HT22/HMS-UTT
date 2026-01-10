@@ -25,9 +25,14 @@ namespace HospitalManagement.repository
         Account FindById(long id);
 
         /// <summary>
-        /// Chèn tài khoản mới và trả về ID đã chèn
+        /// Chèn tài khoản mới và trả về ID đã chèn (không có transaction)
         /// </summary>
         long Insert(SqlConnection conn, Account account);
+        
+        /// <summary>
+        /// Chèn tài khoản mới và trả về ID đã chèn (có transaction)
+        /// </summary>
+        long Insert(SqlConnection conn, SqlTransaction transaction, Account account);
 
         /// <summary>
         /// Cập nhật vai trò và trạng thái kích hoạt của tài khoản

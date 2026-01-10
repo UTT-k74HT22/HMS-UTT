@@ -9,9 +9,14 @@ namespace HospitalManagement.repository
     public interface IUserProfileRepository
     {
         /// <summary>
-        /// Chèn hồ sơ người dùng mới
+        /// Chèn hồ sơ người dùng mới (không có transaction)
         /// </summary>
         long Insert(SqlConnection conn, UserProfile profile);
+        
+        /// <summary>
+        /// Chèn hồ sơ người dùng mới (có transaction)
+        /// </summary>
+        long Insert(SqlConnection conn, SqlTransaction transaction, UserProfile profile);
 
         /// <summary>
         /// Tìm hồ sơ theo Account ID

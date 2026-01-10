@@ -121,6 +121,7 @@ namespace HospitalManagement.view
             btnEdit.Click += (_, _) => UpdateAccount();
             btnDelete.Click += (_, _) => DeleteAccount();
             btnDetail.Click += (_, _) => ShowDetail();
+            btnExport.Click += (_, _) => ExportToExcel();
 
             txtKeyword.KeyDown += (_, e) =>
             {
@@ -134,21 +135,29 @@ namespace HospitalManagement.view
 
         private void CreateAccount()
         {
+            Console.WriteLine("[UI] CreateAccount: Opening dialog...");
             var dialog = new AccountFormDialog();
             if (dialog.ShowDialog() == DialogResult.OK && dialog.Result != null)
             {
                 try
                 {
+                    Console.WriteLine($"[UI] CreateAccount: Calling controller with Username={dialog.Result.Username}, Role={dialog.Result.Role}");
                     _controller.CreateAccount(dialog.Result);
+                    Console.WriteLine("[UI] CreateAccount: Success!");
                     MessageBox.Show("Tạo tài khoản thành công!", "Success", 
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     LoadData();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Lỗi: {ex.Message}", "Error", 
+                    Console.WriteLine($"[UI] CreateAccount: ERROR - {ex}");
+                    MessageBox.Show($"Lỗi: {ex.Message}\n\nChi tiết: {ex.InnerException?.Message}", "Error", 
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+            else
+            {
+                Console.WriteLine("[UI] CreateAccount: Dialog cancelled or no result");
             }
         }
 
@@ -162,9 +171,32 @@ namespace HospitalManagement.view
                 return;
             }
 
-            // TODO: Implement update dialog
-            MessageBox.Show($"Chức năng update tài khoản [{account.Username}] đang được phát triển", 
-                "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Console.WriteLine($"[UI] UpdateAccount: Opening dialog for account={account.Username}");
+            var dialog = new AccountUpdateDialog(account.Username, account.Role, account.Active);
+            dialog.ShowDialog();
+
+            if (dialog.Updated)
+            {
+                try
+                {
+                    Console.WriteLine($"[UI] UpdateAccount: Updating account ID={account.Id}, Role={dialog.SelectedRole}, Active={dialog.IsActive}");
+                    _controller.UpdateAccount(account.Id, dialog.SelectedRole, dialog.IsActive);
+                    Console.WriteLine("[UI] UpdateAccount: Success!");
+                    MessageBox.Show("Cập nhật tài khoản thành công!", "Success", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadData();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[UI] UpdateAccount: ERROR - {ex}");
+                    MessageBox.Show($"Lỗi: {ex.Message}\n\nChi tiết: {ex.InnerException?.Message}", "Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                Console.WriteLine("[UI] UpdateAccount: Cancelled");
+            }
         }
 
         private void DeleteAccount()
@@ -235,5 +267,76 @@ namespace HospitalManagement.view
 
         private AccountResponse? GetSelected()
             => dgvAccounts.CurrentRow?.DataBoundItem as AccountResponse;
+
+        private void ExportToExcel()
+        {
+            try
+            {
+                Console.WriteLine("[UI] ExportToExcel: Starting export...");
+
+                var saveDialog = new SaveFileDialog
+                {
+                    Filter = "Excel Files|*.xlsx",
+                    Title = "Export danh sách tài khoản",
+                    FileName = $"Accounts_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
+                };
+
+                if (saveDialog.ShowDialog() == DialogResult.OK)
+                {
+                    Console.WriteLine($"[UI] ExportToExcel: Exporting to {saveDialog.FileName}");
+
+                    using (var workbook = new ClosedXML.Excel.XLWorkbook())
+                    {
+                        var worksheet = workbook.Worksheets.Add("Tài khoản");
+
+                        // Headers
+                        worksheet.Cell(1, 1).Value = "STT";
+                        worksheet.Cell(1, 2).Value = "ID";
+                        worksheet.Cell(1, 3).Value = "Username";
+                        worksheet.Cell(1, 4).Value = "Role";
+                        worksheet.Cell(1, 5).Value = "Active";
+                        worksheet.Cell(1, 6).Value = "Last Login";
+
+                        // Style header
+                        var headerRange = worksheet.Range("A1:F1");
+                        headerRange.Style.Font.Bold = true;
+                        headerRange.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightBlue;
+                        headerRange.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+
+                        // Data
+                        int row = 2;
+                        foreach (var acc in _all)
+                        {
+                            worksheet.Cell(row, 1).Value = row - 1;
+                            worksheet.Cell(row, 2).Value = acc.Id;
+                            worksheet.Cell(row, 3).Value = acc.Username;
+                            worksheet.Cell(row, 4).Value = acc.Role.ToString();
+                            worksheet.Cell(row, 5).Value = acc.Active ? "Có" : "Không";
+                            worksheet.Cell(row, 6).Value = acc.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "Chưa đăng nhập";
+                            row++;
+                        }
+
+                        // Auto-fit columns
+                        worksheet.Columns().AdjustToContents();
+
+                        workbook.SaveAs(saveDialog.FileName);
+                    }
+
+                    Console.WriteLine("[UI] ExportToExcel: Success!");
+                    MessageBox.Show($"Export thành công!\n\nFile: {saveDialog.FileName}", "Success",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    Console.WriteLine("[UI] ExportToExcel: Cancelled");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[UI] ExportToExcel: ERROR - {ex}");
+                MessageBox.Show($"Lỗi khi export: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }
