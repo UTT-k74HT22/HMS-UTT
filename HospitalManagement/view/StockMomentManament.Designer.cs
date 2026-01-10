@@ -97,16 +97,16 @@
             // lblKeyword
             // 
             lblKeyword.AutoSize = true;
-            lblKeyword.Location = new Point(0, 18);
+            lblKeyword.Location = new Point(0, 16);
             lblKeyword.Margin = new Padding(0, 10, 8, 0);
             lblKeyword.Name = "lblKeyword";
-            lblKeyword.Size = new Size(57, 15);
+            lblKeyword.Size = new Size(53, 15);
             lblKeyword.TabIndex = 0;
             lblKeyword.Text = "Từ khóa:";
             // 
             // txtKeyword
             // 
-            txtKeyword.Location = new Point(65, 14);
+            txtKeyword.Location = new Point(61, 12);
             txtKeyword.Margin = new Padding(0, 6, 10, 0);
             txtKeyword.Name = "txtKeyword";
             txtKeyword.Size = new Size(240, 23);
@@ -117,7 +117,7 @@
             btnSearch.BackColor = Color.FromArgb(0, 123, 255);
             btnSearch.FlatStyle = FlatStyle.Flat;
             btnSearch.ForeColor = Color.White;
-            btnSearch.Location = new Point(315, 14);
+            btnSearch.Location = new Point(311, 12);
             btnSearch.Margin = new Padding(0, 6, 12, 0);
             btnSearch.Name = "btnSearch";
             btnSearch.Size = new Size(80, 26);
@@ -128,7 +128,7 @@
             // lblWarehouse
             // 
             lblWarehouse.AutoSize = true;
-            lblWarehouse.Location = new Point(407, 18);
+            lblWarehouse.Location = new Point(403, 16);
             lblWarehouse.Margin = new Padding(0, 10, 8, 0);
             lblWarehouse.Name = "lblWarehouse";
             lblWarehouse.Size = new Size(31, 15);
@@ -138,7 +138,7 @@
             // cboWarehouse
             // 
             cboWarehouse.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboWarehouse.Location = new Point(446, 14);
+            cboWarehouse.Location = new Point(442, 12);
             cboWarehouse.Margin = new Padding(0, 6, 12, 0);
             cboWarehouse.Name = "cboWarehouse";
             cboWarehouse.Size = new Size(220, 23);
@@ -147,27 +147,20 @@
             // lblMovementType
             // 
             lblMovementType.AutoSize = true;
-            lblMovementType.Location = new Point(678, 18);
+            lblMovementType.Location = new Point(674, 16);
             lblMovementType.Margin = new Padding(0, 10, 8, 0);
             lblMovementType.Name = "lblMovementType";
-            lblMovementType.Size = new Size(31, 15);
+            lblMovementType.Size = new Size(32, 15);
             lblMovementType.TabIndex = 5;
             lblMovementType.Text = "Loại:";
             // 
             // cboMovementType
             // 
             cboMovementType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboMovementType.Items.AddRange(new object[] {
-                "TẤT CẢ LOẠI",
-                "Nhập kho",
-                "Xuất kho",
-                "Điều chỉnh",
-                "Chuyển kho"
-            });
-            cboMovementType.Location = new Point(717, 14);
+            cboMovementType.Items.AddRange(new object[] { "TẤT CẢ LOẠI", "Nhập kho", "Xuất kho", "Điều chỉnh", "Chuyển kho" });
+            cboMovementType.Location = new Point(714, 12);
             cboMovementType.Margin = new Padding(0, 6, 0, 0);
             cboMovementType.Name = "cboMovementType";
-            cboMovementType.SelectedIndex = 0;
             cboMovementType.Size = new Size(200, 23);
             cboMovementType.TabIndex = 6;
             // 
@@ -180,7 +173,6 @@
             pnlActions.Controls.Add(btnTransfer);
             pnlActions.Controls.Add(btnRefresh);
             pnlActions.Dock = DockStyle.Fill;
-            pnlActions.FlowDirection = FlowDirection.LeftToRight;
             pnlActions.Location = new Point(0, 40);
             pnlActions.Margin = new Padding(0);
             pnlActions.Name = "pnlActions";
@@ -259,10 +251,10 @@
             dgvStockMovement.BackgroundColor = Color.White;
             dgvStockMovement.BorderStyle = BorderStyle.None;
             dgvStockMovement.Dock = DockStyle.Fill;
-            dgvStockMovement.Location = new Point(16, 120);
+            dgvStockMovement.Location = new Point(16, 108);
             dgvStockMovement.Margin = new Padding(0);
             dgvStockMovement.Name = "dgvStockMovement";
-            dgvStockMovement.Size = new Size(1368, 474);
+            dgvStockMovement.Size = new Size(1368, 486);
             dgvStockMovement.TabIndex = 1;
             // 
             // pnlFooter
@@ -284,7 +276,7 @@
             lblTotal.Margin = new Padding(0);
             lblTotal.Name = "lblTotal";
             lblTotal.Padding = new Padding(0, 10, 0, 0);
-            lblTotal.Size = new Size(120, 25);
+            lblTotal.Size = new Size(115, 25);
             lblTotal.TabIndex = 0;
             lblTotal.Text = "Tổng số giao dịch: 0";
             // 

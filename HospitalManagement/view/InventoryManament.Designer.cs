@@ -96,16 +96,16 @@
             // lblKeyword
             // 
             lblKeyword.AutoSize = true;
-            lblKeyword.Location = new Point(0, 18);
+            lblKeyword.Location = new Point(0, 16);
             lblKeyword.Margin = new Padding(0, 10, 8, 0);
             lblKeyword.Name = "lblKeyword";
-            lblKeyword.Size = new Size(57, 15);
+            lblKeyword.Size = new Size(53, 15);
             lblKeyword.TabIndex = 0;
             lblKeyword.Text = "Từ khóa:";
             // 
             // txtKeyword
             // 
-            txtKeyword.Location = new Point(65, 14);
+            txtKeyword.Location = new Point(61, 12);
             txtKeyword.Margin = new Padding(0, 6, 10, 0);
             txtKeyword.Name = "txtKeyword";
             txtKeyword.Size = new Size(240, 23);
@@ -116,7 +116,7 @@
             btnSearch.BackColor = Color.FromArgb(0, 123, 255);
             btnSearch.FlatStyle = FlatStyle.Flat;
             btnSearch.ForeColor = Color.White;
-            btnSearch.Location = new Point(315, 14);
+            btnSearch.Location = new Point(311, 12);
             btnSearch.Margin = new Padding(0, 6, 12, 0);
             btnSearch.Name = "btnSearch";
             btnSearch.Size = new Size(80, 26);
@@ -127,7 +127,7 @@
             // lblWarehouse
             // 
             lblWarehouse.AutoSize = true;
-            lblWarehouse.Location = new Point(407, 18);
+            lblWarehouse.Location = new Point(403, 16);
             lblWarehouse.Margin = new Padding(0, 10, 8, 0);
             lblWarehouse.Name = "lblWarehouse";
             lblWarehouse.Size = new Size(31, 15);
@@ -137,7 +137,7 @@
             // cboWarehouse
             // 
             cboWarehouse.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboWarehouse.Location = new Point(446, 14);
+            cboWarehouse.Location = new Point(442, 12);
             cboWarehouse.Margin = new Padding(0, 6, 12, 0);
             cboWarehouse.Name = "cboWarehouse";
             cboWarehouse.Size = new Size(200, 23);
@@ -146,27 +146,20 @@
             // lblStatus
             // 
             lblStatus.AutoSize = true;
-            lblStatus.Location = new Point(658, 18);
+            lblStatus.Location = new Point(654, 16);
             lblStatus.Margin = new Padding(0, 10, 8, 0);
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(62, 15);
+            lblStatus.Size = new Size(63, 15);
             lblStatus.TabIndex = 5;
             lblStatus.Text = "Trạng thái:";
             // 
             // cboStatus
             // 
             cboStatus.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboStatus.Items.AddRange(new object[] {
-                "TẤT CẢ",
-                "SẮP HẾT HÀNG",
-                "SẮP HẾT HẠN",
-                "DƯ THỪA",
-                "BÌNH THƯỜNG"
-            });
-            cboStatus.Location = new Point(728, 14);
+            cboStatus.Items.AddRange(new object[] { "TẤT CẢ", "SẮP HẾT HÀNG", "SẮP HẾT HẠN", "DƯ THỪA", "BÌNH THƯỜNG" });
+            cboStatus.Location = new Point(725, 12);
             cboStatus.Margin = new Padding(0, 6, 0, 0);
             cboStatus.Name = "cboStatus";
-            cboStatus.SelectedIndex = 0;
             cboStatus.Size = new Size(180, 23);
             cboStatus.TabIndex = 6;
             // 
@@ -178,7 +171,6 @@
             pnlActions.Controls.Add(btnNearExpiry);
             pnlActions.Controls.Add(btnRefresh);
             pnlActions.Dock = DockStyle.Fill;
-            pnlActions.FlowDirection = FlowDirection.LeftToRight;
             pnlActions.Location = new Point(0, 40);
             pnlActions.Margin = new Padding(0);
             pnlActions.Name = "pnlActions";
@@ -244,10 +236,10 @@
             dgvInventory.BackgroundColor = Color.White;
             dgvInventory.BorderStyle = BorderStyle.None;
             dgvInventory.Dock = DockStyle.Fill;
-            dgvInventory.Location = new Point(16, 120);
+            dgvInventory.Location = new Point(16, 108);
             dgvInventory.Margin = new Padding(0);
             dgvInventory.Name = "dgvInventory";
-            dgvInventory.Size = new Size(1168, 474);
+            dgvInventory.Size = new Size(1168, 486);
             dgvInventory.TabIndex = 1;
             // 
             // pnlFooter
@@ -269,7 +261,7 @@
             lblTotal.Margin = new Padding(0);
             lblTotal.Name = "lblTotal";
             lblTotal.Padding = new Padding(0, 10, 0, 0);
-            lblTotal.Size = new Size(120, 25);
+            lblTotal.Size = new Size(136, 25);
             lblTotal.TabIndex = 0;
             lblTotal.Text = "Tổng số mục tồn kho: 0";
             // 
