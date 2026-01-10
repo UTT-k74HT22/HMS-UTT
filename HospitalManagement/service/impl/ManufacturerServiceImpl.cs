@@ -11,9 +11,10 @@ namespace HospitalManagement.service.impl
     {
         private readonly IManufacturerRepository _manufacturerRepository;
 
-        public ManufacturerServiceImpl(DBConfig dbConfig)
+        public ManufacturerServiceImpl(string connectionString)
         {
-            _manufacturerRepository = new ManufacturerRepositoryImpl(dbConfig);
+            _manufacturerRepository =
+                new ManufacturerRepositoryImpl(connectionString);
         }
 
         public List<Manufacturer> FindAll()

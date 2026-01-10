@@ -15,9 +15,9 @@ namespace HospitalManagement.repository.impl
         // =====================================================
         private readonly string _connectionString;
 
-        public ManufacturerRepositoryImpl(DBConfig dbConfig)
+        public ManufacturerRepositoryImpl(string connectionString)
         {
-            _connectionString = dbConfig.ConnectionString;
+            _connectionString = connectionString;
         }
 
         private SqlConnection GetConnection()

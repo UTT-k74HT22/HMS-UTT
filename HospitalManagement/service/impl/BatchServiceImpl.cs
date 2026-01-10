@@ -9,15 +9,15 @@ public class BatchServiceImpl : IBatchService
 {   
        private readonly IBatchRepository _batchRepository;
 
-        public BatchServiceImpl(IBatchRepository batchRepository)
-        {
-            _batchRepository = batchRepository;
-        }
-
-        public BatchServiceImpl()
-        {
-            _batchRepository = new BatchRepositoryImpl();
-        }
+       public BatchServiceImpl(string connectionString)
+       {
+           _batchRepository = new BatchRepositoryImpl(connectionString);
+       }
+    
+       public BatchServiceImpl(IBatchRepository batchRepository)
+       {
+           _batchRepository = batchRepository;
+       }
 
         /// <summary>
         /// Lấy danh sách tất cả lô hàng

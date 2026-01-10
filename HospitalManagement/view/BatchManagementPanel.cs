@@ -7,6 +7,9 @@ using HospitalManagement.controller;
 using HospitalManagement.dto.request.Batch;
 using HospitalManagement.dto.response;
 using HospitalManagement.dto.response.Product;
+using HospitalManagement.service.impl;
+using HospitalManagement.Service.Impl;
+using Microsoft.Extensions.Configuration;
 
 namespace HospitalManagement.view
 {
@@ -20,9 +23,22 @@ namespace HospitalManagement.view
         public BatchManagementPanel()
         {
             InitializeComponent();
-            _controller = new BatchController();
+
+            // ===== Load appsettings.json =====
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            string connectionString =
+                config.GetConnectionString("DefaultConnection");
+            var batchService = new BatchServiceImpl(connectionString);
+            var productService = new ProductServiceImpl(connectionString);
+
+            _controller = new BatchController(batchService, productService);
+
             InitGrid();
             InitEvents();
+            LoadData();
         }
 
         private void BatchManagementPanel_Load(object sender, EventArgs e)

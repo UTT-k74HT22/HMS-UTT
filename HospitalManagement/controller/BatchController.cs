@@ -12,18 +12,17 @@ public class BatchController
     private readonly IBatchService _batchService;
     private readonly IProductService _productService;
 
-    // ===== Constructors =====
-
-    public BatchController(IBatchService batchService)
+    public BatchController(string connectionString)
+    {
+        _batchService = new BatchServiceImpl(connectionString);
+        _productService = new ProductServiceImpl(connectionString);
+    }
+    public BatchController(
+        IBatchService batchService,
+        IProductService productService)
     {
         _batchService = batchService;
-        _productService = new ProductServiceImpl();
-    }
-
-    public BatchController()
-    {
-        _batchService = new BatchServiceImpl();
-        _productService = new ProductServiceImpl();
+        _productService = productService;
     }
 
     // ===== Batch APIs =====
