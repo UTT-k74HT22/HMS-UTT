@@ -44,8 +44,39 @@ namespace HospitalManagement.service.impl
         // =================== UPDATE ===================
         public void UpdateInvoice(Invoice invoice)
         {
-            _repository.Update(invoice);
+            var existing = _repository.FindById(invoice.Id);
+            if (existing == null) return;
+
+            // Cập nhật ngày đến hạn nếu có
+            existing.DueDate = invoice.DueDate;
+
+            // Cập nhật theo status
+            switch (invoice.Status)
+            {
+                case "PAID":
+                    existing.PaidAmount = existing.TotalAmount;  // PaidAmount = TotalAmount cũ
+                    existing.TotalAmount = 0;                   // TotalAmount = 0
+                    break;
+                case "PARTIAL":
+                    // ví dụ: giữ nguyên PaidAmount, TotalAmount giảm đi PaidAmount
+                    existing.PaidAmount = invoice.PaidAmount;
+                    existing.TotalAmount = existing.TotalAmount - invoice.PaidAmount;
+                    break;
+                case "NEW":
+                case "CANCELED":
+                    existing.PaidAmount = 0;
+                    // TotalAmount giữ nguyên
+                    break;
+                default:
+                    existing.PaidAmount = invoice.PaidAmount; // giữ nguyên nếu status lạ
+                    break;
+            }
+
+            existing.Status = invoice.Status;
+
+            _repository.Update(existing);
         }
+
 
         public void UpdatePaidAmount(long invoiceId, decimal newPaidAmount)
         {

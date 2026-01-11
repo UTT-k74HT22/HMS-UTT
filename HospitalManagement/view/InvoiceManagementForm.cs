@@ -237,10 +237,101 @@ private void btnAdd_Click(object sender, EventArgs e)
     }
 }
 
-        private void btnEdit_Click(object sender, EventArgs e)
-        {
+private void btnEdit_Click(object sender, EventArgs e)
+{
+    if (dgvInvoice.SelectedRows.Count == 0)
+    {
+        MessageBox.Show("Vui lòng chọn một Invoice để sửa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        return;
+    }
 
-        }
+    // Lấy dữ liệu invoice đã chọn
+    var row = dgvInvoice.SelectedRows[0];
+    long invoiceId = Convert.ToInt64(row.Cells["ID"].Value);
+    DateTime? dueDate = string.IsNullOrEmpty(row.Cells["DueDate"].Value?.ToString())
+                        ? (DateTime?)null
+                        : DateTime.Parse(row.Cells["DueDate"].Value.ToString());
+    decimal paidAmount = decimal.Parse(row.Cells["PaidAmount"].Value.ToString());
+    string status = row.Cells["Status"].Value.ToString();
+
+    using (Form dialog = new Form())
+    {
+        dialog.Text = "Sửa Invoice";
+        dialog.Size = new Size(400, 220);
+        dialog.StartPosition = FormStartPosition.CenterParent;
+
+        // DueDate
+        Label lblDueDate = new Label { Text = "Due Date:", Location = new Point(20, 20), AutoSize = true };
+        DateTimePicker dtpDueDate = new DateTimePicker
+        {
+            Location = new Point(120, 18),
+            Width = 200,
+            Format = DateTimePickerFormat.Custom,
+            CustomFormat = "yyyy-MM-dd",
+            Value = dueDate ?? DateTime.Now
+        };
+
+        // PaidAmount
+        Label lblPaid = new Label { Text = "Paid Amount:", Location = new Point(20, 60), AutoSize = true };
+        NumericUpDown numPaid = new NumericUpDown
+        {
+            Location = new Point(120, 58),
+            Width = 200,
+            Maximum = 1000000000,
+            DecimalPlaces = 2,
+            Value = paidAmount
+        };
+
+        // Status
+        Label lblStatus = new Label { Text = "Status:", Location = new Point(20, 100), AutoSize = true };
+        ComboBox cbStatus = new ComboBox
+        {
+            Location = new Point(120, 98),
+            Width = 200,
+            DropDownStyle = ComboBoxStyle.DropDownList,
+            DataSource = new List<string> { "NEW", "PAID", "PARTIAL", "CANCELED" }
+        };
+        cbStatus.SelectedItem = status;
+
+        // Buttons
+        Button btnSave = new Button { Text = "Lưu", Location = new Point(120, 150), Width = 80 };
+        Button btnCancel = new Button { Text = "Hủy", Location = new Point(240, 150), Width = 80 };
+
+        btnCancel.Click += (s, ev) => dialog.Close();
+
+        btnSave.Click += (s, ev) =>
+        {
+            try
+            {
+                DateTime? newDueDate = dtpDueDate.Value;
+                decimal newPaidAmount = numPaid.Value;
+                string newStatus = cbStatus.SelectedItem.ToString();
+
+                // Gọi service/controller — service sẽ tự xử lý PaidAmount & TotalAmount theo status
+                _invoiceController.UpdateInvoice(invoiceId, newDueDate, newPaidAmount, newStatus);
+
+                MessageBox.Show("Cập nhật Invoice thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadData();
+                dialog.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi cập nhật Invoice:\n" + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        };
+
+        dialog.Controls.Add(lblDueDate);
+        dialog.Controls.Add(dtpDueDate);
+        dialog.Controls.Add(lblPaid);
+        dialog.Controls.Add(numPaid);
+        dialog.Controls.Add(lblStatus);
+        dialog.Controls.Add(cbStatus);
+        dialog.Controls.Add(btnSave);
+        dialog.Controls.Add(btnCancel);
+
+        dialog.ShowDialog(this);
+    }
+}
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
