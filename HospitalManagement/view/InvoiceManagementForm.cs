@@ -333,10 +333,39 @@ private void btnEdit_Click(object sender, EventArgs e)
     }
 }
 
-        private void btnDelete_Click(object sender, EventArgs e)
-        {
+private void btnDelete_Click(object sender, EventArgs e)
+{
+    if (dgvInvoice.SelectedRows.Count == 0)
+    {
+        MessageBox.Show("Vui lòng chọn một Invoice để xóa.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        return;
+    }
 
+    var row = dgvInvoice.SelectedRows[0];
+    long invoiceId = Convert.ToInt64(row.Cells["ID"].Value);
+
+    var confirm = MessageBox.Show(
+        "Bạn có chắc chắn muốn xóa hóa đơn này không?",
+        "Xác nhận",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question
+    );
+
+    if (confirm == DialogResult.Yes)
+    {
+        try
+        {
+            _invoiceController.CancelInvoice(invoiceId);
+            MessageBox.Show("Xóa Invoice thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            LoadData();
         }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Lỗi xóa Invoice:\n" + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+}
+
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
