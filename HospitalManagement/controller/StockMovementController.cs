@@ -22,12 +22,8 @@ namespace HospitalManagement.controller
         /// </summary>
         public void CreateStockMovement(CreateStockMovementRequest request)
         {
-            // TODO: Implement
-            // 1. Validate request
-            // 2. Check product/warehouse exists
-            // 3. For EXPORT, check stock availability
-            // 4. Create movement (service will handle inventory update)
-            throw new NotImplementedException();
+            Console.WriteLine("Creating stock movement: " + request);
+            _stockMovementService.CreateMovement(request);
         }
 
         /// <summary>
@@ -35,8 +31,8 @@ namespace HospitalManagement.controller
         /// </summary>
         public List<StockMovementResponse> GetAllMovements()
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            Console.WriteLine("Fetching all stock movements");
+            return _stockMovementService.GetAll();
         }
 
         /// <summary>

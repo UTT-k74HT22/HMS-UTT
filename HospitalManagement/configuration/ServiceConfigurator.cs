@@ -2,10 +2,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using HospitalManagement.controller;
 using HospitalManagement.dto.response;
+using HospitalManagement.entity;
 using HospitalManagement.repository;
 using HospitalManagement.repository.impl;
 using HospitalManagement.service;
 using HospitalManagement.service.impl;
+using HospitalManagement.Service.Impl;
 using HospitalManagement.view;
 
 namespace HospitalManagement.configuration
@@ -78,8 +80,48 @@ namespace HospitalManagement.configuration
                 return new CustomerProfileRepositoryImpl(dbConfig.ConnectionString);
             });
 
-            // TODO: Thêm các repository khác
-            // services.AddScoped<IProductRepository, ProductRepositoryImpl>();
+            // Inventory & Product Repositories
+            services.AddScoped<IInventoryRepository>(provider =>
+            {
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new InventoryRepositoryImpl(dbConfig.ConnectionString);
+            });
+
+            services.AddScoped<IWarehousesRepository>(provider =>
+            {
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new WarehousesRepositoryImpl(dbConfig.ConnectionString);
+            });
+
+            services.AddScoped<IProductRepository>(provider =>
+            {
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new ProductRepositoryImpl(dbConfig.ConnectionString);
+            });
+
+            services.AddScoped<ICategoryRepository>(provider =>
+            {
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new CategoryRepositoryImpl(dbConfig.ConnectionString);
+            });
+
+            services.AddScoped<IManufacturerRepository>(provider =>
+            {
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new ManufacturerRepositoryImpl(dbConfig.ConnectionString);
+            });
+
+            services.AddScoped<IBatchRepository>(provider =>
+            {
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new BatchRepositoryImpl(dbConfig.ConnectionString);
+            });
+
+            services.AddScoped<IStockMovementRepository>(provider =>
+            {
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new StockMovementRepositoryImpl(dbConfig.ConnectionString);
+            });
         }
 
         private static void ConfigureBusinessServices(IServiceCollection services)
@@ -102,20 +144,49 @@ namespace HospitalManagement.configuration
             // Employee Service
             services.AddScoped<IEmployeeService, EmployeeServiceImpl>();
 
-            // TODO: Thêm các service khác
-            // services.AddScoped<ProductService, ProductServiceImpl>();
+            // Inventory & Product Services
+            services.AddScoped<IInventoryService, InventoryServiceImpl>();
+            services.AddScoped<IWarehousesService, WarehousesServiceImpl>();
+            
+            services.AddScoped<IProductService>(provider =>
+            {
+                var dbConfig = provider.GetRequiredService<DBConfig>();
+                return new ProductServiceImpl(dbConfig.ConnectionString);
+            });
+            
+            services.AddScoped<IBatchService>(provider =>
+            {
+                var batchRepo = provider.GetRequiredService<IBatchRepository>();
+                return new BatchServiceImpl(batchRepo);
+            });
+            
+            services.AddScoped<IStockMovementService, StockMovementServiceImpl>();
         }
 
         private static void ConfigureControllers(IServiceCollection services)
         {
-            // Account Controller
+            // Account & Employee Controllers
             services.AddScoped<AccountController>();
             services.AddScoped<EmployeeController>();
-
-            // TODO: Thêm các controller khác
-            // services.AddScoped<EmployeeController>();
-            // services.AddScoped<CustomerController>();
-            // services.AddScoped<ProductController>();
+            
+            // Inventory & Stock Management Controllers
+            services.AddScoped<InventoryController>();
+            services.AddScoped<WarehousesController>();
+            
+            services.AddScoped<ProductController>(provider =>
+            {
+                var productService = provider.GetRequiredService<IProductService>();
+                return new ProductController(productService);
+            });
+            
+            services.AddScoped<BatchController>(provider =>
+            {
+                var batchService = provider.GetRequiredService<IBatchService>();
+                var productService = provider.GetRequiredService<IProductService>();
+                return new BatchController(batchService, productService);
+            });
+            
+            services.AddScoped<StockMovementController>();
         }
 
         private static void ConfigureViews(IServiceCollection services)
