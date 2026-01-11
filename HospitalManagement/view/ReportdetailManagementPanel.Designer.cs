@@ -60,92 +60,200 @@ namespace HospitalManagement.view
         {
             tabControl = new TabControl();
             tabBestSelling = new TabPage();
+            pnlBestSellingTop = new Panel();
+            btnReloadBestSelling = new Button();
             tabInventory = new TabPage();
+            pnlInventoryTop = new Panel();
+            btnReloadInventory = new Button();
             tabCustomers = new TabPage();
+            pnlCustomersTop = new Panel();
+            btnReloadCustomers = new Button();
             tabOrders = new TabPage();
-
-            // ================= TAB CONTROL =================
+            pnlOrdersTop = new Panel();
+            btnReloadOrders = new Button();
+            dataGridView1 = new DataGridView();
+            dataGridView2 = new DataGridView();
+            dataGridView3 = new DataGridView();
+            dataGridView4 = new DataGridView();
+            tabControl.SuspendLayout();
+            tabBestSelling.SuspendLayout();
+            pnlBestSellingTop.SuspendLayout();
+            tabInventory.SuspendLayout();
+            pnlInventoryTop.SuspendLayout();
+            tabCustomers.SuspendLayout();
+            pnlCustomersTop.SuspendLayout();
+            tabOrders.SuspendLayout();
+            pnlOrdersTop.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView2).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView3).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView4).BeginInit();
+            SuspendLayout();
+            // 
+            // tabControl
+            // 
+            tabControl.Controls.Add(tabBestSelling);
+            tabControl.Controls.Add(tabInventory);
+            tabControl.Controls.Add(tabCustomers);
+            tabControl.Controls.Add(tabOrders);
             tabControl.Dock = DockStyle.Fill;
-            tabControl.Controls.AddRange(new Control[]
-            {
-                tabBestSelling, tabInventory, tabCustomers, tabOrders
-            });
-
-            // =================================================
-            // =============== BEST SELLING ====================
-            // =================================================
-            pnlBestSellingTop = new Panel { Dock = DockStyle.Top, Height = 40 };
-            btnReloadBestSelling = new Button { Text = "Reload", Left = 10, Top = 8, Width = 80 };
-            pnlBestSellingTop.Controls.Add(btnReloadBestSelling);
-
-            dgvBestSelling = CreateGrid();
-            bsCol1 = CreateCol("STT");
-            bsCol2 = CreateCol("Product Code");
-            bsCol3 = CreateCol("Product Name");
-            bsCol4 = CreateCol("Sold Quantity");
-            dgvBestSelling.Columns.AddRange(bsCol1, bsCol2, bsCol3, bsCol4);
-
-            tabBestSelling.Text = "Best Selling";
-            tabBestSelling.Controls.Add(dgvBestSelling);
+            tabControl.Location = new Point(0, 0);
+            tabControl.Name = "tabControl";
+            tabControl.SelectedIndex = 0;
+            tabControl.Size = new Size(900, 600);
+            tabControl.TabIndex = 0;
+            // 
+            // tabBestSelling
+            // 
             tabBestSelling.Controls.Add(pnlBestSellingTop);
-
-            // =================================================
-            // ================= INVENTORY =====================
-            // =================================================
-            pnlInventoryTop = new Panel { Dock = DockStyle.Top, Height = 40 };
-            btnReloadInventory = new Button { Text = "Reload", Left = 10, Top = 8, Width = 80 };
-            pnlInventoryTop.Controls.Add(btnReloadInventory);
-
-            dgvInventory = CreateGrid();
-            invCol1 = CreateCol("STT");
-            invCol2 = CreateCol("Product Code");
-            invCol3 = CreateCol("Product Name");
-            invCol4 = CreateCol("Stock Quantity");
-            dgvInventory.Columns.AddRange(invCol1, invCol2, invCol3, invCol4);
-
-            tabInventory.Text = "Inventory";
-            tabInventory.Controls.Add(dgvInventory);
+            tabBestSelling.Location = new Point(4, 24);
+            tabBestSelling.Name = "tabBestSelling";
+            tabBestSelling.Size = new Size(892, 572);
+            tabBestSelling.TabIndex = 0;
+            tabBestSelling.Text = "Best Selling";
+            // 
+            // pnlBestSellingTop
+            // 
+            pnlBestSellingTop.Controls.Add(dataGridView1);
+            pnlBestSellingTop.Controls.Add(btnReloadBestSelling);
+            pnlBestSellingTop.Location = new Point(0, 0);
+            pnlBestSellingTop.Name = "pnlBestSellingTop";
+            pnlBestSellingTop.Size = new Size(839, 547);
+            pnlBestSellingTop.TabIndex = 0;
+            // 
+            // btnReloadBestSelling
+            // 
+            btnReloadBestSelling.Location = new Point(0, 0);
+            btnReloadBestSelling.Name = "btnReloadBestSelling";
+            btnReloadBestSelling.Size = new Size(75, 23);
+            btnReloadBestSelling.TabIndex = 0;
+            // 
+            // tabInventory
+            // 
             tabInventory.Controls.Add(pnlInventoryTop);
-
-            // =================================================
-            // ================= CUSTOMERS =====================
-            // =================================================
-            pnlCustomersTop = new Panel { Dock = DockStyle.Top, Height = 40 };
-            btnReloadCustomers = new Button { Text = "Reload", Left = 10, Top = 8, Width = 80 };
-            pnlCustomersTop.Controls.Add(btnReloadCustomers);
-
-            dgvCustomers = CreateGrid();
-            cusCol1 = CreateCol("STT");
-            cusCol2 = CreateCol("Customer Code");
-            cusCol3 = CreateCol("Customer Name");
-            cusCol4 = CreateCol("Total Orders");
-            dgvCustomers.Columns.AddRange(cusCol1, cusCol2, cusCol3, cusCol4);
-
-            tabCustomers.Text = "Customers";
-            tabCustomers.Controls.Add(dgvCustomers);
+            tabInventory.Location = new Point(4, 24);
+            tabInventory.Name = "tabInventory";
+            tabInventory.Size = new Size(892, 572);
+            tabInventory.TabIndex = 1;
+            tabInventory.Text = "Inventory";
+            // 
+            // pnlInventoryTop
+            // 
+            pnlInventoryTop.Controls.Add(dataGridView2);
+            pnlInventoryTop.Controls.Add(btnReloadInventory);
+            pnlInventoryTop.Location = new Point(0, 0);
+            pnlInventoryTop.Name = "pnlInventoryTop";
+            pnlInventoryTop.Size = new Size(841, 550);
+            pnlInventoryTop.TabIndex = 0;
+            // 
+            // btnReloadInventory
+            // 
+            btnReloadInventory.Location = new Point(0, 0);
+            btnReloadInventory.Name = "btnReloadInventory";
+            btnReloadInventory.Size = new Size(75, 23);
+            btnReloadInventory.TabIndex = 0;
+            // 
+            // tabCustomers
+            // 
             tabCustomers.Controls.Add(pnlCustomersTop);
-
-            // =================================================
-            // ================= ORDERS ========================
-            // =================================================
-            pnlOrdersTop = new Panel { Dock = DockStyle.Top, Height = 40 };
-            btnReloadOrders = new Button { Text = "Reload", Left = 10, Top = 8, Width = 80 };
-            pnlOrdersTop.Controls.Add(btnReloadOrders);
-
-            dgvOrders = CreateGrid();
-            ordCol1 = CreateCol("STT");
-            ordCol2 = CreateCol("Status");
-            ordCol3 = CreateCol("Orders Count");
-            ordCol4 = CreateCol("Total Amount");
-            dgvOrders.Columns.AddRange(ordCol1, ordCol2, ordCol3, ordCol4);
-
-            tabOrders.Text = "Orders";
-            tabOrders.Controls.Add(dgvOrders);
+            tabCustomers.Location = new Point(4, 24);
+            tabCustomers.Name = "tabCustomers";
+            tabCustomers.Size = new Size(892, 572);
+            tabCustomers.TabIndex = 2;
+            tabCustomers.Text = "Customers";
+            // 
+            // pnlCustomersTop
+            // 
+            pnlCustomersTop.Controls.Add(dataGridView3);
+            pnlCustomersTop.Controls.Add(btnReloadCustomers);
+            pnlCustomersTop.Location = new Point(0, 0);
+            pnlCustomersTop.Name = "pnlCustomersTop";
+            pnlCustomersTop.Size = new Size(849, 543);
+            pnlCustomersTop.TabIndex = 0;
+            // 
+            // btnReloadCustomers
+            // 
+            btnReloadCustomers.Location = new Point(0, 0);
+            btnReloadCustomers.Name = "btnReloadCustomers";
+            btnReloadCustomers.Size = new Size(75, 23);
+            btnReloadCustomers.TabIndex = 0;
+            // 
+            // tabOrders
+            // 
             tabOrders.Controls.Add(pnlOrdersTop);
-
-            // ================= ROOT =================
+            tabOrders.Location = new Point(4, 24);
+            tabOrders.Name = "tabOrders";
+            tabOrders.Size = new Size(892, 572);
+            tabOrders.TabIndex = 3;
+            tabOrders.Text = "Orders";
+            // 
+            // pnlOrdersTop
+            // 
+            pnlOrdersTop.Controls.Add(dataGridView4);
+            pnlOrdersTop.Controls.Add(btnReloadOrders);
+            pnlOrdersTop.Location = new Point(0, 0);
+            pnlOrdersTop.Name = "pnlOrdersTop";
+            pnlOrdersTop.Size = new Size(842, 547);
+            pnlOrdersTop.TabIndex = 0;
+            // 
+            // btnReloadOrders
+            // 
+            btnReloadOrders.Location = new Point(0, 0);
+            btnReloadOrders.Name = "btnReloadOrders";
+            btnReloadOrders.Size = new Size(75, 23);
+            btnReloadOrders.TabIndex = 0;
+            // 
+            // dataGridView1
+            // 
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Location = new Point(0, 29);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.Size = new Size(855, 515);
+            dataGridView1.TabIndex = 1;
+            // 
+            // dataGridView2
+            // 
+            dataGridView2.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView2.Location = new Point(0, 29);
+            dataGridView2.Name = "dataGridView2";
+            dataGridView2.Size = new Size(849, 518);
+            dataGridView2.TabIndex = 1;
+            // 
+            // dataGridView3
+            // 
+            dataGridView3.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView3.Location = new Point(0, 29);
+            dataGridView3.Name = "dataGridView3";
+            dataGridView3.Size = new Size(849, 511);
+            dataGridView3.TabIndex = 1;
+            // 
+            // dataGridView4
+            // 
+            dataGridView4.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView4.Location = new Point(-1, 29);
+            dataGridView4.Name = "dataGridView4";
+            dataGridView4.Size = new Size(851, 515);
+            dataGridView4.TabIndex = 1;
+            // 
+            // ReportDetailManagementPanel
+            // 
             Controls.Add(tabControl);
-            Size = new System.Drawing.Size(900, 600);
+            Name = "ReportDetailManagementPanel";
+            Size = new Size(900, 600);
+            tabControl.ResumeLayout(false);
+            tabBestSelling.ResumeLayout(false);
+            pnlBestSellingTop.ResumeLayout(false);
+            tabInventory.ResumeLayout(false);
+            pnlInventoryTop.ResumeLayout(false);
+            tabCustomers.ResumeLayout(false);
+            pnlCustomersTop.ResumeLayout(false);
+            tabOrders.ResumeLayout(false);
+            pnlOrdersTop.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView2).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView3).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView4).EndInit();
+            ResumeLayout(false);
         }
         #endregion
 
@@ -170,5 +278,9 @@ namespace HospitalManagement.view
                 ReadOnly = true
             };
         }
+        private DataGridView dataGridView1;
+        private DataGridView dataGridView2;
+        private DataGridView dataGridView3;
+        private DataGridView dataGridView4;
     }
 }
