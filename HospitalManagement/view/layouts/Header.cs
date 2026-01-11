@@ -3,7 +3,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
-using static iText.Kernel.Pdf.PageResizer;
+using static iText.Kernel.Pdf.CompressionConstants;
 
 namespace HospitalManagement.view.layouts
 {
