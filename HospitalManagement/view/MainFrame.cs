@@ -201,9 +201,7 @@ namespace HospitalManagement.view
                 Sidebar.MENU_STOCK_MOVEMENTS => _stockMovementController != null && _warehousesController != null && _productController != null && _batchController != null
                     ? new StockMovementManagementPanel(_stockMovementController, _warehousesController, _productController, _batchController)
                     : CreateComingSoonPanel("Xuất/Nhập kho (Cần DI)"),
-                Sidebar.MENU_ORDERS => CreateComingSoonPanel("Đơn hàng"),
                 Sidebar.MENU_INVOICES => new InvoiceManagementForm(),
-                Sidebar.MENU_INVOICES => CreateComingSoonPanel("Hóa đơn"),
                 Sidebar.MENU_PAYMENTS => new PaymentManagementForm(),
                 Sidebar.MENU_REPORT_SUMMARY => CreateComingSoonPanel("Báo cáo tóm tắt"),
                 Sidebar.MENU_REPORT_DETAIL => new ReportDetailManagementPanel(),
