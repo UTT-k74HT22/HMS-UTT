@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
 using HospitalManagement.dto.request;
 using HospitalManagement.dto.response;
 using HospitalManagement.entity;
+using HospitalManagement.entity.enums;
 using HospitalManagement.service;
 
 namespace HospitalManagement.controller
@@ -13,71 +16,48 @@ namespace HospitalManagement.controller
         private readonly IStockMovementService _stockMovementService;
 
         public StockMovementController(IStockMovementService stockMovementService)
-        {
-            _stockMovementService = stockMovementService;
-        }
+            => _stockMovementService = stockMovementService;
 
         /// <summary>
         /// Tạo giao dịch xuất/nhập kho mới
         /// </summary>
         public void CreateStockMovement(CreateStockMovementRequest request)
-        {
-            Console.WriteLine("Creating stock movement: " + request);
-            _stockMovementService.CreateMovement(request);
-        }
+            => _stockMovementService.CreateMovement(request);
 
         /// <summary>
         /// Lấy tất cả giao dịch xuất nhập kho
         /// </summary>
         public List<StockMovementResponse> GetAllMovements()
-        {
-            Console.WriteLine("Fetching all stock movements");
-            return _stockMovementService.GetAll();
-        }
+            => _stockMovementService.GetAll();
 
         /// <summary>
         /// Lấy giao dịch theo warehouse
         /// </summary>
         public List<StockMovementResponse> GetMovementsByWarehouse(long warehouseId)
-        {
-            // TODO: Implement
-            throw new NotImplementedException();
-        }
+            => _stockMovementService.GetByWarehouse(warehouseId);
 
         /// <summary>
         /// Lấy giao dịch theo product
         /// </summary>
         public List<StockMovementResponse> GetMovementsByProduct(long productId)
-        {
-            // TODO: Implement
-            throw new NotImplementedException();
-        }
+            => _stockMovementService.GetByProduct(productId);
 
         /// <summary>
         /// Lấy giao dịch theo loại
         /// </summary>
         public List<StockMovementResponse> GetMovementsByType(StockMovementType movementType)
-        {
-            // TODO: Implement
-            throw new NotImplementedException();
-        }
+            => _stockMovementService.GetByMovementType(movementType);
 
         /// <summary>
         /// Lấy giao dịch trong khoảng thời gian
         /// </summary>
         public List<StockMovementResponse> GetMovementsByDateRange(DateTime fromDate, DateTime toDate)
-        {
-            // TODO: Implement
-            throw new NotImplementedException();
-        }
+            => _stockMovementService.GetByDateRange(fromDate, toDate);
 
         /// <summary>
         /// Lấy lịch sử xuất nhập của sản phẩm tại kho
         /// </summary>
         public List<StockMovementResponse> GetProductWarehouseHistory(long productId, long warehouseId)
-        {
-            // TODO: Implement
-            throw new NotImplementedException();
-        }
+            => _stockMovementService.GetHistoryByProductAndWarehouse(productId, warehouseId);
     }
 }

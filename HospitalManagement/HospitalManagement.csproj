@@ -39,9 +39,6 @@
 	  <EmbeddedResource Remove="view\DashboardPanel1.resx" />
 	  <EmbeddedResource Remove="view\DashboardPanel.resx" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="dto\request\" />
-	</ItemGroup>
 
 	<PropertyGroup>
 		<Nullable>disable</Nullable>

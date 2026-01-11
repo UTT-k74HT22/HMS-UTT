@@ -82,15 +82,27 @@ namespace HospitalManagement.service.impl
             _inventoryRepository.UpdateStock(productId, batchId, warehouseId, newQuantity);
         }
 
-        public void InsertStockMovement(long productId, long batchId, long warehouseId, 
-            int quantity, int before, int after, 
-            long userId, string note, string movementType)
+        public void InsertStockMovement(
+            long productId, long batchId, long warehouseId,
+            int quantity, int before, int after,
+            string note, string movementType)
         {
-            // This is typically called from StockMovementService
-            _inventoryRepository.InsertStockMovement(productId, batchId, warehouseId, 
-                quantity, before, after, 
-                userId, note, movementType);
+            long userProfileId = AuthServiceImpl.GetCurrentUserProfileId()
+                                 ?? throw new Exception("Chưa đăng nhập");
+
+            _inventoryRepository.InsertStockMovement(
+                productId,
+                batchId,
+                warehouseId,
+                quantity,
+                before,
+                after,
+                userProfileId,  
+                note,
+                movementType
+            );
         }
+
 
         public int GetCurrentQuantity(long productId, long batchId, long warehouseId)
         {

@@ -19,8 +19,10 @@ public interface IProductService
     
     ProductDetailResponse GetDetailByCode(string code);
 
-    List<CategoryResponse> GetAllCategories();
+    List<CategoryResponse> getAllCategories();
     
+    List<ProductResponse> GetByCategory(long categoryId);
+
     List<ManufacturerResponse> GetAllManufacturers();
     
     List<BatchResponse> GetBatchesByProduct(long productId);

@@ -1,7 +1,9 @@
 using HospitalManagement.controller;
 using HospitalManagement.entity.enums;
+using HospitalManagement.router;
 using HospitalManagement.view.layouts;
 using HospitalManagement.view.@base;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace HospitalManagement.view
@@ -20,6 +22,9 @@ namespace HospitalManagement.view
         private readonly ProductController? _productController;
         private readonly BatchController? _batchController;
         private readonly StockMovementController? _stockMovementController;
+        private readonly OrderController? _orderController;
+        private readonly CategoryController? _categoryController;
+
 
         private Sidebar _sidebar = null!;
         private Header _header = null!;
@@ -27,23 +32,27 @@ namespace HospitalManagement.view
         private Panel _contentPanel = null!;
 
         // Constructor mặc định cho Designer (REQUIRED for WinForms designer)
-        public MainFrame() : this("Designer", RoleType.ADMIN.ToString(), null!, null!, null!, null!, null!, null!, null!)
+        public MainFrame() : this("Designer", RoleType.ADMIN.ToString(), null!, null!, null!, null!, null!, null!, null! ,null!,null!)
         {
         }
 
         public MainFrame(
             string username, 
             string role, 
+            OrderController orderController,
             AccountController accountController, 
             EmployeeController employeeController,
             InventoryController inventoryController,
             WarehousesController warehousesController,
             ProductController productController,
             BatchController batchController,
-            StockMovementController stockMovementController)
+            StockMovementController stockMovementController,
+            CategoryController categoryController
+            )
         {
             _username = username;
             _role = role;
+            _orderController = orderController;
             _accountController = accountController;
             _employeeController = employeeController;
             _inventoryController = inventoryController;
@@ -51,10 +60,14 @@ namespace HospitalManagement.view
             _productController = productController;
             _batchController = batchController;
             _stockMovementController = stockMovementController;
+            _categoryController = categoryController;
+            
 
             InitializeForm();
             CreateLayout();
             SetupEvents();
+         
+
             
             // Show dashboard by default
             ShowPanel(Sidebar.MENU_DASHBOARD);
@@ -156,11 +169,31 @@ namespace HospitalManagement.view
                
                 
                 Sidebar.MENU_MANUFACTURERS => new ManufacturerManagementForm(),
-                Sidebar.MENU_PRODUCTS => new ProductManagementPanel(),
+                Sidebar.MENU_PRODUCTS =>
+                    Program.ServiceProvider!.GetRequiredService<ProductManagementPanel>(),
+
 
                 Sidebar.MENU_WAREHOUSES => new WarehousesManagementPanel(),
 
-                Sidebar.MENU_BATCHES => new BatchManagementPanel(),
+                Sidebar.MENU_BATCHES => 
+                    Program.ServiceProvider!.GetRequiredService<BatchManagementPanel>(),
+
+
+                Sidebar.MENU_ORDERS => 
+                    _orderController != null &&
+                    _inventoryController != null &&
+                    _productController != null &&
+                    _stockMovementController != null &&
+                     _categoryController !=null
+                        ? new OrderManagementPanel(
+                            AuthContextManager.UserProfileId!.Value,
+                            _orderController,
+                            _inventoryController,
+                            _productController,
+                            _categoryController,
+                            _stockMovementController
+                        )
+                        : CreateComingSoonPanel("Đơn hàng (Cần DI)"),
 
                 Sidebar.MENU_INVENTORY => _inventoryController != null && _warehousesController != null
                     ? new InventoryManagementPanel(_inventoryController, _warehousesController)
@@ -170,6 +203,7 @@ namespace HospitalManagement.view
                     : CreateComingSoonPanel("Xuất/Nhập kho (Cần DI)"),
                 Sidebar.MENU_ORDERS => CreateComingSoonPanel("Đơn hàng"),
                 Sidebar.MENU_INVOICES => new InvoiceManagementForm(),
+                Sidebar.MENU_INVOICES => CreateComingSoonPanel("Hóa đơn"),
                 Sidebar.MENU_PAYMENTS => new PaymentManagementForm(),
                 Sidebar.MENU_REPORT_SUMMARY => CreateComingSoonPanel("Báo cáo tóm tắt"),
                 Sidebar.MENU_REPORT_DETAIL => new ReportDetailManagementPanel(),

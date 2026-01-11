@@ -12,11 +12,6 @@ public class BatchController
     private readonly IBatchService _batchService;
     private readonly IProductService _productService;
 
-    public BatchController(string connectionString)
-    {
-        _batchService = new BatchServiceImpl(connectionString);
-        _productService = new ProductServiceImpl(connectionString);
-    }
     public BatchController(
         IBatchService batchService,
         IProductService productService)
