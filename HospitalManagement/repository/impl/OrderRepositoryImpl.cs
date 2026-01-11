@@ -1,12 +1,12 @@
 ﻿using System.Data;
 using HospitalManagement.dto.request.Order;
 using HospitalManagement.dto.response.Order;
-using HospitalManagement.entity;
+using HospitalManagement.entity.enums;
 using Microsoft.Data.SqlClient;
 
-namespace HospitalManagement.repository.impl;
-
-public class OrderRepositoryImpl : IOrderRepository
+namespace HospitalManagement.repository.impl
+{
+    public class OrderRepositoryImpl : IOrderRepository
     {
         private readonly string _connectionString;
 
@@ -15,7 +15,9 @@ public class OrderRepositoryImpl : IOrderRepository
             _connectionString = connectionString;
         }
 
-        // ===== Tạo đơn hàng =====
+        /* =========================================================
+           CREATE ORDER
+           ========================================================= */
         public long InsertOrder(
             long? customerId,
             string shippingAddress,
@@ -26,10 +28,18 @@ public class OrderRepositoryImpl : IOrderRepository
             const string sql = @"
                 INSERT INTO orders
                 (customer_id, order_number, order_date,
-                 shipping_address, note, discount, tax, created_by_user_id, status)
+                 shipping_address, note, discount, tax,
+                 created_by_user_id, status)
                 VALUES
-                (@customerId, CONCAT('ORD-', DATEDIFF(SECOND,'1970-01-01',GETDATE())),
-                 GETDATE(), @shippingAddress, @note, @discount, 0, @employeeId, 'NEW');
+                (@customerId,
+                 CONCAT('ORD-', DATEDIFF(SECOND,'1970-01-01',GETDATE())),
+                 GETDATE(),
+                 @shippingAddress,
+                 @note,
+                 @discount,
+                 0,
+                 @employeeId,
+                 'NEW');
 
                 SELECT SCOPE_IDENTITY();
             ";
@@ -38,8 +48,8 @@ public class OrderRepositoryImpl : IOrderRepository
             using var cmd = new SqlCommand(sql, conn);
 
             cmd.Parameters.AddWithValue("@customerId", (object?)customerId ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@shippingAddress", shippingAddress);
-            cmd.Parameters.AddWithValue("@note", note ?? string.Empty);
+            cmd.Parameters.AddWithValue("@shippingAddress", (object?)shippingAddress ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@note", (object?)note ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@discount", discount);
             cmd.Parameters.AddWithValue("@employeeId", employeeId);
 
@@ -47,15 +57,19 @@ public class OrderRepositoryImpl : IOrderRepository
             return Convert.ToInt64(cmd.ExecuteScalar());
         }
 
-        // ===== Thêm sản phẩm vào đơn =====
+        /* =========================================================
+           INSERT ORDER ITEM (schema-safe)
+           ========================================================= */
         public void InsertItem(long orderId, OrderItemRequest item)
         {
             const string sql = @"
-                INSERT INTO order_items
-                (order_id, product_id, batch_id, quantity, unit_price, line_total, warehouse_id, note)
-                VALUES
-                (@orderId, @productId, @batchId, @quantity, @unitPrice, @lineTotal, @warehouseId, @note)
-            ";
+        INSERT INTO order_items
+        (order_id, product_id, batch_id, warehouse_id,
+         quantity, unit_price, discount, line_total)
+        VALUES
+        (@orderId, @productId, @batchId, @warehouseId,
+         @quantity, @unitPrice, 0, @lineTotal)
+    ";
 
             using var conn = new SqlConnection(_connectionString);
             using var cmd = new SqlCommand(sql, conn);
@@ -63,39 +77,45 @@ public class OrderRepositoryImpl : IOrderRepository
             cmd.Parameters.AddWithValue("@orderId", orderId);
             cmd.Parameters.AddWithValue("@productId", item.ProductId!.Value);
             cmd.Parameters.AddWithValue("@batchId", (object?)item.BatchId ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@warehouseId", item.WarehouseId); 
             cmd.Parameters.AddWithValue("@quantity", item.Quantity);
             cmd.Parameters.AddWithValue("@unitPrice", item.UnitPrice);
             cmd.Parameters.AddWithValue("@lineTotal", item.UnitPrice * item.Quantity);
-            cmd.Parameters.AddWithValue("@warehouseId", (object?)item.WarehouseId ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@note", item.Note ?? string.Empty);
 
             conn.Open();
             cmd.ExecuteNonQuery();
         }
 
-        // ===== Cập nhật tổng tiền =====
+
+        /* =========================================================
+           UPDATE TOTAL
+           ========================================================= */
         public void UpdateOrderTotal(long orderId)
         {
             const string sql = @"
                 UPDATE o
                 SET subtotal = (
-                    SELECT ISNULL(SUM(line_total), 0)
-                    FROM order_items WHERE order_id = o.id
-                ),
-                total_amount = subtotal - discount
+                        SELECT ISNULL(SUM(line_total), 0)
+                        FROM order_items
+                        WHERE order_id = o.id
+                    ),
+                    total_amount = subtotal - discount
                 FROM orders o
                 WHERE o.id = @orderId
             ";
 
             using var conn = new SqlConnection(_connectionString);
             using var cmd = new SqlCommand(sql, conn);
+
             cmd.Parameters.AddWithValue("@orderId", orderId);
 
             conn.Open();
             cmd.ExecuteNonQuery();
         }
 
-        // ===== Cập nhật trạng thái =====
+        /* =========================================================
+           STATUS
+           ========================================================= */
         public void UpdateStatus(long orderId, string status)
         {
             const string sql = "UPDATE orders SET status = @status WHERE id = @orderId";
@@ -110,24 +130,31 @@ public class OrderRepositoryImpl : IOrderRepository
             cmd.ExecuteNonQuery();
         }
 
-        // ===== Hủy đơn (soft delete) =====
         public void CancelOrder(long orderId)
         {
             UpdateStatus(orderId, OrderStatus.CANCELED.ToString());
         }
 
-        // ===== Lấy tất cả đơn =====
+        /* =========================================================
+           FIND ALL (LIST VIEW)
+           ========================================================= */
         public List<OrderResponse> FindAll()
         {
             const string sql = @"
-                SELECT 
-                    o.id, o.order_number, o.status, o.total_amount,
-                    o.order_date, o.note, o.shipping_address,
+                SELECT
+                    o.id,
+                    o.order_number,
+                    o.order_date,
+                    o.status,
+                    o.total_amount,
+                    o.note,
+                    o.shipping_address,
                     u.full_name AS creator_name,
                     u.phone     AS creator_phone,
                     u.email     AS creator_email
                 FROM orders o
-                LEFT JOIN user_profiles u ON o.created_by_user_id = u.id
+                LEFT JOIN user_profiles u
+                       ON o.created_by_user_id = u.id
                 ORDER BY o.order_date DESC
             ";
 
@@ -140,27 +167,37 @@ public class OrderRepositoryImpl : IOrderRepository
             using var reader = cmd.ExecuteReader();
 
             while (reader.Read())
-                list.Add(Map(reader));
+                list.Add(MapList(reader));
 
             return list;
         }
 
-        // ===== Lấy đơn theo ID =====
+        /* =========================================================
+           FIND BY ID (DETAIL VIEW)
+           ========================================================= */
         public OrderResponse FindById(long orderId)
         {
             const string sql = @"
                 SELECT
-                    o.id, o.order_number, o.order_date, o.status,
-                    o.total_amount, o.note, o.shipping_address,
-                    u.full_name AS customer_name,
-                    u.phone     AS customer_phone,
-                    u.email     AS customer_email,
-                    c.full_name AS creator_name,
-                    c.phone     AS creator_phone,
-                    c.email     AS creator_email
+                    o.id,
+                    o.order_number,
+                    o.order_date,
+                    o.status,
+                    o.total_amount,
+                    o.note,
+                    o.shipping_address,
+                    o.customer_id,
+                    cus.full_name AS customer_name,
+                    cus.phone     AS customer_phone,
+                    cus.email     AS customer_email,
+                    cre.full_name AS creator_name,
+                    cre.phone     AS creator_phone,
+                    cre.email     AS creator_email
                 FROM orders o
-                JOIN user_profiles u ON o.customer_id = u.id
-                LEFT JOIN user_profiles c ON o.created_by_user_id = c.id
+                LEFT JOIN user_profiles cus
+                       ON o.customer_id = cus.id
+                LEFT JOIN user_profiles cre
+                       ON o.created_by_user_id = cre.id
                 WHERE o.id = @orderId
             ";
 
@@ -177,13 +214,20 @@ public class OrderRepositoryImpl : IOrderRepository
             return MapDetail(reader);
         }
 
-        // ===== Lấy danh sách sản phẩm =====
+        /* =========================================================
+           GET ORDER ITEMS
+           ========================================================= */
         public List<OrderItemResponse> GetItems(long orderId)
         {
             const string sql = @"
                 SELECT
-                    oi.id, oi.product_id, oi.batch_id, oi.warehouse_id,
-                    oi.quantity, oi.unit_price, oi.line_total, oi.note,
+                    oi.id,
+                    oi.product_id,
+                    oi.batch_id,
+                    oi.quantity,
+                    oi.unit_price,
+                    oi.line_total,
+                    oi.discount,
                     p.name AS product_name
                 FROM order_items oi
                 JOIN products p ON oi.product_id = p.id
@@ -203,50 +247,87 @@ public class OrderRepositoryImpl : IOrderRepository
             {
                 list.Add(new OrderItemResponse
                 {
-                    Id = reader.GetInt64("id"),
-                    ProductId = reader.GetInt64("product_id"),
-                    ProductName = reader.GetString("product_name"),
-                    BatchId = reader.IsDBNull("batch_id") ? null : reader.GetInt64("batch_id"),
-                    WarehouseId = reader.IsDBNull("warehouse_id") ? null : reader.GetInt64("warehouse_id"),
-                    Quantity = reader.GetInt32("quantity"),
-                    UnitPrice = reader.GetDecimal("unit_price"),
-                    LineTotal = reader.GetDecimal("line_total"),
-                    Note = reader.GetString("note")
+                    Id = reader.GetInt32(reader.GetOrdinal("id")),
+                    ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
+                    ProductName = reader.GetString(reader.GetOrdinal("product_name")),
+                    BatchId = reader.IsDBNull(reader.GetOrdinal("batch_id"))
+                        ? null
+                        : reader.GetInt32(reader.GetOrdinal("batch_id")),
+                    Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
+                    UnitPrice = reader.GetDecimal(reader.GetOrdinal("unit_price")),
+                    LineTotal = reader.GetDecimal(reader.GetOrdinal("line_total"))
                 });
             }
 
             return list;
         }
-
-        // ===== Mapper dùng chung =====
-        private static OrderResponse Map(SqlDataReader r) => new()
+        private static OrderResponse MapList(SqlDataReader r) => new()
         {
-            Id = r.GetInt64("id"),
-            OrderNumber = r.GetString("order_number"),
-            OrderDate = r.GetDateTime("order_date"),
-            Status = r.GetString("status"),
-            TotalAmount = r.GetDecimal("total_amount"),
-            Note = r.IsDBNull("note") ? "-" : r.GetString("note"),
-            ShippingAddress = r.GetString("shipping_address"),
-            CreatorName = r.GetString("creator_name"),
-            CreatorEmail = r.GetString("creator_email"),
-            CreatorPhone = r.GetString("creator_phone")
-        };
+            Id = r.GetInt32(r.GetOrdinal("id")),
+            OrderNumber = r.GetString(r.GetOrdinal("order_number")),
+            OrderDate = r.GetDateTime(r.GetOrdinal("order_date")),
+            Status = r.GetString(r.GetOrdinal("status")),
+            TotalAmount = r.GetDecimal(r.GetOrdinal("total_amount")),
 
+            Note = r.IsDBNull(r.GetOrdinal("note"))
+                ? null
+                : r.GetString(r.GetOrdinal("note")),
+
+            ShippingAddress = r.IsDBNull(r.GetOrdinal("shipping_address"))
+                ? null
+                : r.GetString(r.GetOrdinal("shipping_address")),
+
+            CreatorName = r.IsDBNull(r.GetOrdinal("creator_name"))
+                ? null
+                : r.GetString(r.GetOrdinal("creator_name")),
+
+            CreatorPhone = r.IsDBNull(r.GetOrdinal("creator_phone"))
+                ? null
+                : r.GetString(r.GetOrdinal("creator_phone")),
+
+            CreatorEmail = r.IsDBNull(r.GetOrdinal("creator_email"))
+                ? null
+                : r.GetString(r.GetOrdinal("creator_email"))
+        };
         private static OrderResponse MapDetail(SqlDataReader r) => new()
         {
-            Id = r.GetInt64("id"),
-            OrderNumber = r.GetString("order_number"),
-            OrderDate = r.GetDateTime("order_date"),
-            Status = r.GetString("status"),
-            TotalAmount = r.GetDecimal("total_amount"),
-            Note = r.GetString("note"),
-            ShippingAddress = r.GetString("shipping_address"),
-            CustomerName = r.GetString("customer_name"),
-            CustomerPhone = r.GetString("customer_phone"),
-            CustomerEmail = r.GetString("customer_email"),
-            CreatorName = r.GetString("creator_name"),
-            CreatorEmail = r.GetString("creator_email"),
-            CreatorPhone = r.GetString("creator_phone")
+            Id = r.GetInt32(r.GetOrdinal("id")),
+            OrderNumber = r.GetString(r.GetOrdinal("order_number")),
+            OrderDate = r.GetDateTime(r.GetOrdinal("order_date")),
+            Status = r.GetString(r.GetOrdinal("status")),
+            TotalAmount = r.GetDecimal(r.GetOrdinal("total_amount")),
+            Note = r.IsDBNull(r.GetOrdinal("note")) ? null : r.GetString(r.GetOrdinal("note")),
+            ShippingAddress = r.IsDBNull(r.GetOrdinal("shipping_address"))
+                ? null
+                : r.GetString(r.GetOrdinal("shipping_address")),
+
+            CustomerId = r.IsDBNull(r.GetOrdinal("customer_id"))
+                ? null
+                : r.GetInt32(r.GetOrdinal("customer_id")),
+
+            CustomerName = r.IsDBNull(r.GetOrdinal("customer_name"))
+                ? null
+                : r.GetString(r.GetOrdinal("customer_name")),
+
+            CustomerPhone = r.IsDBNull(r.GetOrdinal("customer_phone"))
+                ? null
+                : r.GetString(r.GetOrdinal("customer_phone")),
+
+            CustomerEmail = r.IsDBNull(r.GetOrdinal("customer_email"))
+                ? null
+                : r.GetString(r.GetOrdinal("customer_email")),
+
+            CreatorName = r.IsDBNull(r.GetOrdinal("creator_name"))
+                ? null
+                : r.GetString(r.GetOrdinal("creator_name")),
+
+            CreatorPhone = r.IsDBNull(r.GetOrdinal("creator_phone"))
+                ? null
+                : r.GetString(r.GetOrdinal("creator_phone")),
+
+            CreatorEmail = r.IsDBNull(r.GetOrdinal("creator_email"))
+                ? null
+                : r.GetString(r.GetOrdinal("creator_email"))
         };
     }
+}

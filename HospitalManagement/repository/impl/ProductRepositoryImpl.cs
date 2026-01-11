@@ -292,6 +292,81 @@ public class ProductRepositoryImpl : IProductRepository
 
         // ================= UNUSED (but required by interface) =================
         public ProductResponse FindById(long id) => null;
-        public List<BatchResponse> FindBatchesByProduct(long productId) => new();
-        public List<ProductResponse> FindByCategory(long categoryId) => new();
+        public List<BatchResponse> FindBatchesByProduct(long productId)
+        {
+            const string sql = @"
+        SELECT
+            id,
+            batch_code,
+            expiry_date
+        FROM batches
+        WHERE product_id = @productId
+        ORDER BY expiry_date ASC
+    ";
+
+            var list = new List<BatchResponse>();
+
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("@productId", productId);
+
+            conn.Open();
+            using var rs = cmd.ExecuteReader();
+
+            while (rs.Read())
+            {
+                list.Add(new BatchResponse
+                {
+                    Id = Convert.ToInt64(rs["id"]),
+                    BatchCode = rs["batch_code"]?.ToString(),
+                    ExpiryDate = rs["expiry_date"] == DBNull.Value
+                        ? null
+                        : Convert.ToDateTime(rs["expiry_date"]).Date
+                });
+            }
+
+            return list;
+        }
+
+        public List<ProductResponse> FindByCategory(long categoryId)
+        {
+            const string sql = @"
+        SELECT
+            p.id,
+            p.code,
+            p.name,
+            p.standard_price,
+            p.status
+        FROM products p
+        WHERE p.category_id = @categoryId
+          AND p.status = @status
+        ORDER BY p.name
+    ";
+
+            var list = new List<ProductResponse>();
+
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("@categoryId", categoryId);
+            cmd.Parameters.AddWithValue("@status", ProductStatus.ACTIVE.ToString());
+
+            conn.Open();
+            using var rs = cmd.ExecuteReader();
+
+            while (rs.Read())
+            {
+                list.Add(new ProductResponse
+                {
+                    Id = Convert.ToInt64(rs["id"]),
+                    Code = rs["code"]?.ToString(),
+                    Name = rs["name"]?.ToString(),
+                    StandardPrice = (decimal)rs["standard_price"],
+                    Status = Enum.Parse<ProductStatus>(rs["status"].ToString())
+                });
+            }
+
+            return list;
+        }
     }

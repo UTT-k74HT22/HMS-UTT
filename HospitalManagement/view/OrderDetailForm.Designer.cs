@@ -47,6 +47,7 @@
             // dgvItems
             // 
             dgvItems.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dgvItems.BackgroundColor = SystemColors.Control;
             dgvItems.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvItems.Location = new Point(12, 197);
             dgvItems.Name = "dgvItems";
@@ -56,9 +57,10 @@
             // lblOrderCode
             // 
             lblOrderCode.AutoSize = true;
+            lblOrderCode.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblOrderCode.Location = new Point(34, 18);
             lblOrderCode.Name = "lblOrderCode";
-            lblOrderCode.Size = new Size(51, 15);
+            lblOrderCode.Size = new Size(53, 15);
             lblOrderCode.TabIndex = 1;
             lblOrderCode.Text = "Mã đơn:";
             // 
@@ -83,27 +85,30 @@
             // lblOrderDate
             // 
             lblOrderDate.AutoSize = true;
+            lblOrderDate.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblOrderDate.Location = new Point(219, 18);
             lblOrderDate.Name = "lblOrderDate";
-            lblOrderDate.Size = new Size(58, 15);
+            lblOrderDate.Size = new Size(59, 15);
             lblOrderDate.TabIndex = 4;
             lblOrderDate.Text = "Ngày tạo:";
             // 
             // lblStatus
             // 
             lblStatus.AutoSize = true;
+            lblStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblStatus.Location = new Point(363, 18);
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(63, 15);
+            lblStatus.Size = new Size(65, 15);
             lblStatus.TabIndex = 5;
             lblStatus.Text = "Trạng thái:";
             // 
             // lblTotal
             // 
             lblTotal.AutoSize = true;
+            lblTotal.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTotal.Location = new Point(570, 18);
             lblTotal.Name = "lblTotal";
-            lblTotal.Size = new Size(61, 15);
+            lblTotal.Size = new Size(63, 15);
             lblTotal.TabIndex = 6;
             lblTotal.Text = "Tổng tiền:";
             // 
@@ -143,23 +148,23 @@
             lblCreatorName.TabIndex = 10;
             lblCreatorName.Text = "Người tạo:";
             // 
-            // label10
-            // 
-            lblCreatorEmail.AutoSize = true;
-            lblCreatorEmail.Location = new Point(219, 148);
-            lblCreatorEmail.Name = "label10";
-            lblCreatorEmail.Size = new Size(39, 15);
-            lblCreatorEmail.TabIndex = 11;
-            lblCreatorEmail.Text = "Email:";
-            // 
-            // label11
+            // lblCreatorPhone
             // 
             lblCreatorPhone.AutoSize = true;
             lblCreatorPhone.Location = new Point(460, 148);
-            lblCreatorPhone.Name = "label11";
+            lblCreatorPhone.Name = "lblCreatorPhone";
             lblCreatorPhone.Size = new Size(85, 15);
             lblCreatorPhone.TabIndex = 12;
             lblCreatorPhone.Text = "SĐT người tạo:";
+            // 
+            // lblCreatorEmail
+            // 
+            lblCreatorEmail.AutoSize = true;
+            lblCreatorEmail.Location = new Point(219, 148);
+            lblCreatorEmail.Name = "lblCreatorEmail";
+            lblCreatorEmail.Size = new Size(39, 15);
+            lblCreatorEmail.TabIndex = 11;
+            lblCreatorEmail.Text = "Email:";
             // 
             // OrderDetailForm
             // 

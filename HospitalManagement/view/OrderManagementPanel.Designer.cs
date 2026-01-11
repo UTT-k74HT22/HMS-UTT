@@ -51,6 +51,8 @@
             // 
             // dgvOrders
             // 
+            dgvOrders.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            dgvOrders.BackgroundColor = SystemColors.Control;
             dgvOrders.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvOrders.Location = new Point(3, 85);
             dgvOrders.Name = "dgvOrders";
@@ -104,7 +106,7 @@
             // 
             // btnRefresh
             // 
-            btnRefresh.Location = new Point(944, 36);
+            btnRefresh.Location = new Point(945, 32);
             btnRefresh.Name = "btnRefresh";
             btnRefresh.Size = new Size(75, 31);
             btnRefresh.TabIndex = 7;

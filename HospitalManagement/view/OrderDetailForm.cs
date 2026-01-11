@@ -12,10 +12,12 @@ namespace HospitalManagement.view
         private readonly OrderController _controller;
         private readonly long _orderId;
 
-        public OrderDetailForm(long orderId)
+        public OrderDetailForm(long orderId, OrderController controller)
         {
             InitializeComponent();
+
             _orderId = orderId;
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
 
             InitGrid();
             LoadOrderInfo();
