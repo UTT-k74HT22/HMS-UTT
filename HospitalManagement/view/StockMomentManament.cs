@@ -1,18 +1,10 @@
 ﻿using HospitalManagement.controller;
 using HospitalManagement.dto.request;
 using HospitalManagement.dto.response;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using HospitalManagement.entity;
 using HospitalManagement.router;
-using BatchStatus = HospitalManagement.entity.enums.BatchStatus;
+using HospitalManagement.utils.excel.core;
+using HospitalManagement.utils.excel.writers;
 
 namespace HospitalManagement.view
 {
@@ -284,6 +276,9 @@ namespace HospitalManagement.view
             btnExport.Click += (_, _) => OpenMovementDialog(StockMovementType.EXPORT);
             btnAdjust.Click += (_, _) => OpenMovementDialog(StockMovementType.ADJUST);
             btnTransfer.Click += (_, _) => OpenMovementDialog(StockMovementType.TRANSFER);
+            btnExportExcel.Click += (_, _) => ExportExcel();
+            btnDowloadTemplate.Click += (_, _) => DownloadTemplate();
+            btnImportExcel.Click += (sender, args) => ImportExcel();
 
             txtKeyword.KeyDown += (_, e) =>
             {
@@ -296,6 +291,25 @@ namespace HospitalManagement.view
 
             cboWarehouse.SelectedIndexChanged += (_, _) => ApplyFilters();
             cboMovementType.SelectedIndexChanged += (_, _) => ApplyFilters();
+        }
+
+        private void ImportExcel()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DownloadTemplate()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ExportExcel()
+        {
+            Console.WriteLine("Export excel running...");
+            
+            var filteredDate = _bs.List.Cast<StockMovementResponse>().ToList();
+            
+            ExcelExporter.ExportWithDialog<StockMovementResponse>(filteredDate, new StockMovementExcelWriter(), this.FindForm());
         }
 
         private void ApplyFilters()
