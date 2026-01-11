@@ -12,40 +12,43 @@ public class StockMovementRepositoryImpl : IStockMovementRepository
     {
         _connectionString = connectionString;
     }
-    
+
     public long Create(CreateStockMovementRequest request)
     {
-        string query = @"
-                INSERT INTO stock_movement 
-                    (movement_type, product_id, batch_id, warehouse_id, quantity, 
-                     quantity_before, quantity_after, reference_type, reference_id,
-                     performed_by_user_id, note, movement_date, created_at)
-                OUTPUT INSERTED.id
-                VALUES 
-                    (@movementType, @productId, @batchId, @warehouseId, @quantity,
-                     @quantityBefore, @quantityAfter, @referenceType, @referenceId,
-                     @performedBy, @note, GETDATE(), GETDATE())";
+        const string query = @"
+                            INSERT INTO dbo.stock_movements
+                            (
+                                movement_type, product_id, batch_id, warehouse_id, quantity,
+                                quantity_before, quantity_after,
+                                reference_type, reference_id, performed_by_user_id, note
+                            )
+                            OUTPUT INSERTED.id
+                            VALUES
+                            (
+                                @movementType, @productId, @batchId, @warehouseId, @quantity,
+                                @quantityBefore, @quantityAfter,
+                                @referenceType, @referenceId, @performedBy, @note
+                            );";
 
-        using (var connection = new SqlConnection(_connectionString))
-        using (var command = new SqlCommand(query, connection))
-        {
-            command.Parameters.AddWithValue("@movementType", request.MovementType.ToString());
-            command.Parameters.AddWithValue("@productId", request.ProductId);
-            command.Parameters.AddWithValue("@batchId", request.BatchId ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@warehouseId", request.WarehouseId);
-            command.Parameters.AddWithValue("@quantity", request.Quantity);
-            command.Parameters.AddWithValue("@quantityBefore", request.QuantityBefore ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@quantityAfter", request.QuantityAfter ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@referenceType", request.ReferenceType ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@referenceId", request.ReferenceId ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@performedBy", request.PerformedByUserId);
-            command.Parameters.AddWithValue("@note", request.Note ?? (object)DBNull.Value);
+        using var connection = new SqlConnection(_connectionString);
+        using var command = new SqlCommand(query, connection);
 
-            connection.Open();
-            return (int)command.ExecuteScalar();
-        }
+        command.Parameters.AddWithValue("@movementType", request.MovementType.ToString());
+        command.Parameters.AddWithValue("@productId", request.ProductId);
+        command.Parameters.AddWithValue("@batchId", request.BatchId ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@warehouseId", request.WarehouseId);
+        command.Parameters.AddWithValue("@quantity", request.Quantity);
+        command.Parameters.AddWithValue("@quantityBefore", request.QuantityBefore ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@quantityAfter", request.QuantityAfter ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@referenceType", request.ReferenceType ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@referenceId", request.ReferenceId ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@performedBy", request.PerformedByUserId);
+        command.Parameters.AddWithValue("@note", request.Note ?? (object)DBNull.Value);
+
+        connection.Open();
+        return Convert.ToInt64(command.ExecuteScalar());
     }
-
+    
     public List<StockMovementResponse> GetAll()
     {
         var movements = new List<StockMovementResponse>();
@@ -113,7 +116,7 @@ public class StockMovementRepositoryImpl : IStockMovementRepository
                     a.username AS performed_by_username,
                     up.full_name AS performed_by_full_name,
                     sm.note
-                FROM stock_movement sm
+                FROM inventory_items sm
                 INNER JOIN product p ON sm.product_id = p.id
                 LEFT JOIN batch b ON sm.batch_id = b.id
                 INNER JOIN warehouse w ON sm.warehouse_id = w.id
@@ -155,7 +158,7 @@ public class StockMovementRepositoryImpl : IStockMovementRepository
                     a.username AS performed_by_username,
                     up.full_name AS performed_by_full_name,
                     sm.note
-                FROM stock_movement sm
+                FROM inventory_items sm
                 INNER JOIN product p ON sm.product_id = p.id
                 LEFT JOIN batch b ON sm.batch_id = b.id
                 INNER JOIN warehouse w ON sm.warehouse_id = w.id
@@ -203,7 +206,7 @@ public class StockMovementRepositoryImpl : IStockMovementRepository
 
     public long InsertWithQuantityTracking(CreateStockMovementRequest request)
     {
-        throw new NotImplementedException();
+        return Create(request);
     }
 
     private StockMovementResponse MapToStockMovementResponse(SqlDataReader reader)

@@ -344,17 +344,13 @@ namespace HospitalManagement.view
 
         private void OpenMovementDialog(StockMovementType movementType)
         {
-            var dialog = new StockMovementDialog(
-                movementType,
-                _warehouseController,
-                _productController,
-                _batchController);
+            var dialog = new StockMovementDialog(movementType, _warehouseController, _productController, _batchController);
 
             if (dialog.ShowDialog() == DialogResult.OK && dialog.Result != null)
             {
                 try
                 {
-                    // _stockMovementController.CreateMovement(dialog.Result);
+                    _stockMovementController.CreateStockMovement(dialog.Result);
 
                     string successMsg = movementType switch
                     {
@@ -403,11 +399,7 @@ namespace HospitalManagement.view
         private TextBox txtQuantity;
         private TextBox txtNote;
 
-        public StockMovementDialog(
-            StockMovementType movementType,
-            WarehousesController warehouseController,
-            ProductController productController,
-            BatchController batchController)
+        public StockMovementDialog(StockMovementType movementType, WarehousesController warehouseController, ProductController productController, BatchController batchController)
         {
             _movementType = movementType;
             _warehouseController = warehouseController;
@@ -569,8 +561,9 @@ namespace HospitalManagement.view
             cboBatch.Items.Clear();
             cboBatch.Enabled = false;
 
-            if (cboProduct.SelectedValue is long productId)
+            if (cboProduct.SelectedValue != null)
             {
+                long productId = Convert.ToInt64(cboProduct.SelectedValue);
                 try
                 {
                     var batches = _batchController.GetByProduct(productId)
@@ -620,12 +613,12 @@ namespace HospitalManagement.view
                 Result = new CreateStockMovementRequest
                 {
                     MovementType = _movementType,
-                    WarehouseId = (long)cboWarehouse.SelectedValue,
-                    ProductId = (long)cboProduct.SelectedValue,
-                    BatchId = (long)cboBatch.SelectedValue,
+                    WarehouseId = Convert.ToInt64(cboWarehouse.SelectedValue),
+                    ProductId   = Convert.ToInt64(cboProduct.SelectedValue),
+                    BatchId     = Convert.ToInt64(cboBatch.SelectedValue),
                     Quantity = quantity,
                     Note = txtNote.Text.Trim(),
-                    PerformedByUserId = 1 // TODO: Get from logged-in user session
+                    PerformedByUserId = 1
                 };
 
                 DialogResult = DialogResult.OK;

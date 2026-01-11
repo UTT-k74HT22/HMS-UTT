@@ -77,7 +77,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
                               AND DATEDIFF(MONTH, GETDATE(), b.expiry_date) <= 3 
                               THEN 1 ELSE 0 END AS is_near_expiry,
                          ii.last_stock_check
-                     FROM inventory_item ii
+                     FROM inventory_items ii
                      INNER JOIN product p ON ii.product_id = p.id
                      LEFT JOIN batch b ON ii.batch_id = b.id
                      INNER JOIN warehouse w ON ii.warehouse_id = w.id
@@ -119,7 +119,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
                                  AND DATEDIFF(MONTH, GETDATE(), b.expiry_date) <= 3 
                                  THEN 1 ELSE 0 END AS is_near_expiry,
                             ii.last_stock_check
-                        FROM inventory_item ii
+                        FROM inventory_items ii
                         INNER JOIN product p ON ii.product_id = p.id
                         LEFT JOIN batch b ON ii.batch_id = b.id
                         INNER JOIN warehouse w ON ii.warehouse_id = w.id
@@ -163,7 +163,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
                          AND DATEDIFF(MONTH, GETDATE(), b.expiry_date) <= 3 
                          THEN 1 ELSE 0 END AS is_near_expiry,
                     ii.last_stock_check
-                FROM inventory_item ii
+                FROM inventory_items ii
                 INNER JOIN product p ON ii.product_id = p.id
                 LEFT JOIN batch b ON ii.batch_id = b.id
                 INNER JOIN warehouse w ON ii.warehouse_id = w.id
@@ -216,7 +216,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
                          AND DATEDIFF(MONTH, GETDATE(), b.expiry_date) <= 3 
                          THEN 1 ELSE 0 END AS is_near_expiry,
                     ii.last_stock_check
-                FROM inventory_item ii
+                FROM inventory_items ii
                 INNER JOIN product p ON ii.product_id = p.id
                 LEFT JOIN batch b ON ii.batch_id = b.id
                 INNER JOIN warehouse w ON ii.warehouse_id = w.id
@@ -261,7 +261,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
                     CASE WHEN ii.quantity_on_hand >= ii.max_threshold THEN 1 ELSE 0 END AS is_over_stock,
                     1 AS is_near_expiry,
                     ii.last_stock_check
-                FROM inventory_item ii
+                FROM inventory_items ii
                 INNER JOIN product p ON ii.product_id = p.id
                 INNER JOIN batch b ON ii.batch_id = b.id
                 INNER JOIN warehouse w ON ii.warehouse_id = w.id
@@ -296,7 +296,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
     public void UpdateThresholds(long inventoryItemId, UpdateInventoryThresholdRequest request)
     {
         string query = @"
-                UPDATE inventory_item
+                UPDATE inventory_items
                 SET min_threshold = @minThreshold,
                     max_threshold = @maxThreshold,
                     updated_at = GETDATE()
@@ -318,7 +318,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
     {
         string query = @"
                 SELECT ISNULL(SUM(quantity_on_hand), 0)
-                FROM inventory_item
+                FROM inventory_items
                 WHERE product_id = @productId";
 
         using (var connection = new SqlConnection(_connectionString))
@@ -334,7 +334,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
     {
         string query = @"
                 SELECT ISNULL(SUM(quantity_on_hand - quantity_reserved), 0)
-                FROM inventory_item
+                FROM inventory_items
                 WHERE product_id = @productId
                   AND warehouse_id = @warehouseId";
 
@@ -350,15 +350,77 @@ public class InventoryRepositoryImpl : IInventoryRepository
         }
     }
 
+    /// <summary>
+    /// Get or create inventory item (used in transaction)
+    /// Step 1: Try to get existing inventory item
+    /// Step 2: If not found, create new inventory item with quantity 0
+    /// Step 3: Return inventory item ID and current quantity
+    /// </summary>
+    /// <param name="productId"></param>
+    /// <param name="batchId"></param>
+    /// <param name="warehouseId"></param>
+    /// <returns></returns>
     public InventoryItemInfo GetOrCreateInventoryItem(long productId, long batchId, long warehouseId)
     {
-        throw new NotImplementedException();
+        const string findQuery = """
+                                     SELECT ii.id, ii.quantity_on_hand
+                                     FROM inventory_items ii
+                                     WHERE product_id = @productId
+                                       AND batch_id = @batchId
+                                       AND warehouse_id = @warehouseId
+                                 """;
+
+        const string insertQuery = """
+                                       INSERT INTO inventory_items(product_id, batch_id, warehouse_id, quantity_on_hand)
+                                       VALUES(@productId, @batchId, @warehouseId, 0);
+                                       SELECT SCOPE_IDENTITY();
+                                   """;
+
+        using var connection = new SqlConnection(_connectionString);
+        connection.Open();
+
+        // 1) Try find
+        using (var command = new SqlCommand(findQuery, connection))
+        {
+            command.Parameters.AddWithValue("@productId", productId);
+            command.Parameters.AddWithValue("@batchId", batchId);
+            command.Parameters.AddWithValue("@warehouseId", warehouseId);
+
+            using var reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                return new InventoryItemInfo
+                {
+                    InventoryItemId = Convert.ToInt64(reader.GetValue(0)),
+                    CurrentQuantity = Convert.ToInt32(reader.GetValue(1))
+                };
+            }
+        }
+
+        // 2) Not found -> create
+        long newId;
+        using (var command = new SqlCommand(insertQuery, connection))
+        {
+            command.Parameters.AddWithValue("@productId", productId);
+            command.Parameters.AddWithValue("@batchId", batchId);
+            command.Parameters.AddWithValue("@warehouseId", warehouseId);
+
+            var idObj = command.ExecuteScalar();
+            newId = Convert.ToInt64(idObj);
+        }
+
+        // 3) Return newly created record (quantity = 0)
+        return new InventoryItemInfo
+        {
+            InventoryItemId = newId,
+            CurrentQuantity = 0
+        };
     }
 
     public void UpdateQuantity(long inventoryItemId, int newQuantity)
     {
         string query = @"
-                UPDATE inventory_item
+                UPDATE inventory_items
                 SET quantity_on_hand = @newQuantity,
                     last_stock_check = GETDATE(),
                     updated_at = GETDATE()
@@ -379,7 +441,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
     {
         string query = @"
                 SELECT ISNULL(quantity_on_hand, 0)
-                FROM inventory_item
+                FROM inventory_items
                 WHERE product_id = @productId
                   AND batch_id = @batchId
                   AND warehouse_id = @warehouseId";
@@ -400,7 +462,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
     public void UpdateStock(long productId, long batchId, long warehouseId, int newQuantity)
     {
         string query = @"
-                UPDATE inventory_item
+                UPDATE inventory_items
                 SET quantity_on_hand = @newQuantity,
                     last_stock_check = GETDATE(),
                     updated_at = GETDATE()
