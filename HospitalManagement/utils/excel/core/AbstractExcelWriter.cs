@@ -1,137 +1,110 @@
-// using OfficeOpenXml;
-// using System.Globalization;
-// using OfficeOpenXml.Core.ExcelPackage;
-//
-// namespace HospitalManagement.utils.excel.core
-// {
-//     /// <summary>
-//     /// Base class cho các Excel Writer
-//     /// Cung cấp các helper methods để ghi dữ liệu vào cell
-//     /// Tương đương với AbstractExcelWriter.java
-//     /// </summary>
-//     /// <typeparam name="T">Kiểu dữ liệu cần export</typeparam>
-//     public abstract class AbstractExcelWriter<T> : IExcelSheetWriter<T>
-//     {
-//         protected static readonly string DateFormat = "dd/MM/yyyy";
-//         protected static readonly string DateTimeFormat = "dd/MM/yyyy HH:mm";
-//
-//         // ========== Abstract Members (phải implement) ==========
-//         
-//         public abstract string SheetName { get; }
-//         public abstract string Title { get; }
-//         public abstract string[] Headers { get; }
-//         public abstract void Create(ExcelWorksheet worksheet, ExcelStyles styles, List<T> data);
-//
-//         // ========== Helper Methods ==========
-//
-//         /// <summary>
-//         /// Trả về chuỗi an toàn (không null)
-//         /// </summary>
-//         protected string Safe(string? s)
-//         {
-//             return s ?? string.Empty;
-//         }
-//
-//         /// <summary>
-//         /// Ghi giá trị vào cell với style
-//         /// </summary>
-//         protected void SetCell(ExcelWorksheet worksheet, int row, int col, object? value, ExcelStyles style)
-//         {
-//             var cell = worksheet.Cells[row, col];
-//             
-//             if (value == null)
-//             {
-//                 cell.Value = string.Empty;
-//             }
-//             else if (value is string str)
-//             {
-//                 cell.Value = str;
-//             }
-//             else if (value is bool b)
-//             {
-//                 cell.Value = b;
-//             }
-//             else if (value is DateTime dt)
-//             {
-//                 cell.Value = dt.ToString(DateTimeFormat, CultureInfo.InvariantCulture);
-//             }
-//             else if (value is DateOnly d)
-//             {
-//                 cell.Value = d.ToString(DateFormat, CultureInfo.InvariantCulture);
-//             }
-//             else if (value is decimal dec)
-//             {
-//                 cell.Value = dec;
-//             }
-//             else if (value is int || value is long || value is double || value is float)
-//             {
-//                 cell.Value = Convert.ToDouble(value);
-//             }
-//             else
-//             {
-//                 cell.Value = value.ToString();
-//             }
-//
-//             // Apply style
-//             ApplyStyle(cell, style);
-//         }
-//
-//         /// <summary>
-//         /// Apply style vào cell
-//         /// </summary>
-//         protected void ApplyStyle(ExcelRange cell, ExcelStyles style)
-//         {
-//             cell.Style.Font.Bold = style.Font.Bold;
-//             cell.Style.Font.Size = style.Font.Size;
-//             cell.Style.Font.Color.SetColor(style.Font.Color.Rgb);
-//             
-//             if (style.Fill.PatternType != OfficeOpenXml.Style.ExcelFillStyle.None)
-//             {
-//                 cell.Style.Fill.PatternType = style.Fill.PatternType;
-//                 cell.Style.Fill.BackgroundColor.SetColor(style.Fill.BackgroundColor.Rgb);
-//             }
-//             
-//             cell.Style.HorizontalAlignment = style.HorizontalAlignment;
-//             cell.Style.VerticalAlignment = style.VerticalAlignment;
-//             cell.Style.WrapText = style.WrapText;
-//             
-//             // Borders
-//             cell.Style.Border.Top.Style = style.Border.Top.Style;
-//             cell.Style.Border.Bottom.Style = style.Border.Bottom.Style;
-//             cell.Style.Border.Left.Style = style.Border.Left.Style;
-//             cell.Style.Border.Right.Style = style.Border.Right.Style;
-//             
-//             if (style.Border.Top.Style != OfficeOpenXml.Style.ExcelBorderStyle.None)
-//             {
-//                 cell.Style.Border.Top.Color.SetColor(style.Border.Top.Color.Rgb);
-//                 cell.Style.Border.Bottom.Color.SetColor(style.Border.Bottom.Color.Rgb);
-//                 cell.Style.Border.Left.Color.SetColor(style.Border.Left.Color.Rgb);
-//                 cell.Style.Border.Right.Color.SetColor(style.Border.Right.Color.Rgb);
-//             }
-//         }
-//
-//         /// <summary>
-//         /// Format số thành chuỗi với ngăn cách hàng nghìn
-//         /// </summary>
-//         protected string FormatNumber(decimal? number)
-//         {
-//             return number?.ToString("N0", CultureInfo.GetCultureInfo("vi-VN")) ?? string.Empty;
-//         }
-//
-//         /// <summary>
-//         /// Format DateTime
-//         /// </summary>
-//         protected string FormatDateTime(DateTime? dateTime)
-//         {
-//             return dateTime?.ToString(DateTimeFormat) ?? string.Empty;
-//         }
-//
-//         /// <summary>
-//         /// Format Date
-//         /// </summary>
-//         protected string FormatDate(DateTime? date)
-//         {
-//             return date?.ToString(DateFormat) ?? string.Empty;
-//         }
-//     }
-// }
+using System.Globalization;
+using ClosedXML.Excel;
+
+namespace HospitalManagement.utils.excel.core
+{
+    public abstract class AbstractExcelWriter<T> : IExcelSheetWriter<T>
+    {
+        protected static readonly string DateFormat = "dd/MM/yyyy";
+        protected static readonly string DateTimeFormat = "dd/MM/yyyy HH:mm";
+
+        public abstract string SheetName { get; }
+        public abstract string Title { get; }
+        public abstract string[] Headers { get; }
+        
+        public abstract void Create(IXLWorksheet worksheet, List<T> data);
+
+        protected string Safe(string? s) => s ?? string.Empty;
+
+        // Helper để ghi giá trị với style
+        protected void SetCell(IXLWorksheet worksheet, int row, int col, object? value, Action<IXLCell> styleAction)
+        {
+            var cell = worksheet.Cell(row, col);
+            
+            // Set value - ClosedXML cần explicit type
+            switch (value)
+            {
+                case null:
+                    cell.SetValue(string.Empty);
+                    break;
+                case DateTime dt:
+                    cell.SetValue(dt.ToString(DateTimeFormat, CultureInfo.InvariantCulture));
+                    break;
+                case DateOnly d:
+                    cell.SetValue(d.ToString(DateFormat, CultureInfo.InvariantCulture));
+                    break;
+                case int i:
+                    cell.SetValue(i);
+                    break;
+                case long l:
+                    cell.SetValue(l);
+                    break;
+                case decimal dec:
+                    cell.SetValue((double)dec);
+                    break;
+                case double dbl:
+                    cell.SetValue(dbl);
+                    break;
+                case float f:
+                    cell.SetValue(f);
+                    break;
+                case string s:
+                    cell.SetValue(s);
+                    break;
+                default:
+                    cell.SetValue(value.ToString() ?? string.Empty);
+                    break;
+            }
+
+            // Apply style
+            styleAction(cell);
+        }
+
+        // Style presets
+        protected void ApplyTitleStyle(IXLCell cell)
+        {
+            cell.Style.Font.Bold = true;
+            cell.Style.Font.FontSize = 16;
+            cell.Style.Font.FontColor = XLColor.White;
+            cell.Style.Fill.BackgroundColor = XLColor.DarkBlue;
+            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        }
+
+        protected void ApplyHeaderStyle(IXLCell cell)
+        {
+            cell.Style.Font.Bold = true;
+            cell.Style.Font.FontSize = 12;
+            cell.Style.Font.FontColor = XLColor.White;
+            cell.Style.Fill.BackgroundColor = XLColor.RoyalBlue;
+            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        }
+
+        protected void ApplyDataStyle(IXLCell cell, bool center = false)
+        {
+            cell.Style.Font.FontSize = 11;
+            cell.Style.Font.FontColor = XLColor.Black;
+            cell.Style.Fill.BackgroundColor = XLColor.White;
+            cell.Style.Alignment.Horizontal = center 
+                ? XLAlignmentHorizontalValues.Center 
+                : XLAlignmentHorizontalValues.Left;
+            cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            cell.Style.Alignment.WrapText = true;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        }
+
+        protected void ApplyBadgeStyle(IXLCell cell, bool isActive)
+        {
+            cell.Style.Font.Bold = true;
+            cell.Style.Font.FontSize = 11;
+            cell.Style.Font.FontColor = XLColor.White;
+            cell.Style.Fill.BackgroundColor = isActive ? XLColor.Green : XLColor.Red;
+            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        }
+    }
+}
