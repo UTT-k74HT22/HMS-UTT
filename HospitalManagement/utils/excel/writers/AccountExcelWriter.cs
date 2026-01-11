@@ -1,69 +1,62 @@
-// using HospitalManagement.entity;
-// using HospitalManagement.utils.excel.core;
-// using OfficeOpenXml;
-//
-// namespace HospitalManagement.utils.excel.writers
-// {
-//     /// <summary>
-//     /// Excel writer cho Account entity
-//     /// Export danh sách tài khoản ra file Excel
-//     /// </summary>
-//     public class AccountExcelWriter : AbstractExcelWriter<Account>
-//     {
-//         public override string SheetName => "Accounts";
-//         public override string Title => "DANH SÁCH TÀI KHOẢN";
-//         public override string[] Headers => new[]
-//         {
-//             "STT",
-//             "Account ID",
-//             "Username",
-//             "Role",
-//             "Trạng thái",
-//             "Last Login",
-//             "Ngày tạo"
-//         };
-//
-//         public override void Create(ExcelWorksheet worksheet, ExcelStyles styles, List<Account> data)
-//         {
-//             int currentRow = 1;
-//
-//             // ===== Title Row =====
-//             worksheet.Row(currentRow).Height = 25;
-//             worksheet.Cells[currentRow, 1, currentRow, Headers.Length].Merge = true;
-//             SetCell(worksheet, currentRow, 1, Title, styles.Get(StyleKey.TITLE));
-//             currentRow++;
-//
-//             // ===== Header Row =====
-//             worksheet.Row(currentRow).Height = 18;
-//             for (int i = 0; i < Headers.Length; i++)
-//             {
-//                 SetCell(worksheet, currentRow, i + 1, Headers[i], styles.Get(StyleKey.HEADER));
-//             }
-//             currentRow++;
-//
-//             // ===== Data Rows =====
-//             int stt = 1;
-//             foreach (var account in data)
-//             {
-//                 worksheet.Row(currentRow).Height = 16;
-//
-//                 SetCell(worksheet, currentRow, 1, stt++, styles.Get(StyleKey.DATA_CENTER));
-//                 SetCell(worksheet, currentRow, 2, account.Id, styles.Get(StyleKey.DATA_CENTER));
-//                 SetCell(worksheet, currentRow, 3, Safe(account.Username), styles.Get(StyleKey.DATA));
-//                 SetCell(worksheet, currentRow, 4, account.Role, styles.Get(StyleKey.DATA_CENTER));
-//
-//                 // Status badge
-//                 var statusText = account.IsActive ? "ACTIVE" : "INACTIVE";
-//                 var statusStyle = account.IsActive 
-//                     ? styles.Get(StyleKey.BADGE_ACTIVE) 
-//                     : styles.Get(StyleKey.BADGE_INACTIVE);
-//                 SetCell(worksheet, currentRow, 5, statusText, statusStyle);
-//
-//                 SetCell(worksheet, currentRow, 6, FormatDateTime(account.LastLoginAt), styles.Get(StyleKey.DATA_CENTER));
-//                 SetCell(worksheet, currentRow, 7, FormatDate(account.CreatedAt), styles.Get(StyleKey.DATA_CENTER));
-//
-//                 currentRow++;
-//             }
-//         }
-//     }
-// }
+using HospitalManagement.dto.response;
+using HospitalManagement.utils.excel.core;
+using ClosedXML.Excel;
+
+namespace HospitalManagement.utils.excel.writers
+{
+    /// <summary>
+    /// Excel writer cho AccountResponse entity (ClosedXML version)
+    /// Export danh sách tài khoản ra file Excel
+    /// </summary>
+    public class AccountExcelWriter : AbstractExcelWriter<AccountResponse>
+    {
+        public override string SheetName { get; } = "Danh sách tài khoản";
+        public override string Title { get; } = "DANH SÁCH TÀI KHOẢN";
+
+        public override string[] Headers { get; } = new string[]
+        {
+            "STT",
+            "ID Tài khoản",
+            "Tên đăng nhập",
+            "ROLE",
+            "Trạng thái"
+        };
+        
+        public override void Create(IXLWorksheet worksheet, List<AccountResponse> data)
+        {
+            Console.WriteLine($"[AccountExcelWriter] Creating sheet for {data.Count} accounts");
+            
+            // Title row (merge cells A1:E1)
+            Console.WriteLine("[AccountExcelWriter] Setting title...");
+            var titleRange = worksheet.Range("A1:E1");
+            titleRange.Merge();
+            SetCell(worksheet, 1, 1, Title, ApplyTitleStyle);
+            
+            // Header row
+            Console.WriteLine("[AccountExcelWriter] Setting headers...");
+            for (int i = 0; i < Headers.Length; i++)
+            {
+                SetCell(worksheet, 2, i + 1, Headers[i], ApplyHeaderStyle);
+            }
+
+            // Data rows
+            Console.WriteLine("[AccountExcelWriter] Writing data rows...");
+            int row = 3;
+            int stt = 1;
+            foreach (var item in data)
+            {
+                SetCell(worksheet, row, 1, stt, cell => ApplyDataStyle(cell, true));
+                SetCell(worksheet, row, 2, item.Id, cell => ApplyDataStyle(cell));
+                SetCell(worksheet, row, 3, item.Username, cell => ApplyDataStyle(cell));
+                SetCell(worksheet, row, 4, item.Role.ToString(), cell => ApplyDataStyle(cell));
+                SetCell(worksheet, row, 5, item.Active ? "Kích hoạt" : "Vô hiệu hóa", 
+                    cell => ApplyBadgeStyle(cell, item.Active));
+                
+                row++;
+                stt++;
+            }
+            
+            Console.WriteLine($"[AccountExcelWriter] Completed writing {data.Count} rows");
+        }
+    }
+}

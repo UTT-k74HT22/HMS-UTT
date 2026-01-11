@@ -620,6 +620,7 @@ namespace HospitalManagement.view
                     Quantity = quantity,
                     Note = txtNote.Text.Trim(),
                     PerformedByUserId = AuthContextManager.UserProfileId.Value,
+                    PerformedByUserId = AuthContextManager.UserProfileId ?? throw new Exception("Không lấy được user profile ID")
                 };
 
                 DialogResult = DialogResult.OK;
