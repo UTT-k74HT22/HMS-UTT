@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.ComponentModel;
 using System.Windows.Forms;
 using HospitalManagement.controller;
 using HospitalManagement.dto.response.ReportDetailResponse;
