@@ -827,6 +827,14 @@ ALTER COLUMN dosage_form NVARCHAR(100);
 
 ALTER TABLE dbo.products
 ALTER COLUMN unit NVARCHAR(50);
+
+ALTER TABLE dbo.warehouses
+ALTER COLUMN name NVARCHAR(255);
+
+ALTER TABLE dbo.warehouses
+ALTER COLUMN address NVARCHAR(255);
+ALTER TABLE dbo.warehouses
+ALTER COLUMN manager_name NVARCHAR(255);
       
 ALTER TABLE dbo.order_items
     ADD warehouse_id INT NULL,
