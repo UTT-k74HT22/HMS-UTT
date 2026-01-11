@@ -21,8 +21,8 @@ namespace HospitalManagement.controller
         /// </summary>
         public List<InventoryResponse> GetAllInventory()
         {
-            // TODO: Implement
-            throw new NotImplementedException();
+            Console.WriteLine("Fetching all inventory items");
+            return _inventoryService.GetAll();
         }
 
         /// <summary>
