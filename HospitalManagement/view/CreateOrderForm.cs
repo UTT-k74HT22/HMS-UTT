@@ -12,7 +12,7 @@ namespace HospitalManagement.view
 {
     public partial class CreateOrderForm : Form
     {
-        public CreateOrderForm()
+        public CreateOrderForm(long userId)
         {
             InitializeComponent();
         }

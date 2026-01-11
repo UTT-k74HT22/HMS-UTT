@@ -28,126 +28,126 @@
         /// </summary>
         private void InitializeComponent()
         {
-            label1 = new Label();
-            dataGridView1 = new DataGridView();
-            button1 = new Button();
-            button2 = new Button();
-            button3 = new Button();
-            button4 = new Button();
-            button5 = new Button();
-            button6 = new Button();
-            textBox1 = new TextBox();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            lblTotal = new Label();
+            dgvOrders = new DataGridView();
+            btnCreate = new Button();
+            btnView = new Button();
+            btnConfirm = new Button();
+            btnCancel = new Button();
+            btnSearch = new Button();
+            btnRefresh = new Button();
+            txtSearch = new TextBox();
+            ((System.ComponentModel.ISupportInitialize)dgvOrders).BeginInit();
             SuspendLayout();
             // 
-            // label1
+            // lblTotal
             // 
-            label1.AutoSize = true;
-            label1.Location = new Point(39, 574);
-            label1.Name = "label1";
-            label1.Size = new Size(110, 15);
-            label1.TabIndex = 0;
-            label1.Text = "Tổng số đơn hàng: ";
+            lblTotal.AutoSize = true;
+            lblTotal.Location = new Point(39, 574);
+            lblTotal.Name = "lblTotal";
+            lblTotal.Size = new Size(110, 15);
+            lblTotal.TabIndex = 0;
+            lblTotal.Text = "Tổng số đơn hàng: ";
             // 
-            // dataGridView1
+            // dgvOrders
             // 
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(3, 85);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(1323, 472);
-            dataGridView1.TabIndex = 1;
+            dgvOrders.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvOrders.Location = new Point(3, 85);
+            dgvOrders.Name = "dgvOrders";
+            dgvOrders.Size = new Size(1323, 472);
+            dgvOrders.TabIndex = 1;
             // 
-            // button1
+            // btnCreate
             // 
-            button1.Location = new Point(246, 33);
-            button1.Name = "button1";
-            button1.Size = new Size(75, 34);
-            button1.TabIndex = 2;
-            button1.Text = "Tạo đơn ";
-            button1.UseVisualStyleBackColor = true;
+            btnCreate.Location = new Point(246, 33);
+            btnCreate.Name = "btnCreate";
+            btnCreate.Size = new Size(75, 34);
+            btnCreate.TabIndex = 2;
+            btnCreate.Text = "Tạo đơn ";
+            btnCreate.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // btnView
             // 
-            button2.Location = new Point(336, 32);
-            button2.Name = "button2";
-            button2.Size = new Size(86, 35);
-            button2.TabIndex = 3;
-            button2.Text = "Xem chi tiết ";
-            button2.UseVisualStyleBackColor = true;
+            btnView.Location = new Point(336, 32);
+            btnView.Name = "btnView";
+            btnView.Size = new Size(86, 35);
+            btnView.TabIndex = 3;
+            btnView.Text = "Xem chi tiết ";
+            btnView.UseVisualStyleBackColor = true;
             // 
-            // button3
+            // btnConfirm
             // 
-            button3.Location = new Point(445, 33);
-            button3.Name = "button3";
-            button3.Size = new Size(75, 34);
-            button3.TabIndex = 4;
-            button3.Text = "Xác nhận";
-            button3.UseVisualStyleBackColor = true;
+            btnConfirm.Location = new Point(445, 33);
+            btnConfirm.Name = "btnConfirm";
+            btnConfirm.Size = new Size(75, 34);
+            btnConfirm.TabIndex = 4;
+            btnConfirm.Text = "Xác nhận";
+            btnConfirm.UseVisualStyleBackColor = true;
             // 
-            // button4
+            // btnCancel
             // 
-            button4.Location = new Point(539, 33);
-            button4.Name = "button4";
-            button4.Size = new Size(75, 34);
-            button4.TabIndex = 5;
-            button4.Text = "Hủy đơn";
-            button4.UseVisualStyleBackColor = true;
+            btnCancel.Location = new Point(539, 33);
+            btnCancel.Name = "btnCancel";
+            btnCancel.Size = new Size(75, 34);
+            btnCancel.TabIndex = 5;
+            btnCancel.Text = "Hủy đơn";
+            btnCancel.UseVisualStyleBackColor = true;
             // 
-            // button5
+            // btnSearch
             // 
-            button5.Location = new Point(855, 33);
-            button5.Name = "button5";
-            button5.Size = new Size(75, 34);
-            button5.TabIndex = 6;
-            button5.Text = "Tìm kiếm";
-            button5.UseVisualStyleBackColor = true;
+            btnSearch.Location = new Point(855, 33);
+            btnSearch.Name = "btnSearch";
+            btnSearch.Size = new Size(75, 34);
+            btnSearch.TabIndex = 6;
+            btnSearch.Text = "Tìm kiếm";
+            btnSearch.UseVisualStyleBackColor = true;
             // 
-            // button6
+            // btnRefresh
             // 
-            button6.Location = new Point(944, 36);
-            button6.Name = "button6";
-            button6.Size = new Size(75, 31);
-            button6.TabIndex = 7;
-            button6.Text = "Làm mới";
-            button6.UseVisualStyleBackColor = true;
+            btnRefresh.Location = new Point(944, 36);
+            btnRefresh.Name = "btnRefresh";
+            btnRefresh.Size = new Size(75, 31);
+            btnRefresh.TabIndex = 7;
+            btnRefresh.Text = "Làm mới";
+            btnRefresh.UseVisualStyleBackColor = true;
             // 
-            // textBox1
+            // txtSearch
             // 
-            textBox1.Location = new Point(647, 40);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(202, 23);
-            textBox1.TabIndex = 8;
+            txtSearch.Location = new Point(647, 40);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(202, 23);
+            txtSearch.TabIndex = 8;
             // 
             // OrderManagementPanel
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(textBox1);
-            Controls.Add(button6);
-            Controls.Add(button5);
-            Controls.Add(button4);
-            Controls.Add(button3);
-            Controls.Add(button2);
-            Controls.Add(button1);
-            Controls.Add(dataGridView1);
-            Controls.Add(label1);
+            Controls.Add(txtSearch);
+            Controls.Add(btnRefresh);
+            Controls.Add(btnSearch);
+            Controls.Add(btnCancel);
+            Controls.Add(btnConfirm);
+            Controls.Add(btnView);
+            Controls.Add(btnCreate);
+            Controls.Add(dgvOrders);
+            Controls.Add(lblTotal);
             Name = "OrderManagementPanel";
             Size = new Size(1357, 613);
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvOrders).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
 
-        private Label label1;
-        private DataGridView dataGridView1;
-        private Button button1;
-        private Button button2;
-        private Button button3;
-        private Button button4;
-        private Button button5;
-        private Button button6;
-        private TextBox textBox1;
+        private Label lblTotal;
+        private DataGridView dgvOrders;
+        private Button btnCreate;
+        private Button btnView;
+        private Button btnConfirm;
+        private Button btnCancel;
+        private Button btnSearch;
+        private Button btnRefresh;
+        private TextBox txtSearch;
     }
 }

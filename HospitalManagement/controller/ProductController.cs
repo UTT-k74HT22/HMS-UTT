@@ -11,10 +11,10 @@ namespace HospitalManagement.controller
     {
         private readonly IProductService _productService;
 
-        // public ProductController(string connectionString)
-        // {
-        //     _productService = new ProductServiceImpl(connectionString);
-        // }
+        public ProductController(string connectionString)
+        {
+            _productService = new ProductServiceImpl(connectionString);
+        }
 
         public ProductController(IProductService productService)
         {

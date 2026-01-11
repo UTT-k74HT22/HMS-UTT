@@ -1,6 +1,7 @@
 using HospitalManagement.dto.request;
 using HospitalManagement.dto.response;
 using HospitalManagement.service;
+using HospitalManagement.service.impl;
 
 namespace HospitalManagement.controller
 {
@@ -15,7 +16,6 @@ namespace HospitalManagement.controller
         {
             _inventoryService = inventoryService;
         }
-
         /// <summary>
         /// Lấy tất cả tồn kho
         /// </summary>

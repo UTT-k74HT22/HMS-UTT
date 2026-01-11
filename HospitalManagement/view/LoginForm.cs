@@ -2,99 +2,114 @@
 using HospitalManagement.service;
 using HospitalManagement.controller;
 using HospitalManagement.entity.enums;
+using HospitalManagement.router;
+using HospitalManagement.service.impl;
 
 namespace HospitalManagement.view;
 public partial class LoginForm : Form
 {
     private IAuthService? _authService;
-    private AccountController? _accountController;
-    private EmployeeController? _employeeController;
+        private AccountController? _accountController;
+        private EmployeeController? _employeeController;
 
-    // Constructor cho Designer
-    public LoginForm()
-    {
-        InitializeComponent();
-        this.ActiveControl = tbUsername;
-    }
-
-    // Constructor cho runtime (DI)
-    public LoginForm(IAuthService authService, AccountController accountController, EmployeeController employeeController) : this()
-    {
-        _authService = authService;
-        _accountController = accountController;
-        _employeeController = employeeController;
-    }
-
-    private void btnLogin_Click(object sender, EventArgs e)
-    {
-        lblError.Visible = false; // Hide error 
-        string username = tbUsername.Text.Trim();
-        string password = tbPassword.Text.Trim();
-        
-        if (string.IsNullOrWhiteSpace(username))
+        // Constructor cho Designer
+        public LoginForm()
         {
-            ShowError("Vui lòng nhập tên đăng nhập");
-            tbUsername.Focus();
-            return;
+            InitializeComponent();
+            this.ActiveControl = tbUsername;
         }
 
-        if (string.IsNullOrWhiteSpace(password))
+        // Constructor runtime (DI)
+        public LoginForm(
+            IAuthService authService,
+            AccountController accountController,
+            EmployeeController employeeController
+        ) : this()
         {
-            ShowError("Vui lòng nhập mật khẩu");
-            tbPassword.Focus();
-            return;
+            _authService = authService;
+            _accountController = accountController;
+            _employeeController = employeeController;
         }
-        btnLogin.Enabled = false;
-        btnLogin.Text = "Đang đăng nhập...";
 
-        try
+        private void btnLogin_Click(object sender, EventArgs e)
         {
-            Account account = _authService.authenticate(username, password);
-            
-            // Debug: Check if controllers are null
-            if (_accountController == null)
+            lblError.Visible = false;
+
+            if (_authService == null)
             {
-                MessageBox.Show("WARNING: AccountController is NULL!", "Debug", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ShowError("AuthService chưa được khởi tạo");
+                return;
             }
-            if (_employeeController == null)
-            {
-                MessageBox.Show("WARNING: EmployeeController is NULL!", "Debug", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            
-            // Open MainFrame
-            var mainFrame = new MainFrame(account.Username, account.Role.ToString(), _accountController, _employeeController);
-            mainFrame.FormClosed += (_, _) => Application.Exit();
-            mainFrame.Show();
-            
-            // Hide login form
-            this.Hide();
-        }
-        catch (Exception ex)
-        {
-            ShowError(ex.Message);
-        }
-        finally
-        {
-            btnLogin.Enabled = true;
-            btnLogin.Text = "Đăng nhập";
-            this.Cursor = Cursors.Default;
-        }
-    }
 
-    private void tbPassword_KeyPress(object sender, KeyPressEventArgs e)
-    {
-        if (e.KeyChar == (char)Keys.Enter)
-        {
-            e.Handled = true;
-            btnLogin.PerformClick();
+            string username = tbUsername.Text.Trim();
+            string password = tbPassword.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                ShowError("Vui lòng nhập tên đăng nhập");
+                tbUsername.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                ShowError("Vui lòng nhập mật khẩu");
+                tbPassword.Focus();
+                return;
+            }
+
+            btnLogin.Enabled = false;
+            btnLogin.Text = "Đang đăng nhập...";
+
+            try
+            {
+                Account account = _authService.authenticate(username, password);
+                
+                long userId = AuthServiceImpl.GetCurrentUserProfileId()
+                              ?? throw new Exception("Không lấy được user profile");
+                
+                AuthContextManager.SetUser(
+                    userId,
+                    account.Role.ToString(),
+                    account.Username
+                );
+                var mainFrame = new MainFrame(
+                    account.Username,
+                    account.Role.ToString(),
+                    _accountController,
+                    _employeeController
+                );
+
+                mainFrame.FormClosed += (_, _) => Application.Exit();
+                mainFrame.Show();
+                this.Hide();
+            }
+            catch (Exception ex)
+            {
+                ShowError(ex.Message);
+            }
+            finally
+            {
+                btnLogin.Enabled = true;
+                btnLogin.Text = "Đăng nhập";
+            }
         }
-    }
-    
-    // Helpers
-    private void ShowError(string error)
-    {
-        lblError.Text = error;
-        lblError.Visible = true;
-    }
+
+
+
+        private void tbPassword_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true;
+                btnLogin.PerformClick();
+            }
+        }
+
+        private void ShowError(string error)
+        {
+            lblError.Text = error;
+            lblError.Visible = true;
+        }
 }
 

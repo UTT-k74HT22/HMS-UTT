@@ -39,8 +39,8 @@
             lblCustomerEmail = new Label();
             lblShippingAddress = new Label();
             lblCreatorName = new Label();
-            label10 = new Label();
-            label11 = new Label();
+            lblCreatorPhone = new Label();
+            lblCreatorEmail = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvItems).BeginInit();
             SuspendLayout();
             // 
@@ -145,29 +145,29 @@
             // 
             // label10
             // 
-            label10.AutoSize = true;
-            label10.Location = new Point(219, 148);
-            label10.Name = "label10";
-            label10.Size = new Size(39, 15);
-            label10.TabIndex = 11;
-            label10.Text = "Email:";
+            lblCreatorEmail.AutoSize = true;
+            lblCreatorEmail.Location = new Point(219, 148);
+            lblCreatorEmail.Name = "label10";
+            lblCreatorEmail.Size = new Size(39, 15);
+            lblCreatorEmail.TabIndex = 11;
+            lblCreatorEmail.Text = "Email:";
             // 
             // label11
             // 
-            label11.AutoSize = true;
-            label11.Location = new Point(460, 148);
-            label11.Name = "label11";
-            label11.Size = new Size(85, 15);
-            label11.TabIndex = 12;
-            label11.Text = "SĐT người tạo:";
+            lblCreatorPhone.AutoSize = true;
+            lblCreatorPhone.Location = new Point(460, 148);
+            lblCreatorPhone.Name = "label11";
+            lblCreatorPhone.Size = new Size(85, 15);
+            lblCreatorPhone.TabIndex = 12;
+            lblCreatorPhone.Text = "SĐT người tạo:";
             // 
             // OrderDetailForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(label11);
-            Controls.Add(label10);
+            Controls.Add(lblCreatorPhone);
+            Controls.Add(lblCreatorEmail);
             Controls.Add(lblCreatorName);
             Controls.Add(lblShippingAddress);
             Controls.Add(lblCustomerEmail);
@@ -199,7 +199,7 @@
         private Label lblCustomerEmail;
         private Label lblShippingAddress;
         private Label lblCreatorName;
-        private Label label10;
-        private Label label11;
+        private Label lblCreatorEmail;
+        private Label lblCreatorPhone;
     }
 }
