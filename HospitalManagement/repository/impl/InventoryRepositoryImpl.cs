@@ -541,7 +541,7 @@ public class InventoryRepositoryImpl : IInventoryRepository
         cmd.Parameters.AddWithValue("@userId", (object?)userId ?? DBNull.Value);
         cmd.Parameters.AddWithValue("@note", note);
         
-        MessageBox.Show("DEBUG userId = " + userId);
+        MessageBox.Show("Xác nhận thành công ");
         conn.Open();
         cmd.ExecuteNonQuery();
     }
