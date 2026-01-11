@@ -16,8 +16,10 @@ namespace HospitalManagement.service.impl
         }
         public static long? GetCurrentUserProfileId()
         {
+            //FIND BY user_profile qua account => find tiếp employee (DI repo)
             return _currentUserProfileId;
         }
+        
         public static Account? GetCurrentAccount()
         {
             return _currentAccount;

@@ -93,15 +93,18 @@ namespace HospitalManagement.repository.impl
         public void UpdateOrderTotal(long orderId)
         {
             const string sql = @"
-                UPDATE o
-                SET subtotal = (
-                        SELECT ISNULL(SUM(line_total), 0)
-                        FROM order_items
-                        WHERE order_id = o.id
-                    ),
-                    total_amount = subtotal - discount
+               UPDATE o
+                SET 
+                    subtotal = t.subtotal,
+                    total_amount = t.subtotal - o.discount
                 FROM orders o
-                WHERE o.id = @orderId
+                CROSS APPLY (
+                    SELECT ISNULL(SUM(line_total), 0) AS subtotal
+                    FROM order_items
+                    WHERE order_id = o.id
+                ) t
+                WHERE o.id = @orderId;
+
             ";
 
             using var conn = new SqlConnection(_connectionString);
@@ -221,17 +224,18 @@ namespace HospitalManagement.repository.impl
         {
             const string sql = @"
                 SELECT
-                    oi.id,
-                    oi.product_id,
-                    oi.batch_id,
-                    oi.quantity,
-                    oi.unit_price,
-                    oi.line_total,
-                    oi.discount,
-                    p.name AS product_name
-                FROM order_items oi
-                JOIN products p ON oi.product_id = p.id
-                WHERE oi.order_id = @orderId
+                        oi.id,
+                        oi.product_id,
+                        oi.warehouse_id,      
+                        oi.batch_id,
+                        oi.quantity,
+                        oi.unit_price,
+                        oi.line_total,
+                        oi.discount,
+                        p.name AS product_name
+                    FROM order_items oi
+                    JOIN products p ON oi.product_id = p.id
+                    WHERE oi.order_id = @orderId
             ";
 
             var list = new List<OrderItemResponse>();
@@ -250,13 +254,20 @@ namespace HospitalManagement.repository.impl
                     Id = reader.GetInt32(reader.GetOrdinal("id")),
                     ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
                     ProductName = reader.GetString(reader.GetOrdinal("product_name")),
+
+                    WarehouseId = reader.IsDBNull(reader.GetOrdinal("warehouse_id"))
+                        ? null
+                        : reader.GetInt32(reader.GetOrdinal("warehouse_id")),
+
                     BatchId = reader.IsDBNull(reader.GetOrdinal("batch_id"))
                         ? null
                         : reader.GetInt32(reader.GetOrdinal("batch_id")),
+
                     Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
                     UnitPrice = reader.GetDecimal(reader.GetOrdinal("unit_price")),
                     LineTotal = reader.GetDecimal(reader.GetOrdinal("line_total"))
                 });
+
             }
 
             return list;
