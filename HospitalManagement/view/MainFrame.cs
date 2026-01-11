@@ -169,7 +169,7 @@ namespace HospitalManagement.view
                     ? new StockMovementManagementPanel(_stockMovementController, _warehousesController, _productController, _batchController)
                     : CreateComingSoonPanel("Xuất/Nhập kho (Cần DI)"),
                 Sidebar.MENU_ORDERS => CreateComingSoonPanel("Đơn hàng"),
-                Sidebar.MENU_INVOICES => CreateComingSoonPanel("Hóa đơn"),
+                Sidebar.MENU_INVOICES => new InvoiceManagementForm(),
                 Sidebar.MENU_PAYMENTS => new PaymentManagementForm(),
                 Sidebar.MENU_REPORT_SUMMARY => CreateComingSoonPanel("Báo cáo tóm tắt"),
                 Sidebar.MENU_REPORT_DETAIL => CreateComingSoonPanel("Thống kê chi tiết"),
