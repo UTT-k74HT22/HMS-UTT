@@ -2,6 +2,7 @@
 using HospitalManagement.dto.response;
 using HospitalManagement.dto.response.Category;
 using HospitalManagement.dto.response.Product;
+using HospitalManagement.repository.impl;
 using HospitalManagement.service;
 using HospitalManagement.Service.Impl;
 
@@ -10,12 +11,7 @@ namespace HospitalManagement.controller
     public class ProductController
     {
         private readonly IProductService _productService;
-
-        public ProductController(string connectionString)
-        {
-            _productService = new ProductServiceImpl(connectionString);
-        }
-
+        
         public ProductController(IProductService productService)
         {
             _productService = productService;
@@ -40,16 +36,15 @@ namespace HospitalManagement.controller
             => _productService.Delete(code);
 
         public List<CategoryResponse> GetAllCategories()
-            => _productService.GetAllCategories();
+            => _productService.getAllCategories(); 
 
         public List<ManufacturerResponse> GetAllManufacturers()
             => _productService.GetAllManufacturers();
-
-        // public List<ProductResponse> GetByCategory(long categoryId)
-        //     => _productService.GetByCategory(categoryId);
-
+        
         public List<BatchResponse> GetBatchesByProduct(long productId)
             => _productService.GetBatchesByProduct(productId);
+        public List<ProductResponse> GetByCategory(long categoryId)
+            => _productService.GetByCategory(categoryId);
 
         // public List<ProductResponse> SearchByName(string name)
         //     => _productService.SearchByName(name);

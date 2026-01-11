@@ -22,31 +22,18 @@ namespace HospitalManagement.view
         private List<ProductResponse> _allProducts = new();
         private List<CategoryResponse> _categories = new();
         private List<ManufacturerResponse> _manufacturers = new();
-
         private readonly BindingSource _bs = new();
 
-        // ================= CONSTRUCTOR =================
-
-        public ProductManagementPanel()
+        public ProductManagementPanel(ProductController controller)
         {
             InitializeComponent();
-
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            string connectionString =
-                config.GetConnectionString("DefaultConnection");
-
-            var productService = new ProductServiceImpl(connectionString);
-            _controller = new ProductController(productService);
+            _controller = controller;
 
             dgvProducts.DataSource = _bs;
 
             InitGrid();
             InitStatusCombo();
         }
-
         private void ProductManagementPanel_Load(object sender, EventArgs e)
         {
             Panel footerPanel = new Panel

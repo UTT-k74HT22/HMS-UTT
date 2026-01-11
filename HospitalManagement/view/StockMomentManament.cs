@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using HospitalManagement.entity;
+using HospitalManagement.router;
 using BatchStatus = HospitalManagement.entity.enums.BatchStatus;
 
 namespace HospitalManagement.view
@@ -618,7 +619,7 @@ namespace HospitalManagement.view
                     BatchId     = Convert.ToInt64(cboBatch.SelectedValue),
                     Quantity = quantity,
                     Note = txtNote.Text.Trim(),
-                    PerformedByUserId = 1
+                    PerformedByUserId = AuthContextManager.UserProfileId ?? throw new Exception("Không lấy được user profile ID")
                 };
 
                 DialogResult = DialogResult.OK;

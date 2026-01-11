@@ -187,28 +187,84 @@ namespace HospitalManagement.repository.impl
 
         public void UpdateLastLogin(long accountId)
         {
-            throw new NotImplementedException();
+            string sql = """
+                             UPDATE accounts
+                             SET last_login_at = @now
+                             WHERE id = @id
+                         """;
+
+            using (var connection = new SqlConnection(_connectionString))
+            using (var command = new SqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue("@now", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@id", accountId);
+                connection.Open();
+                command.ExecuteNonQuery();
+            }
         }
+
 
         public long? FindUserIdByAccountId(long accountId)
         {
-            string query = @"
-                SELECT id 
-                FROM user_profiles 
-                WHERE account_id = @accountId";
+            const string sql = @"
+        SELECT id
+        FROM user_profiles
+        WHERE account_id = @accountId
+    ";
 
-            using (var connection = new SqlConnection(_connectionString))
-            using (var command = new SqlCommand(query, connection))
-            {
-                command.Parameters.AddWithValue("@accountId", accountId);
-                connection.Open();
-                
-                var result = command.ExecuteScalar();
-                return result != null ? (long?)(int)result : null;
-            }
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("@accountId", accountId);
+
+            conn.Open();
+            var result = cmd.ExecuteScalar();
+
+            if (result == null || result == DBNull.Value)
+                return null;
+
+            return Convert.ToInt64(result); // user_profiles.id
         }
-        
-        
+
+        public long CreateUserProfile(long accountId, string username, string role)
+        {
+            string sql = """
+                             INSERT INTO user_profiles
+                             (
+                                 account_id,
+                                 code,
+                                 full_name,
+                                 status,
+                                 created_at,
+                                 updated_at
+                             )
+                             OUTPUT INSERTED.id
+                             VALUES
+                             (
+                                 @accountId,
+                                 @code,
+                                 @fullName,
+                                 'ACTIVE',
+                                 SYSDATETIME(),
+                                 SYSDATETIME()
+                             )
+                         """;
+
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand(sql, conn);
+
+            string codePrefix = role == "ADMIN" ? "ADM" :
+                role == "EMPLOYEE" ? "EMP" : "CUS";
+
+            cmd.Parameters.AddWithValue("@accountId", accountId);
+            cmd.Parameters.AddWithValue("@code", $"{codePrefix}-{accountId}");
+            cmd.Parameters.AddWithValue("@fullName", username);
+
+            conn.Open();
+            return Convert.ToInt64(cmd.ExecuteScalar());
+        }
+
+
         private Account Map(SqlDataReader reader)
         {
             return new Account

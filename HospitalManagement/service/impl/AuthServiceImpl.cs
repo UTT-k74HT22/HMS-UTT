@@ -6,36 +6,62 @@ namespace HospitalManagement.service.impl
 {
     public class AuthServiceImpl : IAuthService
     {
-        
+        private static Account? _currentAccount;
         private IAccountRepository repository;
+        private static long? _currentUserProfileId;
         
         public AuthServiceImpl(IAccountRepository repository)
         {
             this.repository = repository;
         }
-        
+        public static long? GetCurrentUserProfileId()
+        {
+            return _currentUserProfileId;
+        }
+        public static Account? GetCurrentAccount()
+        {
+            return _currentAccount;
+        }
         public Account authenticate(string username, string password)
         {
-            Console.WriteLine("Authenticating user: " + username);
-            if (username.IsNullOrEmpty() || password.IsNullOrEmpty())
+            Console.WriteLine($"[AUTH] Authenticating user: {username}");
+            
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
-                throw new SecurityTokenException("Username or password is required");
+                throw new SecurityTokenException("Username hoặc password không được để trống");
             }
             var account = repository.FindByUsername(username);
             if (account == null)
             {
-                throw new Exception("Invalid username or password");
+                throw new Exception("Sai tên đăng nhập hoặc mật khẩu");
             }
-            
             if (account.Password != password)
             {
-                throw new Exception("Invalid username or password");
+                throw new Exception("Sai tên đăng nhập hoặc mật khẩu");
             }
-            
-            if (account.IsActive.Equals(false))
+            if (!account.IsActive)
             {
-                throw new Exception("Account is inactive");
+                throw new Exception("Tài khoản đã bị vô hiệu hóa");
             }
+            try
+            {
+                repository.UpdateLastLogin(account.Id);
+            }
+            catch (NotImplementedException)
+            {
+            }
+            _currentAccount = account;
+            var userProfileId = repository.FindUserIdByAccountId(account.Id);
+            if (userProfileId == null)
+            {
+                Console.WriteLine("[AUTH] User profile not found → creating new profile");
+                userProfileId = repository.CreateUserProfile(
+                    accountId: account.Id,
+                    username: account.Username,
+                    role: account.Role.ToString()
+                );
+            }
+            _currentUserProfileId = userProfileId;
             return account;
         }
     }

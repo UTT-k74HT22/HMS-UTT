@@ -803,7 +803,7 @@ GO
 
 INSERT INTO dbo.accounts (username, [password], role, is_active, created_at, updated_at)
 VALUES ('admin', '123456789', 'ADMIN', 1, SYSDATETIME(), SYSDATETIME());
-
+/*chạy lại để ko lỗi hin thị */
 ALTER TABLE dbo.categories
 ALTER COLUMN name NVARCHAR(100) NOT NULL;
 
@@ -827,3 +827,19 @@ ALTER COLUMN dosage_form NVARCHAR(100);
 
 ALTER TABLE dbo.products
 ALTER COLUMN unit NVARCHAR(50);
+
+ALTER TABLE dbo.warehouses
+ALTER COLUMN name NVARCHAR(255);
+
+ALTER TABLE dbo.warehouses
+ALTER COLUMN address NVARCHAR(255);
+ALTER TABLE dbo.warehouses
+ALTER COLUMN manager_name NVARCHAR(255);
+
+ALTER TABLE dbo.batches
+ALTER COLUMN supplier_name NVARCHAR(255);
+
+      
+ALTER TABLE dbo.order_items
+    ADD warehouse_id INT NULL,
+    note VARCHAR(255) NULL;
