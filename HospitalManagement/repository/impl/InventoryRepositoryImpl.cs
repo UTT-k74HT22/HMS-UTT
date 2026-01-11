@@ -78,9 +78,9 @@ public class InventoryRepositoryImpl : IInventoryRepository
                               THEN 1 ELSE 0 END AS is_near_expiry,
                          ii.last_stock_check
                      FROM inventory_items ii
-                     INNER JOIN product p ON ii.product_id = p.id
-                     LEFT JOIN batch b ON ii.batch_id = b.id
-                     INNER JOIN warehouse w ON ii.warehouse_id = w.id
+                     INNER JOIN dbo.products p ON ii.product_id = p.id
+                     LEFT JOIN dbo.batches b ON ii.batch_id = b.id
+                     INNER JOIN dbo.warehouses w ON ii.warehouse_id = w.id
                      WHERE ii.warehouse_id = @warehouseId
                        AND p.deleted_at IS NULL
                        AND w.deleted_at IS NULL
@@ -106,13 +106,22 @@ public class InventoryRepositoryImpl : IInventoryRepository
 
         string query = """
                         SELECT 
-                            ii.id, p.id AS product_id, p.code AS product_code,
-                            p.name AS product_name, p.unit,
-                            b.id AS batch_id, b.code AS batch_code, b.expiry_date,
-                            w.id AS warehouse_id, w.code AS warehouse_code, w.name AS warehouse_name,
-                            ii.quantity_on_hand, ii.quantity_reserved,
+                            ii.id,
+                            p.id AS product_id,
+                            p.code AS product_code,
+                            p.name AS product_name,
+                            p.unit,
+                            b.id AS batch_id,
+                            b.batch_code AS batch_code,
+                            b.expiry_date,
+                            w.id AS warehouse_id,
+                            w.code AS warehouse_code,
+                            w.name AS warehouse_name,
+                            ii.quantity_on_hand,
+                            ii.quantity_reserved,
                             (ii.quantity_on_hand - ii.quantity_reserved) AS quantity_available,
-                            ii.min_threshold, ii.max_threshold,
+                            ii.min_threshold,
+                            ii.max_threshold,
                             CASE WHEN ii.quantity_on_hand <= ii.min_threshold THEN 1 ELSE 0 END AS is_low_stock,
                             CASE WHEN ii.quantity_on_hand >= ii.max_threshold THEN 1 ELSE 0 END AS is_over_stock,
                             CASE WHEN b.expiry_date IS NOT NULL 
@@ -120,13 +129,12 @@ public class InventoryRepositoryImpl : IInventoryRepository
                                  THEN 1 ELSE 0 END AS is_near_expiry,
                             ii.last_stock_check
                         FROM inventory_items ii
-                        INNER JOIN product p ON ii.product_id = p.id
-                        LEFT JOIN batch b ON ii.batch_id = b.id
-                        INNER JOIN warehouse w ON ii.warehouse_id = w.id
+                        INNER JOIN dbo.products p ON ii.product_id = p.id
+                        LEFT JOIN dbo.batches b ON ii.batch_id = b.id
+                        INNER JOIN dbo.warehouses w ON ii.warehouse_id = w.id
                         WHERE ii.product_id = @productId
-                          AND p.deleted_at IS NULL
-                          AND w.deleted_at IS NULL
                         ORDER BY w.name
+                        
                         """;
 
         using (var connection = new SqlConnection(_connectionString))
@@ -163,10 +171,11 @@ public class InventoryRepositoryImpl : IInventoryRepository
                          AND DATEDIFF(MONTH, GETDATE(), b.expiry_date) <= 3 
                          THEN 1 ELSE 0 END AS is_near_expiry,
                     ii.last_stock_check
-                FROM inventory_items ii
-                INNER JOIN product p ON ii.product_id = p.id
-                LEFT JOIN batch b ON ii.batch_id = b.id
-                INNER JOIN warehouse w ON ii.warehouse_id = w.id
+               FROM inventory_items ii
+                INNER JOIN dbo.products p ON ii.product_id = p.id
+                LEFT JOIN dbo.batches b ON ii.batch_id = b.id
+                INNER JOIN dbo.warehouses w ON ii.warehouse_id = w.id
+
                 WHERE ii.product_id = @productId
                   AND ii.warehouse_id = @warehouseId
                   AND (@batchId IS NULL OR ii.batch_id = @batchId)
@@ -217,9 +226,9 @@ public class InventoryRepositoryImpl : IInventoryRepository
                          THEN 1 ELSE 0 END AS is_near_expiry,
                     ii.last_stock_check
                 FROM inventory_items ii
-                INNER JOIN product p ON ii.product_id = p.id
-                LEFT JOIN batch b ON ii.batch_id = b.id
-                INNER JOIN warehouse w ON ii.warehouse_id = w.id
+                  INNER JOIN products p ON ii.product_id = p.id
+                LEFT JOIN batches b ON ii.batch_id = b.id
+            INNER JOIN warehouses w ON ii.warehouse_id = w.id
                 WHERE ii.quantity_on_hand <= ii.min_threshold
                   AND p.deleted_at IS NULL
                   AND w.deleted_at IS NULL
@@ -262,9 +271,10 @@ public class InventoryRepositoryImpl : IInventoryRepository
                     1 AS is_near_expiry,
                     ii.last_stock_check
                 FROM inventory_items ii
-                INNER JOIN product p ON ii.product_id = p.id
-                INNER JOIN batch b ON ii.batch_id = b.id
-                INNER JOIN warehouse w ON ii.warehouse_id = w.id
+                INNER JOIN products p ON ii.product_id = p.id
+                INNER JOIN batches b ON ii.batch_id = b.id
+                INNER JOIN warehouses w ON ii.warehouse_id = w.id
+
                 WHERE b.expiry_date IS NOT NULL
                   AND DATEDIFF(MONTH, GETDATE(), b.expiry_date) <= 3
                   AND DATEDIFF(DAY, GETDATE(), b.expiry_date) >= 0
@@ -461,32 +471,79 @@ public class InventoryRepositoryImpl : IInventoryRepository
 
     public void UpdateStock(long productId, long batchId, long warehouseId, int newQuantity)
     {
-        string query = @"
-                UPDATE inventory_items
-                SET quantity_on_hand = @newQuantity,
-                    last_stock_check = GETDATE(),
-                    updated_at = GETDATE()
-                WHERE product_id = @productId
-                  AND batch_id = @batchId
-                  AND warehouse_id = @warehouseId";
+        const string sql = @"
+        UPDATE inventory_items
+        SET quantity_on_hand = @quantity,
+            last_stock_check = CAST(GETDATE() AS DATE)
+        WHERE product_id = @productId
+          AND warehouse_id = @warehouseId
+          AND (
+                batch_id = @batchId
+                OR (batch_id IS NULL AND @batchId IS NULL)
+              )
+    ";
 
-        using (var connection = new SqlConnection(_connectionString))
-        using (var command = new SqlCommand(query, connection))
+        using var conn = new SqlConnection(_connectionString);
+        using var cmd = new SqlCommand(sql, conn);
+
+        cmd.Parameters.AddWithValue("@quantity", (object?)newQuantity ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@productId", productId);
+        cmd.Parameters.AddWithValue("@warehouseId", warehouseId);
+        cmd.Parameters.AddWithValue("@batchId", (object?)batchId ?? DBNull.Value);
+
+        conn.Open();
+        int affectedRows = cmd.ExecuteNonQuery();
+
+        if (affectedRows == 0)
         {
-            command.Parameters.AddWithValue("@productId", productId);
-            command.Parameters.AddWithValue("@batchId", batchId);
-            command.Parameters.AddWithValue("@warehouseId", warehouseId);
-            command.Parameters.AddWithValue("@newQuantity", newQuantity);
-
-            connection.Open();
-            command.ExecuteNonQuery();
+            throw new InvalidOperationException("Không tìm thấy tồn kho để cập nhật!");
         }
     }
 
     public void InsertStockMovement(long productId, long batchId, long warehouseId, int quantity, int before, int after,
         long userId, string note, string movementType)
-    {
-        throw new NotImplementedException();
+    { const string sql = @"
+        INSERT INTO stock_movements
+        (movement_type,
+         product_id,
+         batch_id,
+         warehouse_id,
+         quantity,
+         quantity_before,
+         quantity_after,
+         performed_by_user_id,
+         note)
+        VALUES
+        (@movementType,
+         @productId,
+         @batchId,
+         @warehouseId,
+         @quantity,
+         @quantityBefore,
+         @quantityAfter,
+         @userId,
+         @note)
+    ";
+
+        using var conn = new SqlConnection(_connectionString);
+        using var cmd = new SqlCommand(sql, conn);
+
+        cmd.Parameters.AddWithValue(
+            "@movementType",
+            !string.IsNullOrEmpty(movementType) ? movementType : "EXPORT"
+        );
+        cmd.Parameters.AddWithValue("@productId", productId);
+        cmd.Parameters.AddWithValue("@batchId", (object?)batchId ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@warehouseId", warehouseId);
+        cmd.Parameters.AddWithValue("@quantity", quantity);
+        cmd.Parameters.AddWithValue("@quantityBefore", before);
+        cmd.Parameters.AddWithValue("@quantityAfter", after);
+        cmd.Parameters.AddWithValue("@userId", (object?)userId ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@note", note);
+        
+        MessageBox.Show("DEBUG userId = " + userId);
+        conn.Open();
+        cmd.ExecuteNonQuery();
     }
 
     private InventoryResponse MapToResponse(SqlDataReader reader)

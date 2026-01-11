@@ -58,7 +58,7 @@ namespace HospitalManagement.service
         /// </summary>
         void InsertStockMovement(long productId, long batchId, long warehouseId,
                                  int quantity, int before, int after,
-                                 long userId, string note, string movementType);
+                                     string note, string movementType);
 
         /// <summary>
         /// Lấy số lượng tồn kho hiện tại

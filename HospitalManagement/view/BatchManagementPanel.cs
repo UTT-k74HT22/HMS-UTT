@@ -20,27 +20,15 @@ namespace HospitalManagement.view
         private readonly BatchController _controller;
         private List<BatchResponse> _allBatches = new();
 
-        public BatchManagementPanel()
+        public BatchManagementPanel(BatchController controller)
         {
             InitializeComponent();
-
-            // ===== Load appsettings.json =====
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            string connectionString =
-                config.GetConnectionString("DefaultConnection");
-            var batchService = new BatchServiceImpl(connectionString);
-            var productService = new ProductServiceImpl(connectionString);
-
-            _controller = new BatchController(batchService, productService);
+            _controller = controller;
 
             InitGrid();
             InitEvents();
             LoadData();
         }
-
         private void BatchManagementPanel_Load(object sender, EventArgs e)
         {
             LoadData();

@@ -1,7 +1,9 @@
-﻿﻿using HospitalManagement.entity;
+﻿﻿﻿using HospitalManagement.entity;
 using HospitalManagement.service;
 using HospitalManagement.controller;
 using HospitalManagement.entity.enums;
+using HospitalManagement.router;
+using HospitalManagement.service.impl;
 
 namespace HospitalManagement.view;
 public partial class LoginForm : Form
@@ -14,6 +16,8 @@ public partial class LoginForm : Form
     private ProductController? _productController;
     private BatchController? _batchController;
     private StockMovementController? _stockMovementController;
+    private OrderController? _orderController;
+    private CategoryController? _categoryController;
 
     // Constructor cho Designer
     public LoginForm()
@@ -31,6 +35,8 @@ public partial class LoginForm : Form
         WarehousesController warehousesController,
         ProductController productController,
         BatchController batchController,
+        OrderController orderController,
+        CategoryController categoryController,
         StockMovementController stockMovementController) : this()
     {
         _authService = authService;
@@ -40,6 +46,8 @@ public partial class LoginForm : Form
         _warehousesController = warehousesController;
         _productController = productController;
         _batchController = batchController;
+        _orderController = orderController;
+        _categoryController = categoryController;
         _stockMovementController = stockMovementController;
     }
 
@@ -78,18 +86,28 @@ public partial class LoginForm : Form
             {
                 MessageBox.Show("WARNING: EmployeeController is NULL!", "Debug", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            
+            long userProfileId = AuthServiceImpl.GetCurrentUserProfileId()
+                                  ?? throw new Exception("Không lấy được user profile");
+
+            AuthContextManager.SetUser(
+                userProfileId,                 // ✅ user_profiles.id
+                account.Role.ToString(),
+                account.Username);
+
             // Open MainFrame
             var mainFrame = new MainFrame(
                 account.Username, 
                 account.Role.ToString(), 
+                _orderController,
                 _accountController, 
                 _employeeController,
                 _inventoryController,
                 _warehousesController,
                 _productController,
                 _batchController,
-                _stockMovementController);
+                _stockMovementController,
+                _categoryController
+                );
             mainFrame.FormClosed += (_, _) => Application.Exit();
             mainFrame.Show();
             
@@ -124,4 +142,3 @@ public partial class LoginForm : Form
         lblError.Visible = true;
     }
 }
-

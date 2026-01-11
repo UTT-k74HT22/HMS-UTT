@@ -68,5 +68,7 @@ namespace HospitalManagement.repository
         /// Tìm User ID theo Account ID
         /// </summary>
         long? FindUserIdByAccountId(long accountId);
+        long CreateUserProfile(long accountId, string username, string role);
+        
     }
 }

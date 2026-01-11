@@ -14,17 +14,19 @@ namespace HospitalManagement.Service.Impl
     /// </summary>
     public class ProductServiceImpl : IProductService
     {
+        private readonly ProductRepositoryImpl _productRepositoryImpl;
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IManufacturerRepository _manufacturerRepository;
-
-        public ProductServiceImpl(string connectionString)
+        public ProductServiceImpl(
+            IProductRepository productRepository,
+            ICategoryRepository categoryRepository,
+            IManufacturerRepository manufacturerRepository)
         {
-            _productRepository = new ProductRepositoryImpl(connectionString);
-            _categoryRepository = new CategoryRepositoryImpl(connectionString);
-            _manufacturerRepository = new ManufacturerRepositoryImpl(connectionString);
+            _productRepository = productRepository;
+            _categoryRepository = categoryRepository;
+            _manufacturerRepository = manufacturerRepository;
         }
-
         // ================= CRUD =================
 
         public void Create(CreateProductRequest request)
@@ -75,7 +77,7 @@ namespace HospitalManagement.Service.Impl
                    "Product not found with code: " + code
                );
 
-        public List<CategoryResponse> GetAllCategories()
+        public List<CategoryResponse> getAllCategories()
             => _categoryRepository.FindAllActive();
 
         public List<ManufacturerResponse> GetAllManufacturers()
@@ -83,6 +85,9 @@ namespace HospitalManagement.Service.Impl
 
         public List<BatchResponse> GetBatchesByProduct(long productId)
             => _productRepository.FindBatchesByProduct(productId);
+    
+        public List<ProductResponse> GetByCategory(long categoryId)
+            => _productRepository.FindByCategory(categoryId);
 
     }
 
