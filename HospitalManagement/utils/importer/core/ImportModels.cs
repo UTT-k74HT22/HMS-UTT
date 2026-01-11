@@ -24,31 +24,15 @@ namespace HospitalManagement.utils.importer.core
     {
         public List<ImportRowData<T>> ValidRows { get; set; } = new();
         public List<ImportRowData<T>> InvalidRows { get; set; } = new();
+        public int TotalRows { get; set; }
+        public bool HasErrors { get; set; }
         
-        public int TotalRows => ValidRows.Count + InvalidRows.Count;
         public int ValidCount => ValidRows.Count;
         public int InvalidCount => InvalidRows.Count;
-        public bool HasErrors => InvalidRows.Any();
 
         public string GetSummary()
         {
             return $"Tổng: {TotalRows} | Hợp lệ: {ValidCount} | Lỗi: {InvalidCount}";
-        }
-    }
-
-    /// <summary>
-    /// Response chứa kết quả sau khi import
-    /// </summary>
-    public class ImportResult
-    {
-        public int SuccessCount { get; set; }
-        public int FailCount { get; set; }
-        public List<string> Errors { get; set; } = new();
-        public bool Success => FailCount == 0 && Errors.Count == 0;
-
-        public string GetSummary()
-        {
-            return $"Thành công: {SuccessCount} | Thất bại: {FailCount}";
         }
     }
 }

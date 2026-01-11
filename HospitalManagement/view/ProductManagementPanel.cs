@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
-using HospitalManagement.controller;
+﻿using HospitalManagement.controller;
+using HospitalManagement.dto.request;
 using HospitalManagement.dto.request.Product;
 using HospitalManagement.dto.response;
 using HospitalManagement.dto.response.Category;
 using HospitalManagement.dto.response.Product;
 using HospitalManagement.entity.enums;
-using HospitalManagement.Service.Impl;
-using Microsoft.Extensions.Configuration;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
+using HospitalManagement.utils.importer.core;
 
 namespace HospitalManagement.view
 {
@@ -349,6 +343,245 @@ namespace HospitalManagement.view
             dlg.Controls.Add(btnPanel);
             dlg.ShowDialog(this);
         }
+        
+        // ================= EXCEL IMPORT/EXPORT =================
+        private void DowloadTemplate()
+        {
+            using var sfd = new SaveFileDialog
+            {
+                Filter = "Excel Files (*.xlsx)|*.xlsx",
+                FileName = "Product_Import_Template.xlsx"
+            };
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                _controller.GenerateImportTemplate(sfd.FileName);
+                MessageBox.Show("Đã tải mẫu về: " + sfd.FileName);
+            }
+        }
+        
+        private void ImportFromExcel()
+        {
+            using var ofd = new OpenFileDialog
+            {
+                Filter = "Excel Files (*.xlsx)|*.xlsx",
+                Title = "Chọn file Excel để import sản phẩm"
+            };
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    // 1. Preview dữ liệu từ file
+                    var preview = _controller.PreviewImport(ofd.FileName);
+
+                    // 2. Hiển thị preview dialog
+                    var previewDialog = CreatePreviewDialog(preview);
+                    
+                    if (previewDialog.ShowDialog(this) == DialogResult.OK)
+                    {
+                        // 3. User click Apply - lưu dữ liệu hợp lệ
+                        var validData = preview.ValidRows.Select(r => r.Data!).ToList();
+                        int count = _controller.ApplyImport(validData);
+                        
+                        MessageBox.Show(
+                            $"Đã import thành công {count} sản phẩm!",
+                            "Thành công",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information
+                        );
+                        
+                        LoadData();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Lỗi khi import: {ex.Message}",
+                        "Lỗi",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
+        }
+        
+        private Form CreatePreviewDialog(ImportPreviewResponse<ProductImportDto> preview)
+        {
+            var dialog = new Form
+            {
+                Text = "Preview Import - Kiểm tra dữ liệu",
+                Size = new Size(1000, 600),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.Sizable,
+                MinimizeBox = false
+            };
+
+            // Summary panel
+            var summaryPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 60,
+                BackColor = Color.WhiteSmoke,
+                Padding = new Padding(10)
+            };
+
+            var lblSummary = new Label
+            {
+                Dock = DockStyle.Fill,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Text = $"Tổng số dòng: {preview.TotalRows}\n" +
+                       $"✓ Hợp lệ: {preview.ValidCount}    ✗ Lỗi: {preview.InvalidCount}"
+            };
+            summaryPanel.Controls.Add(lblSummary);
+
+            // Tab control for Valid/Invalid rows
+            var tabControl = new TabControl
+            {
+                Dock = DockStyle.Fill
+            };
+
+            // Valid rows tab
+            var validTab = new TabPage("Dữ liệu hợp lệ (" + preview.ValidCount + ")");
+            var dgvValid = CreatePreviewGrid(preview.ValidRows, false);
+            validTab.Controls.Add(dgvValid);
+            tabControl.TabPages.Add(validTab);
+
+            // Invalid rows tab
+            var invalidTab = new TabPage("Dữ liệu lỗi (" + preview.InvalidCount + ")");
+            var dgvInvalid = CreatePreviewGrid(preview.InvalidRows, true);
+            invalidTab.Controls.Add(dgvInvalid);
+            tabControl.TabPages.Add(invalidTab);
+
+            // Button panel
+            var btnPanel = new Panel
+            {
+                Dock = DockStyle.Bottom,
+                Height = 60,
+                Padding = new Padding(10)
+            };
+
+            var btnApply = new Button
+            {
+                Text = "Apply - Lưu dữ liệu hợp lệ",
+                Size = new Size(180, 35),
+                Location = new Point(800, 12),
+                Enabled = preview.ValidCount > 0,
+                BackColor = Color.FromArgb(0, 120, 215),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnApply.Click += (s, e) => dialog.DialogResult = DialogResult.OK;
+
+            var btnCancel = new Button
+            {
+                Text = "Hủy",
+                Size = new Size(100, 35),
+                Location = new Point(680, 12),
+                FlatStyle = FlatStyle.Flat
+            };
+            btnCancel.Click += (s, e) => dialog.DialogResult = DialogResult.Cancel;
+
+            btnPanel.Controls.Add(btnApply);
+            btnPanel.Controls.Add(btnCancel);
+
+            dialog.Controls.Add(tabControl);
+            dialog.Controls.Add(summaryPanel);
+            dialog.Controls.Add(btnPanel);
+
+            return dialog;
+        }
+        
+        private DataGridView CreatePreviewGrid(List<ImportRowData<ProductImportDto>> rows, bool showErrors)
+        {
+            var dgv = new DataGridView
+            {
+                Dock = DockStyle.Fill,
+                AutoGenerateColumns = false,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                ReadOnly = true,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                BackgroundColor = Color.White,
+                RowHeadersVisible = false
+            };
+
+            dgv.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "RowIndex",
+                HeaderText = "Dòng",
+                DataPropertyName = "RowIndex",
+                Width = 60
+            });
+
+            dgv.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "Code",
+                HeaderText = "Mã SP",
+                Width = 100
+            });
+
+            dgv.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "Name",
+                HeaderText = "Tên sản phẩm",
+                Width = 200
+            });
+
+            dgv.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "CategoryCode",
+                HeaderText = "Mã danh mục",
+                Width = 120
+            });
+
+            dgv.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "Price",
+                HeaderText = "Giá",
+                Width = 100
+            });
+
+            if (showErrors)
+            {
+                dgv.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    Name = "Errors",
+                    HeaderText = "Lỗi",
+                    Width = 350
+                });
+            }
+
+            dgv.DataSource = rows;
+
+            dgv.CellFormatting += (s, e) =>
+            {
+                if (e.RowIndex < 0 || e.RowIndex >= rows.Count) return;
+                
+                var rowData = rows[e.RowIndex];
+                var data = rowData.Data;
+
+                if (e.ColumnIndex == dgv.Columns["Code"].Index && data != null)
+                    e.Value = data.Code;
+                else if (e.ColumnIndex == dgv.Columns["Name"].Index && data != null)
+                    e.Value = data.Name;
+                else if (e.ColumnIndex == dgv.Columns["CategoryCode"].Index && data != null)
+                    e.Value = data.CategoryCode;
+                else if (e.ColumnIndex == dgv.Columns["Price"].Index && data != null)
+                    e.Value = data.StandardPrice;
+                else if (showErrors && e.ColumnIndex == dgv.Columns["Errors"].Index)
+                    e.Value = string.Join("; ", rowData.Errors.Select(err => $"{err.FieldName}: {err.ErrorMessage}"));
+
+                // Highlight error rows
+                if (!rowData.IsValid)
+                {
+                    dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.FromArgb(255, 240, 240);
+                    dgv.Rows[e.RowIndex].DefaultCellStyle.ForeColor = Color.DarkRed;
+                }
+            };
+
+            return dgv;
+        }
 
         private void btnSearch_Click(object sender, EventArgs e) => ApplyFilters();
         private void btnRefresh_Click(object sender, EventArgs e) => LoadData();
@@ -357,6 +590,9 @@ namespace HospitalManagement.view
         private void btnEdit_Click(object sender, EventArgs e) => OpenAddEditDialog(GetSelected());
         private void btnDelete_Click(object sender, EventArgs e) => DeleteSelected();
         private void btnDetail_Click(object sender, EventArgs e) => ShowDetail();
+        
+        private void btnDowload_Click(object sender, EventArgs e) => DowloadTemplate();
+        private void btnImportExcel_Click(object sender, EventArgs e) => ImportFromExcel();
 
    
     }
