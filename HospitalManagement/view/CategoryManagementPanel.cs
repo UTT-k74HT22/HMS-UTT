@@ -52,6 +52,9 @@ namespace HospitalManagement.view
         {
             dgvCategory.Columns.Clear();
             dgvCategory.Rows.Clear();
+            dgvCategory.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvCategory.AutoGenerateColumns = false;
+            dgvCategory.BackgroundColor = Color.White;
 
             dgvCategory.Columns.AddRange(new[]
             {
