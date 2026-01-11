@@ -26,104 +26,202 @@
 
         #region Component Designer generated code
 
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-
-            this.panelTop = new System.Windows.Forms.Panel();
-            this.panelBottom = new System.Windows.Forms.Panel();
-            this.lblSearch = new System.Windows.Forms.Label();
-
-            this.txtSearch = new System.Windows.Forms.TextBox();
-            this.btnSearch = new System.Windows.Forms.Button();
-            this.btnAdd = new System.Windows.Forms.Button();
-            this.btnEdit = new System.Windows.Forms.Button();
-            this.btnDelete = new System.Windows.Forms.Button();
-            this.btnReload = new System.Windows.Forms.Button();
-
-            this.dataGridView = new System.Windows.Forms.DataGridView();
-            this.lblTotal = new System.Windows.Forms.Label();
-            this.lblSearch.Text = "Từ khóa:";
-            this.lblSearch.AutoSize = true;
-            this.lblSearch.Location = new System.Drawing.Point(10, 11);
-            this.lblSearch.Font = new System.Drawing.Font("Segoe UI", 9);
-            
-
-            // ==================== panelTop ====================
-            this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelTop.Height = 40;
-            this.panelTop.Controls.Add(this.lblSearch);
-
-
-            this.panelTop.Controls.Add(this.txtSearch);
-            this.panelTop.Controls.Add(this.btnSearch);
-            this.panelTop.Controls.Add(this.btnAdd);
-            this.panelTop.Controls.Add(this.btnEdit);
-            this.panelTop.Controls.Add(this.btnDelete);
-            this.panelTop.Controls.Add(this.btnReload);
-
+            panelTop = new System.Windows.Forms.Panel();
+            lblSearch = new System.Windows.Forms.Label();
+            txtSearch = new System.Windows.Forms.TextBox();
+            btnSearch = new System.Windows.Forms.Button();
+            btnAdd = new System.Windows.Forms.Button();
+            btnEdit = new System.Windows.Forms.Button();
+            btnDelete = new System.Windows.Forms.Button();
+            btnReload = new System.Windows.Forms.Button();
+            panelBottom = new System.Windows.Forms.Panel();
+            lblTotal = new System.Windows.Forms.Label();
+            dataGridView = new System.Windows.Forms.DataGridView();
+            dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            panelTop.SuspendLayout();
+            panelBottom.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView).BeginInit();
+            SuspendLayout();
+            // 
+            // panelTop
+            // 
+            panelTop.Controls.Add(lblSearch);
+            panelTop.Controls.Add(txtSearch);
+            panelTop.Controls.Add(btnSearch);
+            panelTop.Controls.Add(btnAdd);
+            panelTop.Controls.Add(btnEdit);
+            panelTop.Controls.Add(btnDelete);
+            panelTop.Controls.Add(btnReload);
+            panelTop.Dock = System.Windows.Forms.DockStyle.Top;
+            panelTop.Location = new System.Drawing.Point(0, 0);
+            panelTop.Name = "panelTop";
+            panelTop.Size = new System.Drawing.Size(800, 40);
+            panelTop.TabIndex = 2;
+            // 
+            // lblSearch
+            // 
+            lblSearch.AutoSize = true;
+            lblSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
+            lblSearch.Location = new System.Drawing.Point(10, 11);
+            lblSearch.Name = "lblSearch";
+            lblSearch.Size = new System.Drawing.Size(53, 15);
+            lblSearch.TabIndex = 0;
+            lblSearch.Text = "Từ khóa:";
+            // 
             // txtSearch
-            this.txtSearch.Location = new System.Drawing.Point(70, 8);
-            this.txtSearch.Width = 200;
-
+            // 
+            txtSearch.Location = new System.Drawing.Point(70, 8);
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new System.Drawing.Size(200, 23);
+            txtSearch.TabIndex = 1;
+            // 
             // btnSearch
-            this.btnSearch.Text = "Tìm";
-            this.btnSearch.Location = new System.Drawing.Point(280, 5);
-            this.btnSearch.Width = 60;
-
+            // 
+            btnSearch.Location = new System.Drawing.Point(280, 5);
+            btnSearch.Name = "btnSearch";
+            btnSearch.Size = new System.Drawing.Size(60, 23);
+            btnSearch.TabIndex = 2;
+            btnSearch.Text = "Tìm";
+            // 
             // btnAdd
-            this.btnAdd.Text = "Thêm";
-            this.btnAdd.Location = new System.Drawing.Point(350, 5);
-            this.btnAdd.Width = 60;
-
+            // 
+            btnAdd.Location = new System.Drawing.Point(350, 5);
+            btnAdd.Name = "btnAdd";
+            btnAdd.Size = new System.Drawing.Size(60, 23);
+            btnAdd.TabIndex = 3;
+            btnAdd.Text = "Thêm";
+            // 
             // btnEdit
-            this.btnEdit.Text = "Sửa";
-            this.btnEdit.Location = new System.Drawing.Point(420, 5);
-            this.btnEdit.Width = 60;
-
+            // 
+            btnEdit.Location = new System.Drawing.Point(420, 5);
+            btnEdit.Name = "btnEdit";
+            btnEdit.Size = new System.Drawing.Size(60, 23);
+            btnEdit.TabIndex = 4;
+            btnEdit.Text = "Sửa";
+            // 
             // btnDelete
-            this.btnDelete.Text = "Xóa";
-            this.btnDelete.Location = new System.Drawing.Point(490, 5);
-            this.btnDelete.Width = 60;
-
+            // 
+            btnDelete.Location = new System.Drawing.Point(490, 5);
+            btnDelete.Name = "btnDelete";
+            btnDelete.Size = new System.Drawing.Size(60, 23);
+            btnDelete.TabIndex = 5;
+            btnDelete.Text = "Xóa";
+            // 
             // btnReload
-            this.btnReload.Text = "Reload";
-            this.btnReload.Location = new System.Drawing.Point(560, 5);
-            this.btnReload.Width = 60;
-
-            // ==================== dataGridView ====================
-            this.dataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView.AllowUserToAddRows = false;
-            this.dataGridView.ReadOnly = true;
-
-            this.dataGridView.Columns.Add("STT", "STT");
-            this.dataGridView.Columns.Add("Code", "Code");
-            this.dataGridView.Columns.Add("Name", "Name");
-            this.dataGridView.Columns.Add("Address", "Address");
-            this.dataGridView.Columns.Add("Phone", "Phone");
-            this.dataGridView.Columns.Add("Manager", "Manager");
-            this.dataGridView.Columns.Add("Status", "Status");
-
-            // ==================== panelBottom ====================
-            this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.Height = 30;
-
-            this.panelBottom.Controls.Add(this.lblTotal);
-
+            // 
+            btnReload.Location = new System.Drawing.Point(560, 5);
+            btnReload.Name = "btnReload";
+            btnReload.Size = new System.Drawing.Size(60, 23);
+            btnReload.TabIndex = 6;
+            btnReload.Text = "Reload";
+            // 
+            // panelBottom
+            // 
+            panelBottom.Controls.Add(lblTotal);
+            panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
+            panelBottom.Location = new System.Drawing.Point(0, 570);
+            panelBottom.Name = "panelBottom";
+            panelBottom.Size = new System.Drawing.Size(800, 30);
+            panelBottom.TabIndex = 1;
+            // 
             // lblTotal
-            this.lblTotal.Text = "Tổng số kho: 0";
-            this.lblTotal.AutoSize = true;
-            this.lblTotal.Location = new System.Drawing.Point(5, 5);
-            this.lblTotal.Font = new System.Drawing.Font("Segoe UI", 10, System.Drawing.FontStyle.Bold);
-
-            // ==================== WarehouseManagementPanel ====================
-            this.Controls.Add(this.dataGridView);
-            this.Controls.Add(this.panelBottom);
-            this.Controls.Add(this.panelTop);
-            this.Size = new System.Drawing.Size(800, 600);
+            // 
+            lblTotal.AutoSize = true;
+            lblTotal.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            lblTotal.Location = new System.Drawing.Point(5, 5);
+            lblTotal.Name = "lblTotal";
+            lblTotal.Size = new System.Drawing.Size(107, 19);
+            lblTotal.TabIndex = 0;
+            lblTotal.Text = "Tổng số kho: 0";
+            // 
+            // dataGridView
+            // 
+            dataGridView.AllowUserToAddRows = false;
+            dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { dataGridViewTextBoxColumn1, dataGridViewTextBoxColumn2, dataGridViewTextBoxColumn3, dataGridViewTextBoxColumn4, dataGridViewTextBoxColumn5, dataGridViewTextBoxColumn6, dataGridViewTextBoxColumn7 });
+            dataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            dataGridView.Location = new System.Drawing.Point(0, 40);
+            dataGridView.Name = "dataGridView";
+            dataGridView.ReadOnly = true;
+            dataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            dataGridView.Size = new System.Drawing.Size(800, 530);
+            dataGridView.TabIndex = 0;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            dataGridViewTextBoxColumn1.HeaderText = "STT";
+            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            dataGridViewTextBoxColumn1.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            dataGridViewTextBoxColumn2.HeaderText = "Code";
+            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            dataGridViewTextBoxColumn2.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            dataGridViewTextBoxColumn3.HeaderText = "Name";
+            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            dataGridViewTextBoxColumn3.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            dataGridViewTextBoxColumn4.HeaderText = "Address";
+            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            dataGridViewTextBoxColumn4.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn5
+            // 
+            dataGridViewTextBoxColumn5.HeaderText = "Phone";
+            dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            dataGridViewTextBoxColumn5.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn6
+            // 
+            dataGridViewTextBoxColumn6.HeaderText = "Manager";
+            dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            dataGridViewTextBoxColumn6.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn7
+            // 
+            dataGridViewTextBoxColumn7.HeaderText = "Status";
+            dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            dataGridViewTextBoxColumn7.ReadOnly = true;
+            // 
+            // WarehousesManagementPanel
+            // 
+            Controls.Add(dataGridView);
+            Controls.Add(panelBottom);
+            Controls.Add(panelTop);
+            Size = new System.Drawing.Size(800, 600);
+            panelTop.ResumeLayout(false);
+            panelTop.PerformLayout();
+            panelBottom.ResumeLayout(false);
+            panelBottom.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView).EndInit();
+            ResumeLayout(false);
         }
+
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn7;
 
         #endregion
     }
