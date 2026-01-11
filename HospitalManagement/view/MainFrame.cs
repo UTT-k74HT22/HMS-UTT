@@ -172,7 +172,7 @@ namespace HospitalManagement.view
                 Sidebar.MENU_INVOICES => CreateComingSoonPanel("Hóa đơn"),
                 Sidebar.MENU_PAYMENTS => new PaymentManagementForm(),
                 Sidebar.MENU_REPORT_SUMMARY => CreateComingSoonPanel("Báo cáo tóm tắt"),
-                Sidebar.MENU_REPORT_DETAIL => CreateComingSoonPanel("Thống kê chi tiết"),
+                Sidebar.MENU_REPORT_DETAIL => new ReportDetailManagementPanel(),
 
                 _ => new DashboardPanel()
             };
