@@ -20,6 +20,8 @@ public interface IPaymentRepository
     // Hủy payment
     void Delete(int id);
 
+    List<Payment> FindByInvoiceId(int invoiceId);
+
     // Kiểm tra tồn tại theo payment number
     bool ExistsByPaymentNumber(string paymentNumber);
 

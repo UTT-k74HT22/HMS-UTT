@@ -120,6 +120,30 @@ namespace HospitalManagement.repository.impl
             conn.Open();
             cmd.ExecuteNonQuery();
         }
+        
+        public List<Payment> FindByInvoiceId(int invoiceId)
+        {
+            string sql = @"
+        SELECT id, invoice_id, payment_number, payment_date, amount, method, status, created_at
+        FROM payments
+        WHERE invoice_id = @invoiceId";
+
+            List<Payment> result = new List<Payment>();
+
+            using var conn = GetConnection();
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@invoiceId", invoiceId);
+
+            conn.Open();
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                result.Add(MapRow(reader));
+            }
+
+            return result;
+        }
+
 
         // =================== EXISTS BY PAYMENT NUMBER ===================
         public bool ExistsByPaymentNumber(string paymentNumber)
