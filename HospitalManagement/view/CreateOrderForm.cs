@@ -53,6 +53,8 @@ namespace HospitalManagement.view
             dgvProducts.MultiSelect = false;
             dgvProducts.AutoGenerateColumns = false;
             dgvProducts.Columns.Clear();
+            dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
 
             dgvProducts.Columns.Add("Id", "ID");
             dgvProducts.Columns.Add("Name", "Tên SP");
@@ -65,6 +67,7 @@ namespace HospitalManagement.view
             dgvOrderItems.MultiSelect = false;
             dgvOrderItems.AutoGenerateColumns = false;
             dgvOrderItems.Columns.Clear();
+            dgvOrderItems.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
             dgvOrderItems.Columns.Add("Product", "Sản phẩm");
             dgvOrderItems.Columns.Add("Warehouse", "Kho");
