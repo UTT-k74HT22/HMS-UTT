@@ -355,7 +355,24 @@ namespace HospitalManagement.view
         private void btnRefresh_Click(object sender, EventArgs e) => LoadData();
         private void cbStatus_SelectedIndexChanged(object sender, EventArgs e) => ApplyFilters();
         private void btnAdd_Click(object sender, EventArgs e) => OpenAddEditDialog(null);
-        private void btnEdit_Click(object sender, EventArgs e) => OpenAddEditDialog(GetSelected());
+        private void btnEdit_Click(object sender, EventArgs e)
+        {
+            var selected = GetSelected();
+            if (selected == null) return;
+
+            if (selected.Status == ProductStatus.DISCONTINUED)
+            {
+                MessageBox.Show(
+                    "Không thể chỉnh sửa sản phẩm đã ngừng kinh doanh (DISCONTINUED).",
+                    "Thông báo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
+            OpenAddEditDialog(selected);
+        }
         private void btnDelete_Click(object sender, EventArgs e) => DeleteSelected();
         private void btnDetail_Click(object sender, EventArgs e) => ShowDetail();
 

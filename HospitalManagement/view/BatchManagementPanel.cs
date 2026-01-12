@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using HospitalManagement.controller;
 using HospitalManagement.dto.request.Batch;
 using HospitalManagement.dto.response;
+using HospitalManagement.entity.enums;
 
 namespace HospitalManagement.view
 {
@@ -217,7 +218,13 @@ namespace HospitalManagement.view
             cbStatus.Items.AddRange(new[] { "ACTIVE", "EXPIRED", "BLOCKED", "DEPLETED" });
             cbStatus.SelectedIndex = 0;
 
-            cbProduct.DataSource = _controller.GetAllProducts();
+            var products = _controller.GetAllProducts()
+                .Where(p => Enum.Parse<ProductStatus>(p.Status.ToString()) == ProductStatus.ACTIVE)
+                .ToList();
+            cbProduct.DataSource = products;
+            cbProduct.DisplayMember = "Name";
+            cbProduct.ValueMember = "Id";
+
             cbProduct.DisplayMember = "Name";
             cbProduct.ValueMember = "Id";
 
