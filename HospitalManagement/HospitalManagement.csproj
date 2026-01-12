@@ -32,6 +32,9 @@
 		<Compile Update="view\LoginForm.cs">
 			<SubType>Form</SubType>
 		</Compile>
+		<Compile Update="view\CustomerProfileManagementPanel.cs">
+		  <SubType>UserControl</SubType>
+		</Compile>
 	</ItemGroup>
 
 	<ItemGroup>
