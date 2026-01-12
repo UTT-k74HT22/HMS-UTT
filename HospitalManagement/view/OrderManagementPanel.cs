@@ -90,7 +90,12 @@ namespace HospitalManagement.view
             dgvOrders.Columns.Add(new DataGridViewTextBoxColumn
             {
                 DataPropertyName = nameof(OrderResponse.TotalAmount),
-                HeaderText = "Tổng tiền"
+                HeaderText = "Tổng tiền",
+                
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                Format = "N0" 
+            }
             });
         }
 
@@ -102,9 +107,21 @@ namespace HospitalManagement.view
             btnView.Click += (_, _) => OnViewDetail();
             btnConfirm.Click += (_, _) => OnConfirm();
             btnCancel.Click += (_, _) => OnCancel();
+            
+            dgvOrders.RowPostPaint += dgvOrders_RowPostPaint;
         }
 
         // ================= DATA =================
+        private void dgvOrders_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
+        {
+            var grid = sender as DataGridView;
+            if (grid == null) return;
+
+            string stt = (e.RowIndex + 1).ToString();
+
+            // Gán giá trị cho cột STT
+            grid.Rows[e.RowIndex].Cells[0].Value = stt;
+        }
 
         private void LoadData()
         {
@@ -116,12 +133,6 @@ namespace HospitalManagement.view
         {
             dgvOrders.DataSource = null;
             dgvOrders.DataSource = data;
-
-            for (int i = 0; i < dgvOrders.Rows.Count; i++)
-            {
-                dgvOrders.Rows[i].Cells[0].Value = i + 1;
-            }
-
             lblTotal.Text = $"Tổng số đơn hàng: {data.Count}";
         }
 
