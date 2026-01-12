@@ -14,10 +14,9 @@ namespace HospitalManagement.repository.impl
         {
             _connectionString = connectionString;
         }
-
-        /* =========================================================
-           CREATE ORDER
-           ========================================================= */
+        /**
+         * Tạo một đơn hàng mới 
+         */
         public long InsertOrder(
             long? customerId,
             string shippingAddress,
@@ -57,9 +56,9 @@ namespace HospitalManagement.repository.impl
             return Convert.ToInt64(cmd.ExecuteScalar());
         }
 
-        /* =========================================================
-           INSERT ORDER ITEM (schema-safe)
-           ========================================================= */
+        /**
+         * Thêm sản phẩm vào đơn hàng
+         */
         public void InsertItem(long orderId, OrderItemRequest item)
         {
             const string sql = @"
@@ -87,9 +86,9 @@ namespace HospitalManagement.repository.impl
         }
 
 
-        /* =========================================================
-           UPDATE TOTAL
-           ========================================================= */
+        /**
+         * Cập nhật tổng tiền 
+         */
         public void UpdateOrderTotal(long orderId)
         {
             const string sql = @"
@@ -116,9 +115,9 @@ namespace HospitalManagement.repository.impl
             cmd.ExecuteNonQuery();
         }
 
-        /* =========================================================
-           STATUS
-           ========================================================= */
+       /**
+        * Cập nhật trạng thái đơn hàng
+        */
         public void UpdateStatus(long orderId, string status)
         {
             const string sql = "UPDATE orders SET status = @status WHERE id = @orderId";
@@ -132,15 +131,17 @@ namespace HospitalManagement.repository.impl
             conn.Open();
             cmd.ExecuteNonQuery();
         }
-
+        /**
+           *  xóa đơn hàng bằng cách cập nhật status (soft delete)
+           */
         public void CancelOrder(long orderId)
         {
             UpdateStatus(orderId, OrderStatus.CANCELED.ToString());
         }
 
-        /* =========================================================
-           FIND ALL (LIST VIEW)
-           ========================================================= */
+        /**
+            * Lấy danh sách tất cả đơn hàng
+         * */
         public List<OrderResponse> FindAll()
         {
             const string sql = @"
@@ -174,10 +175,11 @@ namespace HospitalManagement.repository.impl
 
             return list;
         }
-
-        /* =========================================================
-           FIND BY ID (DETAIL VIEW)
-           ========================================================= */
+        /**
+        * Lấy thông tin đơn hàng theo ID
+        * @param orderId ID của đơn hàng
+        * @return thông tin đơn hàng
+        */
         public OrderResponse FindById(long orderId)
         {
             const string sql = @"
@@ -216,10 +218,11 @@ namespace HospitalManagement.repository.impl
 
             return MapDetail(reader);
         }
-
-        /* =========================================================
-           GET ORDER ITEMS
-           ========================================================= */
+        /**
+         * Lấy danh sách sản phẩm trong đơn hàng
+         * @param orderId ID của đơn hàng
+         * @return danh sách sản phẩm trong đơn hàng
+         */
         public List<OrderItemResponse> GetItems(long orderId)
         {
             const string sql = @"

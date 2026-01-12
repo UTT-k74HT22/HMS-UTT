@@ -9,9 +9,6 @@ namespace HospitalManagement.repository.impl
 {
     public class BatchRepositoryImpl : IBatchRepository
     {
-        // =====================================================
-        // CONNECTION
-        // =====================================================
         private readonly string _connectionString;
 
         public BatchRepositoryImpl(string connectionString)

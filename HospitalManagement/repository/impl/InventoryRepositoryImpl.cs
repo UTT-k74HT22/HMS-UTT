@@ -468,7 +468,9 @@ public class InventoryRepositoryImpl : IInventoryRepository
             return result != null ? (int)result : 0;
         }
     }
-
+    /**
+     * cập nhật tồn kho 
+     */
     public void UpdateStock(long productId, long batchId, long warehouseId, int newQuantity)
     {
         const string sql = @"
@@ -499,7 +501,9 @@ public class InventoryRepositoryImpl : IInventoryRepository
             throw new InvalidOperationException("Không tìm thấy tồn kho để cập nhật!");
         }
     }
-
+    /**
+     * Thêm giao dịch vào danh sách giao dịch
+     */
     public void InsertStockMovement(long productId, long batchId, long warehouseId, int quantity, int before, int after,
         long userId, string note, string movementType)
     { const string sql = @"
