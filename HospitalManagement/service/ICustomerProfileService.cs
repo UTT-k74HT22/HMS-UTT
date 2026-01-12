@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using HospitalManagement.dto.response;
 using HospitalManagement.entity;
-using Microsoft.Data.SqlClient;
 
-namespace HospitalManagement.repository
+namespace HospitalManagement.service
 {
-    public interface ICustomerProfileRepository
+    public interface ICustomerProfileService
     {
-        void Insert(SqlConnection conn, SqlTransaction transaction, CustomerProfile profile);
+        int Create(CustomerProfile profile);
         List<CustomerProfileResponse> GetAll();
         CustomerProfileResponse? GetByProfileId(int profileId);
         CustomerProfileResponse? GetByCode(string code);

@@ -161,7 +161,7 @@ namespace HospitalManagement.view
                 Sidebar.MENU_EMPLOYEE => _employeeController != null
                     ? new EmployeeManagementPanel(_employeeController)
                     : CreateComingSoonPanel("Quản lý nhân viên (Cần DI)"),
-                Sidebar.MENU_CUSTOMER => CreateComingSoonPanel("Quản lý khách hàng"),
+                Sidebar.MENU_CUSTOMER => new CustomerProfileManagementPanel(),
                 
                 Sidebar.MENU_CATEGORIES => new CategoryManagementPanel(),
 
