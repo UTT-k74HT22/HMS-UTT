@@ -308,7 +308,6 @@ namespace HospitalManagement.view
             Console.WriteLine("Export excel running...");
             
             var filteredDate = _bs.List.Cast<StockMovementResponse>().ToList();
-            
             ExcelExporter.ExportWithDialog<StockMovementResponse>(filteredDate, new StockMovementExcelWriter(), this.FindForm());
         }
 

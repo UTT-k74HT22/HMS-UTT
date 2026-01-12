@@ -145,6 +145,7 @@ namespace HospitalManagement.configuration
             // ================= IMPORT SERVICES =================
             
             services.AddScoped<ProductImportService>();
+            services.AddScoped<utils.importer.service.StockMovementImportService>();
 
             // ================= CONTROLLERS =================
 
