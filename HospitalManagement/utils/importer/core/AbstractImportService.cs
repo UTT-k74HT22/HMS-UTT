@@ -43,9 +43,6 @@ namespace HospitalManagement.utils.importer.core
             {
                 throw new FileNotFoundException($"File không tồn tại: {filePath}");
             }
-
-            // EPPlus 8+ requires setting license using static property
-            ExcelPackage.License.SetNonCommercialOrganization("HospitalManagement");
             using var package = new ExcelPackage(new FileInfo(filePath));
             var worksheet = package.Workbook.Worksheets.FirstOrDefault();
 
@@ -72,8 +69,8 @@ namespace HospitalManagement.utils.importer.core
 
             // Process data rows (skip header)
             int rowCount = worksheet.Dimension.Rows;
-            Console.WriteLine($"[IMPORT] Bắt đầu đọc file: {filePath}");
-            Console.WriteLine($"[IMPORT] Tổng số dòng: {rowCount - 1} (không tính header)");
+            Console.WriteLine($"[IMPORT] Ready read file: {filePath}");
+            Console.WriteLine($"[IMPORT]Total: {rowCount - 1} (No header)");
             
             for (int i = 2; i <= rowCount; i++) // Start from row 2 (skip header)
             {
@@ -81,7 +78,7 @@ namespace HospitalManagement.utils.importer.core
 
                 if (IsEmptyRow(row))
                 {
-                    Console.WriteLine($"[IMPORT] Dòng {i}: Bỏ qua (dòng trống)");
+                    Console.WriteLine($"[IMPORT] Row {i}: Skip (empty row)");
                     continue;
                 }
 
@@ -89,17 +86,17 @@ namespace HospitalManagement.utils.importer.core
                 {
                     // Map dữ liệu
                     T data = mapper.MapRow(row, i);
-                    Console.WriteLine($"[IMPORT] Dòng {i}: Đã map dữ liệu -> {data?.GetType().Name}");
+                    Console.WriteLine($"[IMPORT] Row {i}: mapping value -> {data?.GetType().Name}");
 
                     // Validate dữ liệu
                     List<ImportError> errors = validator.Validate(data, i);
-                    Console.WriteLine($"[IMPORT] Dòng {i}: Validation -> {(errors.Count == 0 ? "OK" : $"{errors.Count} lỗi")}");
+                    Console.WriteLine($"[IMPORT] Row {i}: Validation -> {(errors.Count == 0 ? "OK" : $"{errors.Count} Error")}");
                     
                     if (errors.Count > 0)
                     {
                         foreach (var err in errors)
                         {
-                            Console.WriteLine($"  ❌ [{err.FieldName}]: {err.ErrorMessage}");
+                            Console.WriteLine($"[{err.FieldName}]: {err.ErrorMessage}");
                         }
                     }
 
@@ -130,7 +127,7 @@ namespace HospitalManagement.utils.importer.core
                         IsValid = false,
                         Errors = new List<ImportError>
                         {
-                            new ImportError(i, "Parse Error", $"Không thể đọc dữ liệu: {ex.Message}")
+                            new ImportError(i, "Parse Error", $"Can not read value: {ex.Message}")
                         }
                     };
                     invalidRows.Add(rowData);

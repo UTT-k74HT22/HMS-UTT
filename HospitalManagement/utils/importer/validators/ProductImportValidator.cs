@@ -14,10 +14,7 @@ namespace HospitalManagement.utils.importer.validators
         private readonly ICategoryRepository _categoryRepository;
         private readonly IManufacturerRepository _manufacturerRepository;
 
-        public ProductImportValidator(
-            IProductRepository productRepository,
-            ICategoryRepository categoryRepository,
-            IManufacturerRepository manufacturerRepository)
+        public ProductImportValidator(IProductRepository productRepository, ICategoryRepository categoryRepository, IManufacturerRepository manufacturerRepository)
         {
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;

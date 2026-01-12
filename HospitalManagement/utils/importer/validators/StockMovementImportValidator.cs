@@ -1,10 +1,8 @@
-using HospitalManagement.entity;
 using HospitalManagement.repository;
 using HospitalManagement.utils.importer.core;
-using System;
-using System.Linq;
+using HospitalManagement.utils.importer.dto;
 
-namespace HospitalManagement.utils.importer.validator
+namespace HospitalManagement.utils.importer.validators
 {
     /// <summary>
     /// Strategy implementation: Validation logic cho Stock Movement import
@@ -16,10 +14,7 @@ namespace HospitalManagement.utils.importer.validator
         private readonly IWarehousesRepository _warehouseRepository;
         private readonly IBatchRepository _batchRepository;
 
-        public StockMovementImportValidator(
-            IProductRepository productRepository,
-            IWarehousesRepository warehouseRepository,
-            IBatchRepository batchRepository)
+        public StockMovementImportValidator(IProductRepository productRepository, IWarehousesRepository warehouseRepository, IBatchRepository batchRepository)
         {
             _productRepository = productRepository;
             _warehouseRepository = warehouseRepository;
@@ -29,28 +24,28 @@ namespace HospitalManagement.utils.importer.validator
         /// <summary>
         /// Validate 1 dòng dữ liệu đã map
         /// </summary>
-        public List<ImportError> Validate(dto.StockMovementImportDto dto, int rowIndex)
+        public List<ImportError> Validate(StockMovementImportDto dto, int rowIndex)
         {
             var errors = new List<ImportError>();
 
             // 1. MovementType: bắt buộc, phải là IMPORT/EXPORT/ADJUST
             if (string.IsNullOrWhiteSpace(dto.MovementType))
             {
-                errors.Add(new ImportError(rowIndex, "Loại", "Loại không được để trống"));
+                errors.Add(new ImportError(rowIndex, "MovementType", "MovementType is required"));
             }
             else
             {
                 var validTypes = new[] { "IMPORT", "EXPORT", "ADJUST" };
                 if (!validTypes.Contains(dto.MovementType.ToUpper()))
                 {
-                    errors.Add(new ImportError(rowIndex, "Loại", $"Loại không hợp lệ: {dto.MovementType}. Chỉ chấp nhận: IMPORT, EXPORT, ADJUST"));
+                    errors.Add(new ImportError(rowIndex, "MovementType", $"MovementType invalid: {dto.MovementType}. Accept only: IMPORT, EXPORT, ADJUST"));
                 }
             }
 
             // 2. WarehouseCode: bắt buộc, phải tồn tại trong DB (tìm theo Code hoặc Name)
             if (string.IsNullOrWhiteSpace(dto.WarehouseCode))
             {
-                errors.Add(new ImportError(rowIndex, "Kho hàng", "Kho hàng không được để trống"));
+                errors.Add(new ImportError(rowIndex, "Warehouse", "Ware house is required"));
             }
             else
             {
@@ -67,22 +62,22 @@ namespace HospitalManagement.utils.importer.validator
                 
                 if (warehouse == null)
                 {
-                    errors.Add(new ImportError(rowIndex, "Kho hàng", 
-                        $"Kho hàng không tồn tại: '{dto.WarehouseCode}'. Vui lòng nhập đúng tên hoặc mã kho."));
+                    errors.Add(new ImportError(rowIndex, "Warehouse", 
+                        $"Warehouse invalid : '{dto.WarehouseCode}'. Please import correct Warehouse name."));
                 }
             }
 
             // 3. ProductCode: bắt buộc, phải tồn tại trong DB
             if (string.IsNullOrWhiteSpace(dto.ProductCode))
             {
-                errors.Add(new ImportError(rowIndex, "Mã sản phẩm", "Mã sản phẩm không được để trống"));
+                errors.Add(new ImportError(rowIndex, "Product code", "Product code is required"));
             }
             else
             {
                 var product = _productRepository.FindByCode(dto.ProductCode);
                 if (product == null)
                 {
-                    errors.Add(new ImportError(rowIndex, "Mã sản phẩm", $"Sản phẩm không tồn tại: {dto.ProductCode}"));
+                    errors.Add(new ImportError(rowIndex, "Product code", $"Product not found: {dto.ProductCode}"));
                 }
             }
 
@@ -92,14 +87,14 @@ namespace HospitalManagement.utils.importer.validator
                 var batches = _batchRepository.FindByBatchCode(dto.BatchCode);
                 if (batches == null || batches.Count == 0)
                 {
-                    errors.Add(new ImportError(rowIndex, "Mã lô", $"Lô hàng không tồn tại: {dto.BatchCode}"));
+                    errors.Add(new ImportError(rowIndex, "Batch code", $"Batch code not found: {dto.BatchCode}"));
                 }
             }
 
             // 5. Quantity: phải > 0
             if (dto.Quantity <= 0)
             {
-                errors.Add(new ImportError(rowIndex, "Số lượng", $"Số lượng phải lớn hơn 0 (hiện tại: {dto.Quantity})"));
+                errors.Add(new ImportError(rowIndex, "Quantity", $"Quantity must be large 0 (Now: {dto.Quantity})"));
             }
 
             return errors;

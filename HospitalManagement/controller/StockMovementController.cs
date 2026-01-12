@@ -6,7 +6,8 @@ using HospitalManagement.entity;
 using HospitalManagement.entity.enums;
 using HospitalManagement.service;
 using HospitalManagement.utils.importer.core;
-using HospitalManagement.utils.importer.service;
+using HospitalManagement.utils.importer.dto;
+using HospitalManagement.utils.importer.services;
 using HospitalManagement.utils.importer.template;
 
 namespace HospitalManagement.controller
@@ -83,7 +84,7 @@ namespace HospitalManagement.controller
         /// <summary>
         /// Preview dữ liệu từ file Excel (chưa lưu DB)
         /// </summary>
-        public ImportPreviewResponse<utils.importer.dto.StockMovementImportDto> PreviewImport(string filePath)
+        public ImportPreviewResponse<StockMovementImportDto> PreviewImport(string filePath)
         {
             return _importService.PreviewFromFile(filePath);
         }

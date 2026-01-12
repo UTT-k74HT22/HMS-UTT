@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using HospitalManagement.dto.request;
 
 namespace HospitalManagement.view
 {
@@ -328,7 +329,11 @@ namespace HospitalManagement.view
             {
                 try
                 {
-                    // _inventoryController.UpdateThresholds((long)item.Id, dialog.MinThreshold, dialog.MaxThreshold);
+                    _inventoryController.UpdateThresholds((long)item.Id, new UpdateInventoryThresholdRequest
+                    {
+                        MinThreshold = dialog.MinThreshold,
+                        MaxThreshold = dialog.MaxThreshold
+                    });
                     MessageBox.Show("Cập nhật ngưỡng thành công!", "Success", 
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     LoadData();

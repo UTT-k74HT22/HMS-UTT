@@ -3,10 +3,9 @@ using HospitalManagement.entity;
 using HospitalManagement.repository;
 using HospitalManagement.service;
 using HospitalManagement.utils.importer.core;
-using System;
-using System.Linq;
+using HospitalManagement.utils.importer.validators;
 
-namespace HospitalManagement.utils.importer.service
+namespace HospitalManagement.utils.importer.services
 {
     /// <summary>
     /// Concrete service: Stock Movement Import
@@ -19,13 +18,9 @@ namespace HospitalManagement.utils.importer.service
         private readonly IBatchRepository _batchRepository;
         private readonly IStockMovementService _stockMovementService;
         private readonly mapper.StockMovementImportMapper _mapper;
-        private readonly validator.StockMovementImportValidator _validator;
-
+        private readonly StockMovementImportValidator _validator;
         public StockMovementImportService(
-            IProductRepository productRepository,
-            IWarehousesRepository warehouseRepository,
-            IBatchRepository batchRepository,
-            IStockMovementService stockMovementService)
+            IProductRepository productRepository, IWarehousesRepository warehouseRepository, IBatchRepository batchRepository, IStockMovementService stockMovementService)
         {
             _productRepository = productRepository;
             _warehouseRepository = warehouseRepository;
@@ -34,10 +29,7 @@ namespace HospitalManagement.utils.importer.service
 
             // Khởi tạo mapper và validator
             _mapper = new mapper.StockMovementImportMapper();
-            _validator = new validator.StockMovementImportValidator(
-                productRepository,
-                warehouseRepository,
-                batchRepository);
+            _validator = new StockMovementImportValidator(productRepository, warehouseRepository, batchRepository);
         }
 
         /// <summary>
