@@ -3,6 +3,8 @@ using HospitalManagement.entity;
 using HospitalManagement.repository;
 using HospitalManagement.service;
 using HospitalManagement.utils.importer.core;
+using System;
+using System.Linq;
 
 namespace HospitalManagement.utils.importer.service
 {
@@ -69,12 +71,23 @@ namespace HospitalManagement.utils.importer.service
                     throw new Exception($"Product not found: {dto.ProductCode}");
                 }
 
-                // Resolve Warehouse by Code
+                // Resolve Warehouse by Code or Name
                 var warehouse = _warehouseRepository.GetByCode(dto.WarehouseCode!);
+                
+                // Nếu không tìm thấy theo Code, thử tìm theo Name
+                if (warehouse == null)
+                {
+                    var allWarehouses = _warehouseRepository.GetAll();
+                    warehouse = allWarehouses?.FirstOrDefault(w => 
+                        w.Name?.Equals(dto.WarehouseCode, StringComparison.OrdinalIgnoreCase) == true);
+                }
+                
                 if (warehouse == null)
                 {
                     throw new Exception($"Warehouse not found: {dto.WarehouseCode}");
                 }
+                
+                Console.WriteLine($"[IMPORT] Resolved warehouse: {warehouse.Name} (ID: {warehouse.Id})");
                 int warehouseId = (int)warehouse.Id;
 
                 // Resolve Batch (optional)

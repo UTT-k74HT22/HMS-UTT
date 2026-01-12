@@ -1,6 +1,8 @@
 using HospitalManagement.entity;
 using HospitalManagement.repository;
 using HospitalManagement.utils.importer.core;
+using System;
+using System.Linq;
 
 namespace HospitalManagement.utils.importer.validator
 {
@@ -45,18 +47,28 @@ namespace HospitalManagement.utils.importer.validator
                 }
             }
 
-            // 2. WarehouseCode: bắt buộc, phải tồn tại trong DB
+            // 2. WarehouseCode: bắt buộc, phải tồn tại trong DB (tìm theo Code hoặc Name)
             if (string.IsNullOrWhiteSpace(dto.WarehouseCode))
             {
                 errors.Add(new ImportError(rowIndex, "Kho hàng", "Kho hàng không được để trống"));
             }
             else
             {
-                // Kiểm tra warehouse code - chỉ kiểm tra theo code
+                // Tìm warehouse theo Code trước
                 var warehouse = _warehouseRepository.GetByCode(dto.WarehouseCode!);
+                
+                // Nếu không tìm thấy theo Code, thử tìm theo Name
                 if (warehouse == null)
                 {
-                    errors.Add(new ImportError(rowIndex, "Kho hàng", $"Kho hàng không tồn tại: {dto.WarehouseCode}"));
+                    var allWarehouses = _warehouseRepository.GetAll();
+                    warehouse = allWarehouses?.FirstOrDefault(w => 
+                        w.Name?.Equals(dto.WarehouseCode, StringComparison.OrdinalIgnoreCase) == true);
+                }
+                
+                if (warehouse == null)
+                {
+                    errors.Add(new ImportError(rowIndex, "Kho hàng", 
+                        $"Kho hàng không tồn tại: '{dto.WarehouseCode}'. Vui lòng nhập đúng tên hoặc mã kho."));
                 }
             }
 

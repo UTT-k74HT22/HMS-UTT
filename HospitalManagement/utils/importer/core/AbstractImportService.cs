@@ -72,20 +72,36 @@ namespace HospitalManagement.utils.importer.core
 
             // Process data rows (skip header)
             int rowCount = worksheet.Dimension.Rows;
+            Console.WriteLine($"[IMPORT] Bắt đầu đọc file: {filePath}");
+            Console.WriteLine($"[IMPORT] Tổng số dòng: {rowCount - 1} (không tính header)");
+            
             for (int i = 2; i <= rowCount; i++) // Start from row 2 (skip header)
             {
                 var row = worksheet.Cells[i, 1, i, worksheet.Dimension.Columns];
 
                 if (IsEmptyRow(row))
+                {
+                    Console.WriteLine($"[IMPORT] Dòng {i}: Bỏ qua (dòng trống)");
                     continue;
+                }
 
                 try
                 {
                     // Map dữ liệu
                     T data = mapper.MapRow(row, i);
+                    Console.WriteLine($"[IMPORT] Dòng {i}: Đã map dữ liệu -> {data?.GetType().Name}");
 
                     // Validate dữ liệu
                     List<ImportError> errors = validator.Validate(data, i);
+                    Console.WriteLine($"[IMPORT] Dòng {i}: Validation -> {(errors.Count == 0 ? "OK" : $"{errors.Count} lỗi")}");
+                    
+                    if (errors.Count > 0)
+                    {
+                        foreach (var err in errors)
+                        {
+                            Console.WriteLine($"  ❌ [{err.FieldName}]: {err.ErrorMessage}");
+                        }
+                    }
 
                     var rowData = new ImportRowData<T>
                     {

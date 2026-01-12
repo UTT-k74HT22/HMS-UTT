@@ -5,6 +5,8 @@ using HospitalManagement.entity;
 using HospitalManagement.router;
 using HospitalManagement.utils.excel.core;
 using HospitalManagement.utils.excel.writers;
+using HospitalManagement.view.shared;
+using System.Linq;
 
 namespace HospitalManagement.view
 {
@@ -95,10 +97,14 @@ namespace HospitalManagement.view
             {
                 Name = "STT",
                 HeaderText = "STT",
-                Width = 50,
+                Width = 45,
+                MinimumWidth = 45,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+                Resizable = DataGridViewTriState.False,
                 SortMode = DataGridViewColumnSortMode.NotSortable
             });
-
+            dgvStockMovement.Columns["STT"].Frozen = true; //giữ cố định cột STT khi cuộn ngang
+            
             // Movement Type
             dgvStockMovement.Columns.Add(new DataGridViewTextBoxColumn
             {
@@ -295,12 +301,94 @@ namespace HospitalManagement.view
 
         private void ImportExcel()
         {
-            throw new NotImplementedException();
+            using var ofd = new OpenFileDialog
+            {
+                Filter = "Excel Files (*.xlsx)|*.xlsx",
+                Title = "Chọn file Excel để import Stock Movement"
+            };
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    // 1. Preview dữ liệu từ file
+                    var preview = _stockMovementController.PreviewImport(ofd.FileName);
+
+                    // 2. Hiển thị preview dialog với data mapper
+                    var previewDialog = new ImportPreviewDialog<utils.importer.dto.StockMovementImportDto>(
+                        preview,
+                        new[] { "Loại", "Kho", "Mã SP", "Lô", "Số lượng", "Ghi chú" },
+                        dto => new object[]
+                        {
+                            dto.MovementType?.ToString() ?? "",
+                            dto.WarehouseCode ?? "",
+                            dto.ProductCode ?? "",
+                            dto.BatchCode ?? "",
+                            dto.Quantity,
+                            dto.Note ?? ""
+                        }
+                    );
+                    
+                    if (previewDialog.ShowDialog(this) == DialogResult.OK)
+                    {
+                        // 3. User click Apply - lưu dữ liệu hợp lệ
+                        var validData = preview.ValidRows.Select(r => r.Data!).ToList();
+                        _stockMovementController.ApplyImport(validData);
+                        
+                        MessageBox.Show(
+                            $"Đã import thành công {validData.Count} giao dịch!",
+                            "Thành công",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information
+                        );
+                        
+                        LoadData(); // Refresh grid
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Lỗi khi import: {ex.Message}",
+                        "Lỗi",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
         }
 
         private void DownloadTemplate()
         {
-            throw new NotImplementedException();
+            using var sfd = new SaveFileDialog
+            {
+                Filter = "Excel Files (*.xlsx)|*.xlsx",
+                FileName = "StockMovement_Import_Template.xlsx"
+            };
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    var templateData = _stockMovementController.GenerateImportTemplate();
+                    System.IO.File.WriteAllBytes(sfd.FileName, templateData);
+                    
+                    MessageBox.Show(
+                        $"Đã tải mẫu về: {sfd.FileName}",
+                        "Thành công",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Lỗi khi tạo template: {ex.Message}",
+                        "Lỗi",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
         }
 
         private void ExportExcel()
@@ -528,7 +616,7 @@ namespace HospitalManagement.view
             pnlMain.Controls.Add(txtNote, 1, row++);
 
             // Buttons
-            var pnlButtons = new FlowLayoutPanel
+            var pnlButtons = new FlowLayoutPanel 
             {
                 Dock = DockStyle.Bottom,
                 FlowDirection = FlowDirection.RightToLeft,

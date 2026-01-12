@@ -7,6 +7,8 @@ using HospitalManagement.dto.response.Product;
 using HospitalManagement.entity.enums;
 using HospitalManagement.utils.importer.core;
 
+using HospitalManagement.view.shared;
+
 namespace HospitalManagement.view
 {
     public partial class ProductManagementPanel : UserControl
@@ -375,8 +377,18 @@ namespace HospitalManagement.view
                     // 1. Preview dữ liệu từ file
                     var preview = _controller.PreviewImport(ofd.FileName);
 
-                    // 2. Hiển thị preview dialog
-                    var previewDialog = CreatePreviewDialog(preview);
+                    // 2. Hiển thị preview dialog với data mapper
+                    var previewDialog = new ImportPreviewDialog<ProductImportDto>(
+                        preview,
+                        new[] { "Mã SP", "Tên sản phẩm", "Mã danh mục", "Giá" },
+                        dto => new object[]
+                        {
+                            dto.Code ?? "",
+                            dto.Name ?? "",
+                            dto.CategoryCode ?? "",
+                            dto.StandardPrice
+                        }
+                    );
                     
                     if (previewDialog.ShowDialog(this) == DialogResult.OK)
                     {
@@ -404,183 +416,6 @@ namespace HospitalManagement.view
                     );
                 }
             }
-        }
-        
-        private Form CreatePreviewDialog(ImportPreviewResponse<ProductImportDto> preview)
-        {
-            var dialog = new Form
-            {
-                Text = "Preview Import - Kiểm tra dữ liệu",
-                Size = new Size(1000, 600),
-                StartPosition = FormStartPosition.CenterParent,
-                FormBorderStyle = FormBorderStyle.Sizable,
-                MinimizeBox = false
-            };
-
-            // Summary panel
-            var summaryPanel = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 60,
-                BackColor = Color.WhiteSmoke,
-                Padding = new Padding(10)
-            };
-
-            var lblSummary = new Label
-            {
-                Dock = DockStyle.Fill,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                Text = $"Tổng số dòng: {preview.TotalRows}\n" +
-                       $"✓ Hợp lệ: {preview.ValidCount}    ✗ Lỗi: {preview.InvalidCount}"
-            };
-            summaryPanel.Controls.Add(lblSummary);
-
-            // Tab control for Valid/Invalid rows
-            var tabControl = new TabControl
-            {
-                Dock = DockStyle.Fill
-            };
-
-            // Valid rows tab
-            var validTab = new TabPage("Dữ liệu hợp lệ (" + preview.ValidCount + ")");
-            var dgvValid = CreatePreviewGrid(preview.ValidRows, false);
-            validTab.Controls.Add(dgvValid);
-            tabControl.TabPages.Add(validTab);
-
-            // Invalid rows tab
-            var invalidTab = new TabPage("Dữ liệu lỗi (" + preview.InvalidCount + ")");
-            var dgvInvalid = CreatePreviewGrid(preview.InvalidRows, true);
-            invalidTab.Controls.Add(dgvInvalid);
-            tabControl.TabPages.Add(invalidTab);
-
-            // Button panel
-            var btnPanel = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 60,
-                Padding = new Padding(10)
-            };
-
-            var btnApply = new Button
-            {
-                Text = "Apply - Lưu dữ liệu hợp lệ",
-                Size = new Size(180, 35),
-                Location = new Point(800, 12),
-                Enabled = preview.ValidCount > 0,
-                BackColor = Color.FromArgb(0, 120, 215),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat
-            };
-            btnApply.Click += (s, e) => dialog.DialogResult = DialogResult.OK;
-
-            var btnCancel = new Button
-            {
-                Text = "Hủy",
-                Size = new Size(100, 35),
-                Location = new Point(680, 12),
-                FlatStyle = FlatStyle.Flat
-            };
-            btnCancel.Click += (s, e) => dialog.DialogResult = DialogResult.Cancel;
-
-            btnPanel.Controls.Add(btnApply);
-            btnPanel.Controls.Add(btnCancel);
-
-            dialog.Controls.Add(tabControl);
-            dialog.Controls.Add(summaryPanel);
-            dialog.Controls.Add(btnPanel);
-
-            return dialog;
-        }
-        
-        private DataGridView CreatePreviewGrid(List<ImportRowData<ProductImportDto>> rows, bool showErrors)
-        {
-            var dgv = new DataGridView
-            {
-                Dock = DockStyle.Fill,
-                AutoGenerateColumns = false,
-                AllowUserToAddRows = false,
-                AllowUserToDeleteRows = false,
-                ReadOnly = true,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                BackgroundColor = Color.White,
-                RowHeadersVisible = false
-            };
-
-            dgv.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "RowIndex",
-                HeaderText = "Dòng",
-                DataPropertyName = "RowIndex",
-                Width = 60
-            });
-
-            dgv.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "Code",
-                HeaderText = "Mã SP",
-                Width = 100
-            });
-
-            dgv.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "Name",
-                HeaderText = "Tên sản phẩm",
-                Width = 200
-            });
-
-            dgv.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "CategoryCode",
-                HeaderText = "Mã danh mục",
-                Width = 120
-            });
-
-            dgv.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "Price",
-                HeaderText = "Giá",
-                Width = 100
-            });
-
-            if (showErrors)
-            {
-                dgv.Columns.Add(new DataGridViewTextBoxColumn
-                {
-                    Name = "Errors",
-                    HeaderText = "Lỗi",
-                    Width = 350
-                });
-            }
-
-            dgv.DataSource = rows;
-
-            dgv.CellFormatting += (s, e) =>
-            {
-                if (e.RowIndex < 0 || e.RowIndex >= rows.Count) return;
-                
-                var rowData = rows[e.RowIndex];
-                var data = rowData.Data;
-
-                if (e.ColumnIndex == dgv.Columns["Code"].Index && data != null)
-                    e.Value = data.Code;
-                else if (e.ColumnIndex == dgv.Columns["Name"].Index && data != null)
-                    e.Value = data.Name;
-                else if (e.ColumnIndex == dgv.Columns["CategoryCode"].Index && data != null)
-                    e.Value = data.CategoryCode;
-                else if (e.ColumnIndex == dgv.Columns["Price"].Index && data != null)
-                    e.Value = data.StandardPrice;
-                else if (showErrors && e.ColumnIndex == dgv.Columns["Errors"].Index)
-                    e.Value = string.Join("; ", rowData.Errors.Select(err => $"{err.FieldName}: {err.ErrorMessage}"));
-
-                // Highlight error rows
-                if (!rowData.IsValid)
-                {
-                    dgv.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.FromArgb(255, 240, 240);
-                    dgv.Rows[e.RowIndex].DefaultCellStyle.ForeColor = Color.DarkRed;
-                }
-            };
-
-            return dgv;
         }
 
         private void btnSearch_Click(object sender, EventArgs e) => ApplyFilters();

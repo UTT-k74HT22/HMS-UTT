@@ -249,7 +249,7 @@
             btnImportExcel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnImportExcel.ForeColor = System.Drawing.Color.White;
             btnImportExcel.Location = new System.Drawing.Point(432, 12);
-            btnImportExcel.Margin = new System.Windows.Forms.Padding(0, 6, 0, 0);
+            btnImportExcel.Margin = new System.Windows.Forms.Padding(0, 6, 8, 0);
             btnImportExcel.Name = "btnImportExcel";
             btnImportExcel.Size = new System.Drawing.Size(90, 26);
             btnImportExcel.TabIndex = 7;
@@ -262,7 +262,7 @@
             btnDowloadTemplate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnDowloadTemplate.ForeColor = System.Drawing.Color.White;
             btnDowloadTemplate.Location = new System.Drawing.Point(522, 12);
-            btnDowloadTemplate.Margin = new System.Windows.Forms.Padding(0, 6, 0, 0);
+            btnDowloadTemplate.Margin = new System.Windows.Forms.Padding(0, 6, 8, 0);
             btnDowloadTemplate.Name = "btnDowloadTemplate";
             btnDowloadTemplate.Size = new System.Drawing.Size(90, 26);
             btnDowloadTemplate.TabIndex = 6;
@@ -275,7 +275,7 @@
             btnExportExcel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnExportExcel.ForeColor = System.Drawing.Color.White;
             btnExportExcel.Location = new System.Drawing.Point(612, 12);
-            btnExportExcel.Margin = new System.Windows.Forms.Padding(0, 6, 0, 0);
+            btnExportExcel.Margin = new System.Windows.Forms.Padding(0, 6, 16, 0);
             btnExportExcel.Name = "btnExportExcel";
             btnExportExcel.Size = new System.Drawing.Size(90, 26);
             btnExportExcel.TabIndex = 5;
@@ -348,11 +348,6 @@
             ResumeLayout(false);
         }
 
-        private System.Windows.Forms.Button btnImportExcel;
-
-        private System.Windows.Forms.Button btnDowloadTemplate;
-        private System.Windows.Forms.Button btnExportExcel;
-
         #endregion
 
         private TableLayoutPanel pnlRoot;
@@ -371,7 +366,10 @@
         private System.Windows.Forms.Button btnAdjust;
         private System.Windows.Forms.Button btnTransfer;
         private System.Windows.Forms.Button btnRefresh;
-
+        private System.Windows.Forms.Button btnImportExcel;
+        private System.Windows.Forms.Button btnDowloadTemplate;
+        private System.Windows.Forms.Button btnExportExcel;
+        
         private DataGridView dgvStockMovement;
 
         private Panel pnlFooter;

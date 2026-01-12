@@ -40,9 +40,9 @@ namespace HospitalManagement.utils.importer.template
                 // ===== Example Rows (Row 2, 3, 4) =====
                 var exampleData = new object[,]
                 {
-                    { "IMPORT", "1", "PRD001", "BATCH001", 100, "Nhập hàng từ NCC ABC" },
-                    { "EXPORT", "1", "PRD002", "BATCH002", 50, "Xuất bán" },
-                    { "ADJUST", "2", "PRD003", "BATCH003", 95, "Kiểm kê" }
+                    { "IMPORT", "Kho chính", "PRD001", "BATCH001", 100, "Nhập hàng từ NCC ABC" },
+                    { "EXPORT", "Kho chính", "PRD002", "BATCH002", 50, "Xuất bán" },
+                    { "ADJUST", "Kho phụ", "PRD003", "BATCH003", 95, "Kiểm kê điều chỉnh" }
                 };
 
                 for (int row = 0; row < exampleData.GetLength(0); row++)
@@ -91,9 +91,78 @@ namespace HospitalManagement.utils.importer.template
                 // ===== Freeze Header Row =====
                 worksheet.View.FreezePanes(2, 1);
 
+                // ===== Add Instruction Sheet =====
+                CreateInstructionSheet(package);
+
                 // ===== Return Excel file as byte array =====
                 return package.GetAsByteArray();
             }
+        }
+
+        private void CreateInstructionSheet(ExcelPackage package)
+        {
+            var sheet = package.Workbook.Worksheets.Add("Hướng dẫn");
+
+            // Title
+            var titleCell = sheet.Cells["A1"];
+            titleCell.Value = "HƯỚNG DẪN IMPORT GIAO DỊCH KHO";
+            titleCell.Style.Font.Size = 16;
+            titleCell.Style.Font.Bold = true;
+            titleCell.Style.Font.Color.SetColor(Color.DarkBlue);
+            sheet.Cells["A1:E1"].Merge = true;
+
+            int row = 3;
+
+            // Instructions
+            var instructions = new[]
+            {
+                ("📋 CÁC CỘT BẮT BUỘC", ""),
+                ("Loại", "IMPORT (Nhập kho) | EXPORT (Xuất kho) | ADJUST (Điều chỉnh)"),
+                ("Kho hàng", "Nhập TÊN KHO hoặc MÃ KHO (vd: 'Kho chính', 'WH001')"),
+                ("Mã sản phẩm", "Mã sản phẩm phải tồn tại trong hệ thống"),
+                ("Số lượng", "Số nguyên dương (> 0)"),
+                ("", ""),
+                ("📝 CÁC CỘT TÙY CHỌN", ""),
+                ("Mã lô", "Để trống nếu không quản lý theo lô"),
+                ("Ghi chú", "Thông tin bổ sung về giao dịch"),
+                ("", ""),
+                ("⚠️ LƯU Ý QUAN TRỌNG", ""),
+                ("1.", "Kho hàng: Bạn có thể nhập TÊN KHO (vd: 'Kho chính') hoặc MÃ KHO (vd: 'WH001')"),
+                ("2.", "File phải có header ở dòng 1 (không được xóa)"),
+                ("3.", "Dữ liệu bắt đầu từ dòng 2 trở đi"),
+                ("4.", "Các dòng trống sẽ bị bỏ qua"),
+                ("5.", "Hệ thống sẽ kiểm tra dữ liệu trước khi import"),
+                ("", ""),
+                ("✅ VÍ DỤ", ""),
+                ("IMPORT | Kho chính | PRD001 | BATCH001 | 100 | Nhập từ NCC", ""),
+                ("EXPORT | Kho phụ   | PRD002 |          | 50  | Xuất bán", ""),
+                ("ADJUST | Kho chính | PRD003 | BATCH003 | 95  | Kiểm kê", "")
+            };
+
+            foreach (var (col1, col2) in instructions)
+            {
+                sheet.Cells[row, 1].Value = col1;
+                sheet.Cells[row, 2].Value = col2;
+
+                if (col1.Contains("📋") || col1.Contains("📝") || col1.Contains("⚠️") || col1.Contains("✅"))
+                {
+                    sheet.Cells[row, 1].Style.Font.Bold = true;
+                    sheet.Cells[row, 1].Style.Font.Size = 12;
+                    sheet.Cells[row, 1].Style.Font.Color.SetColor(Color.DarkBlue);
+                }
+
+                if (col1.Contains("|"))
+                {
+                    sheet.Cells[row, 1].Style.Font.Name = "Consolas";
+                    sheet.Cells[row, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    sheet.Cells[row, 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(240, 240, 240));
+                }
+
+                row++;
+            }
+
+            sheet.Column(1).Width = 40;
+            sheet.Column(2).Width = 60;
         }
     }
 }
