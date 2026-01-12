@@ -46,7 +46,6 @@ public class OrderServiceImpl : IOrderService
     // ===== Xác nhận đơn hàng =====
     public void ConfirmOrder(long orderId)
     {
-        // TODO: trừ kho + ghi stock_movements
         _repo.UpdateStatus(orderId, OrderStatus.CONFIRMED.ToString());
     }
 

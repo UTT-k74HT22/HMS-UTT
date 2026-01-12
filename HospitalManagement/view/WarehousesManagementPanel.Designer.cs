@@ -162,43 +162,43 @@
             // dataGridViewTextBoxColumn1
             // 
             dataGridViewTextBoxColumn1.HeaderText = "STT";
-            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            dataGridViewTextBoxColumn1.Name = "STT";
             dataGridViewTextBoxColumn1.ReadOnly = true;
             // 
             // dataGridViewTextBoxColumn2
             // 
             dataGridViewTextBoxColumn2.HeaderText = "Code";
-            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            dataGridViewTextBoxColumn2.Name = "Code";
             dataGridViewTextBoxColumn2.ReadOnly = true;
             // 
             // dataGridViewTextBoxColumn3
             // 
             dataGridViewTextBoxColumn3.HeaderText = "Name";
-            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            dataGridViewTextBoxColumn3.Name = "Name";
             dataGridViewTextBoxColumn3.ReadOnly = true;
             // 
             // dataGridViewTextBoxColumn4
             // 
             dataGridViewTextBoxColumn4.HeaderText = "Address";
-            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            dataGridViewTextBoxColumn4.Name = "Address";
             dataGridViewTextBoxColumn4.ReadOnly = true;
             // 
             // dataGridViewTextBoxColumn5
             // 
             dataGridViewTextBoxColumn5.HeaderText = "Phone";
-            dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            dataGridViewTextBoxColumn5.Name = "Phone";
             dataGridViewTextBoxColumn5.ReadOnly = true;
             // 
             // dataGridViewTextBoxColumn6
             // 
             dataGridViewTextBoxColumn6.HeaderText = "Manager";
-            dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            dataGridViewTextBoxColumn6.Name = "Manager";
             dataGridViewTextBoxColumn6.ReadOnly = true;
             // 
             // dataGridViewTextBoxColumn7
             // 
             dataGridViewTextBoxColumn7.HeaderText = "Status";
-            dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            dataGridViewTextBoxColumn7.Name = "Status";
             dataGridViewTextBoxColumn7.ReadOnly = true;
             // 
             // WarehousesManagementPanel
