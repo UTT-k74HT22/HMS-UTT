@@ -1,18 +1,12 @@
 ﻿using HospitalManagement.controller;
 using HospitalManagement.dto.request;
 using HospitalManagement.dto.response;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using HospitalManagement.entity;
 using HospitalManagement.router;
-using BatchStatus = HospitalManagement.entity.enums.BatchStatus;
+using HospitalManagement.utils.excel.core;
+using HospitalManagement.utils.excel.writers;
+using HospitalManagement.view.shared;
+using System.Linq;
 
 namespace HospitalManagement.view
 {
@@ -103,10 +97,14 @@ namespace HospitalManagement.view
             {
                 Name = "STT",
                 HeaderText = "STT",
-                Width = 50,
+                Width = 45,
+                MinimumWidth = 45,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+                Resizable = DataGridViewTriState.False,
                 SortMode = DataGridViewColumnSortMode.NotSortable
             });
-
+            dgvStockMovement.Columns["STT"].Frozen = true; //giữ cố định cột STT khi cuộn ngang
+            
             // Movement Type
             dgvStockMovement.Columns.Add(new DataGridViewTextBoxColumn
             {
@@ -284,6 +282,9 @@ namespace HospitalManagement.view
             btnExport.Click += (_, _) => OpenMovementDialog(StockMovementType.EXPORT);
             btnAdjust.Click += (_, _) => OpenMovementDialog(StockMovementType.ADJUST);
             btnTransfer.Click += (_, _) => OpenMovementDialog(StockMovementType.TRANSFER);
+            btnExportExcel.Click += (_, _) => ExportExcel();
+            btnDowloadTemplate.Click += (_, _) => DownloadTemplate();
+            btnImportExcel.Click += (sender, args) => ImportExcel();
 
             txtKeyword.KeyDown += (_, e) =>
             {
@@ -296,6 +297,106 @@ namespace HospitalManagement.view
 
             cboWarehouse.SelectedIndexChanged += (_, _) => ApplyFilters();
             cboMovementType.SelectedIndexChanged += (_, _) => ApplyFilters();
+        }
+
+        private void ImportExcel()
+        {
+            using var ofd = new OpenFileDialog
+            {
+                Filter = "Excel Files (*.xlsx)|*.xlsx",
+                Title = "Chọn file Excel để import Stock Movement"
+            };
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    // 1. Preview dữ liệu từ file
+                    var preview = _stockMovementController.PreviewImport(ofd.FileName);
+
+                    // 2. Hiển thị preview dialog với data mapper
+                    var previewDialog = new ImportPreviewDialog<utils.importer.dto.StockMovementImportDto>(
+                        preview,
+                        new[] { "Loại", "Kho", "Mã SP", "Lô", "Số lượng", "Ghi chú" },
+                        dto => new object[]
+                        {
+                            dto.MovementType?.ToString() ?? "",
+                            dto.WarehouseCode ?? "",
+                            dto.ProductCode ?? "",
+                            dto.BatchCode ?? "",
+                            dto.Quantity,
+                            dto.Note ?? ""
+                        }
+                    );
+                    
+                    if (previewDialog.ShowDialog(this) == DialogResult.OK)
+                    {
+                        // 3. User click Apply - lưu dữ liệu hợp lệ
+                        var validData = preview.ValidRows.Select(r => r.Data!).ToList();
+                        _stockMovementController.ApplyImport(validData);
+                        
+                        MessageBox.Show(
+                            $"Đã import thành công {validData.Count} giao dịch!",
+                            "Thành công",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information
+                        );
+                        
+                        LoadData(); // Refresh grid
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Lỗi khi import: {ex.Message}",
+                        "Lỗi",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
+        }
+
+        private void DownloadTemplate()
+        {
+            using var sfd = new SaveFileDialog
+            {
+                Filter = "Excel Files (*.xlsx)|*.xlsx",
+                FileName = "StockMovement_Import_Template.xlsx"
+            };
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    var templateData = _stockMovementController.GenerateImportTemplate();
+                    System.IO.File.WriteAllBytes(sfd.FileName, templateData);
+                    
+                    MessageBox.Show(
+                        $"Đã tải mẫu về: {sfd.FileName}",
+                        "Thành công",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Lỗi khi tạo template: {ex.Message}",
+                        "Lỗi",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
+        }
+
+        private void ExportExcel()
+        {
+            Console.WriteLine("Export excel running...");
+            
+            var filteredDate = _bs.List.Cast<StockMovementResponse>().ToList();
+            ExcelExporter.ExportWithDialog<StockMovementResponse>(filteredDate, new StockMovementExcelWriter(), this.FindForm());
         }
 
         private void ApplyFilters()
@@ -394,11 +495,12 @@ namespace HospitalManagement.view
         private readonly ProductController _productController;
         private readonly BatchController _batchController;
 
-        private ComboBox cboWarehouse;
-        private ComboBox cboProduct;
-        private ComboBox cboBatch;
-        private TextBox txtQuantity;
-        private TextBox txtNote;
+        private ComboBox cboWarehouse = null!;
+        private ComboBox? cboDestinationWarehouse; // For TRANSFER only
+        private ComboBox cboProduct = null!;
+        private ComboBox cboBatch = null!;
+        private TextBox txtQuantity = null!;
+        private TextBox txtNote = null!;
 
         public StockMovementDialog(StockMovementType movementType, WarehousesController warehouseController, ProductController productController, BatchController batchController)
         {
@@ -432,14 +534,15 @@ namespace HospitalManagement.view
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 2,
-                RowCount = 7,
+                RowCount = _movementType == StockMovementType.TRANSFER ? 8 : 7,
                 Padding = new Padding(16)
             };
 
             pnlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
             pnlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-            for (int i = 0; i < 6; i++)
+            int rowsCount = _movementType == StockMovementType.TRANSFER ? 7 : 6;
+            for (int i = 0; i < rowsCount; i++)
                 pnlMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 35));
             pnlMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 100));
 
@@ -457,11 +560,21 @@ namespace HospitalManagement.view
             };
             pnlMain.Controls.Add(new Label { Text = typeLabel, Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font(Font, FontStyle.Bold) }, 1, row++);
 
-            // Warehouse
-            pnlMain.Controls.Add(new Label { Text = "Kho *:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft }, 0, row);
+            // Warehouse (Source for TRANSFER)
+            string warehouseLabel = _movementType == StockMovementType.TRANSFER ? "Kho nguồn *:" : "Kho *:";
+            pnlMain.Controls.Add(new Label { Text = warehouseLabel, Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft }, 0, row);
             cboWarehouse = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
             LoadWarehouses();
             pnlMain.Controls.Add(cboWarehouse, 1, row++);
+
+            // Destination Warehouse (only for TRANSFER)
+            if (_movementType == StockMovementType.TRANSFER)
+            {
+                pnlMain.Controls.Add(new Label { Text = "Kho đích *:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft }, 0, row);
+                cboDestinationWarehouse = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
+                LoadDestinationWarehouses();
+                pnlMain.Controls.Add(cboDestinationWarehouse, 1, row++);
+            }
 
             // Product
             pnlMain.Controls.Add(new Label { Text = "Sản phẩm *:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft }, 0, row);
@@ -503,7 +616,7 @@ namespace HospitalManagement.view
             pnlMain.Controls.Add(txtNote, 1, row++);
 
             // Buttons
-            var pnlButtons = new FlowLayoutPanel
+            var pnlButtons = new FlowLayoutPanel 
             {
                 Dock = DockStyle.Bottom,
                 FlowDirection = FlowDirection.RightToLeft,
@@ -536,6 +649,24 @@ namespace HospitalManagement.view
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi tải danh sách kho: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void LoadDestinationWarehouses()
+        {
+            if (cboDestinationWarehouse == null) return;
+            
+            try
+            {
+                var warehouses = _warehouseController.GetAllWarehouses();
+                cboDestinationWarehouse.DisplayMember = "Name";
+                cboDestinationWarehouse.ValueMember = "Id";
+                cboDestinationWarehouse.DataSource = warehouses;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách kho đích: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -596,6 +727,20 @@ namespace HospitalManagement.view
                     throw new Exception("Vui lòng chọn kho và sản phẩm");
                 }
 
+                // Validate destination warehouse for TRANSFER
+                if (_movementType == StockMovementType.TRANSFER)
+                {
+                    if (cboDestinationWarehouse == null || cboDestinationWarehouse.SelectedValue == null)
+                    {
+                        throw new Exception("Vui lòng chọn kho đích");
+                    }
+
+                    if (cboWarehouse.SelectedValue.Equals(cboDestinationWarehouse.SelectedValue))
+                    {
+                        throw new Exception("Kho nguồn và kho đích không được trùng nhau");
+                    }
+                }
+
                 if (cboBatch.SelectedValue == null)
                 {
                     throw new Exception("Vui lòng chọn lô hàng");
@@ -615,6 +760,9 @@ namespace HospitalManagement.view
                 {
                     MovementType = _movementType,
                     WarehouseId = Convert.ToInt64(cboWarehouse.SelectedValue),
+                    DestinationWarehouseId = _movementType == StockMovementType.TRANSFER && cboDestinationWarehouse != null
+                        ? Convert.ToInt64(cboDestinationWarehouse.SelectedValue) 
+                        : null,
                     ProductId   = Convert.ToInt64(cboProduct.SelectedValue),
                     BatchId     = Convert.ToInt64(cboBatch.SelectedValue),
                     Quantity = quantity,

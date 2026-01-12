@@ -7,6 +7,7 @@ using HospitalManagement.repository.impl;
 using HospitalManagement.service;
 using HospitalManagement.service.impl;
 using HospitalManagement.Service.Impl;
+using HospitalManagement.utils.importer.services;
 using HospitalManagement.view;
 
 namespace HospitalManagement.configuration
@@ -140,6 +141,11 @@ namespace HospitalManagement.configuration
                 var db = p.GetRequiredService<DBConfig>();
                 return new OrderServiceImpl(db.ConnectionString);
             });
+
+            // ================= IMPORT SERVICES =================
+            
+            services.AddScoped<ProductImportService>();
+            services.AddScoped<utils.importer.service.StockMovementImportService>();
 
             // ================= CONTROLLERS =================
 

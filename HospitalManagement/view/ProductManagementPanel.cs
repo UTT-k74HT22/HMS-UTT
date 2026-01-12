@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
-using HospitalManagement.controller;
+﻿using HospitalManagement.controller;
+using HospitalManagement.dto.request;
 using HospitalManagement.dto.request.Product;
 using HospitalManagement.dto.response;
 using HospitalManagement.dto.response.Category;
 using HospitalManagement.dto.response.Product;
 using HospitalManagement.entity.enums;
-using HospitalManagement.Service.Impl;
-using Microsoft.Extensions.Configuration;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
+using HospitalManagement.utils.importer.core;
+
+using HospitalManagement.view.shared;
 
 namespace HospitalManagement.view
 {
@@ -350,6 +346,78 @@ namespace HospitalManagement.view
             dlg.Controls.Add(btnPanel);
             dlg.ShowDialog(this);
         }
+        
+        // ================= EXCEL IMPORT/EXPORT =================
+        private void DowloadTemplate()
+        {
+            using var sfd = new SaveFileDialog
+            {
+                Filter = "Excel Files (*.xlsx)|*.xlsx",
+                FileName = "Product_Import_Template.xlsx"
+            };
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                _controller.GenerateImportTemplate(sfd.FileName);
+                MessageBox.Show("Đã tải mẫu về: " + sfd.FileName);
+            }
+        }
+        
+        private void ImportFromExcel()
+        {
+            using var ofd = new OpenFileDialog
+            {
+                Filter = "Excel Files (*.xlsx)|*.xlsx",
+                Title = "Chọn file Excel để import sản phẩm"
+            };
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    // 1. Preview dữ liệu từ file
+                    var preview = _controller.PreviewImport(ofd.FileName);
+
+                    // 2. Hiển thị preview dialog với data mapper
+                    var previewDialog = new ImportPreviewDialog<ProductImportDto>(
+                        preview,
+                        new[] { "Mã SP", "Tên sản phẩm", "Mã danh mục", "Giá" },
+                        dto => new object[]
+                        {
+                            dto.Code ?? "",
+                            dto.Name ?? "",
+                            dto.CategoryCode ?? "",
+                            dto.StandardPrice
+                        }
+                    );
+                    
+                    if (previewDialog.ShowDialog(this) == DialogResult.OK)
+                    {
+                        // 3. User click Apply - lưu dữ liệu hợp lệ
+                        var validData = preview.ValidRows.Select(r => r.Data!).ToList();
+                        int count = _controller.ApplyImport(validData);
+                        
+                        MessageBox.Show(
+                            $"Đã import thành công {count} sản phẩm!",
+                            "Thành công",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information
+                        );
+                        
+                        LoadData();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Lỗi khi import: {ex.Message}",
+                        "Lỗi",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
+        }
 
         private void btnSearch_Click(object sender, EventArgs e) => ApplyFilters();
         private void btnRefresh_Click(object sender, EventArgs e) => LoadData();
@@ -358,6 +426,9 @@ namespace HospitalManagement.view
         private void btnEdit_Click(object sender, EventArgs e) => OpenAddEditDialog(GetSelected());
         private void btnDelete_Click(object sender, EventArgs e) => DeleteSelected();
         private void btnDetail_Click(object sender, EventArgs e) => ShowDetail();
+        
+        private void btnDowload_Click(object sender, EventArgs e) => DowloadTemplate();
+        private void btnImportExcel_Click(object sender, EventArgs e) => ImportFromExcel();
 
    
     }

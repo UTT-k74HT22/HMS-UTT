@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using HospitalManagement.configuration;
 using HospitalManagement.view;
+using OfficeOpenXml;
 
 namespace HospitalManagement
 {
@@ -15,23 +16,23 @@ namespace HospitalManagement
         [STAThread]
         static void Main()
         {
+            ExcelPackage.License.SetNonCommercialOrganization("HospitalManagement");
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            // ✅ BẮT LỖI TOÀN CỤC (để thấy stacktrace thật, kể cả lỗi DataGridView)
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-
             Application.ThreadException += (s, e) =>
             {
                 MessageBox.Show(e.Exception.ToString(), "ThreadException",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Console.WriteLine("Exception: " + e.Exception);
             };
 
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
                 MessageBox.Show(e.ExceptionObject?.ToString() ?? "Unknown", "UnhandledException",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Console.WriteLine("Exception: " + e.ExceptionObject);
             };
 
             // 1. Xây dựng Configuration

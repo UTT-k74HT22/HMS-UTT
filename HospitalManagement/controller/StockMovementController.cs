@@ -5,6 +5,9 @@ using HospitalManagement.dto.response;
 using HospitalManagement.entity;
 using HospitalManagement.entity.enums;
 using HospitalManagement.service;
+using HospitalManagement.utils.importer.core;
+using HospitalManagement.utils.importer.service;
+using HospitalManagement.utils.importer.template;
 
 namespace HospitalManagement.controller
 {
@@ -14,9 +17,15 @@ namespace HospitalManagement.controller
     public class StockMovementController
     {
         private readonly IStockMovementService _stockMovementService;
+        private readonly StockMovementImportService _importService;
 
-        public StockMovementController(IStockMovementService stockMovementService)
-            => _stockMovementService = stockMovementService;
+        public StockMovementController(
+            IStockMovementService stockMovementService,
+            StockMovementImportService importService)
+        {
+            _stockMovementService = stockMovementService;
+            _importService = importService;
+        }
 
         /// <summary>
         /// Tạo giao dịch xuất/nhập kho mới
@@ -59,5 +68,32 @@ namespace HospitalManagement.controller
         /// </summary>
         public List<StockMovementResponse> GetProductWarehouseHistory(long productId, long warehouseId)
             => _stockMovementService.GetHistoryByProductAndWarehouse(productId, warehouseId);
+
+        // ===== Excel Import Methods =====
+
+        /// <summary>
+        /// Tạo file Excel template mẫu cho import Stock Movement
+        /// </summary>
+        public byte[] GenerateImportTemplate()
+        {
+            var generator = new StockMovementTemplateGenerator();
+            return generator.Generate();
+        }
+
+        /// <summary>
+        /// Preview dữ liệu từ file Excel (chưa lưu DB)
+        /// </summary>
+        public ImportPreviewResponse<utils.importer.dto.StockMovementImportDto> PreviewImport(string filePath)
+        {
+            return _importService.PreviewFromFile(filePath);
+        }
+
+        /// <summary>
+        /// Apply import: Lưu các dòng valid vào DB
+        /// </summary>
+        public void ApplyImport(List<utils.importer.dto.StockMovementImportDto> validData)
+        {
+            _importService.ApplyImport(validData);
+        }
     }
 }

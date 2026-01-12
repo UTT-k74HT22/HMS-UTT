@@ -1,20 +1,26 @@
-﻿using HospitalManagement.dto.request.Product;
+﻿using HospitalManagement.dto.request;
+using HospitalManagement.dto.request.Product;
 using HospitalManagement.dto.response;
 using HospitalManagement.dto.response.Category;
 using HospitalManagement.dto.response.Product;
 using HospitalManagement.repository.impl;
 using HospitalManagement.service;
 using HospitalManagement.Service.Impl;
+using HospitalManagement.utils.importer.core;
+using HospitalManagement.utils.importer.services;
+using HospitalManagement.utils.importer.template;
 
 namespace HospitalManagement.controller
 {
     public class ProductController
     {
         private readonly IProductService _productService;
+        private readonly ProductImportService _importService;
         
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, ProductImportService importService)
         {
             _productService = productService;
+            _importService = importService;
         }
 
         public List<ProductResponse> GetAll()
@@ -49,5 +55,15 @@ namespace HospitalManagement.controller
         // public List<ProductResponse> SearchByName(string name)
         //     => _productService.SearchByName(name);
 
+        // ================= IMPORT/EXPORT =================
+        
+        public void GenerateImportTemplate(string filePath)
+            => ProductTemplateGenerator.GenerateTemplate(filePath);
+        
+        public ImportPreviewResponse<ProductImportDto> PreviewImport(string filePath)
+            => _importService.PreviewFromFile(filePath);
+        
+        public int ApplyImport(List<ProductImportDto> validData)
+            => _importService.ApplyImport(validData);
     }
 }
