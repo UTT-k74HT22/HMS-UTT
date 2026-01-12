@@ -147,7 +147,8 @@ namespace HospitalManagement.repository.impl
         public void DeleteById(long id)
         {
             string query = @"
-                DELETE FROM accounts
+                UPDATE accounts
+                SET is_active = 0
                 WHERE id = @id";
 
             using (var connection = new SqlConnection(_connectionString))
