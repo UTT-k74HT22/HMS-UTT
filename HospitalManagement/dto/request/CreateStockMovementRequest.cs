@@ -10,7 +10,8 @@ namespace HospitalManagement.dto.request
         public StockMovementType MovementType { get; set; }
         public long ProductId { get; set; }
         public long? BatchId { get; set; } // Optional
-        public long WarehouseId { get; set; }
+        public long WarehouseId { get; set; } // For TRANSFER: source warehouse (FROM)
+        public long? DestinationWarehouseId { get; set; } // For TRANSFER: destination warehouse (TO)
         public int Quantity { get; set; }
         public string ReferenceType { get; set; } // Optional: "IMPORT_ORDER", "SALE_ORDER", "STOCK_CHECK"
         public long? ReferenceId { get; set; } // Optional

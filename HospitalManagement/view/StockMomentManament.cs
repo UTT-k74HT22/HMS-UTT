@@ -407,11 +407,12 @@ namespace HospitalManagement.view
         private readonly ProductController _productController;
         private readonly BatchController _batchController;
 
-        private ComboBox cboWarehouse;
-        private ComboBox cboProduct;
-        private ComboBox cboBatch;
-        private TextBox txtQuantity;
-        private TextBox txtNote;
+        private ComboBox cboWarehouse = null!;
+        private ComboBox? cboDestinationWarehouse; // For TRANSFER only
+        private ComboBox cboProduct = null!;
+        private ComboBox cboBatch = null!;
+        private TextBox txtQuantity = null!;
+        private TextBox txtNote = null!;
 
         public StockMovementDialog(StockMovementType movementType, WarehousesController warehouseController, ProductController productController, BatchController batchController)
         {
@@ -445,14 +446,15 @@ namespace HospitalManagement.view
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 2,
-                RowCount = 7,
+                RowCount = _movementType == StockMovementType.TRANSFER ? 8 : 7,
                 Padding = new Padding(16)
             };
 
             pnlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
             pnlMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-            for (int i = 0; i < 6; i++)
+            int rowsCount = _movementType == StockMovementType.TRANSFER ? 7 : 6;
+            for (int i = 0; i < rowsCount; i++)
                 pnlMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 35));
             pnlMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 100));
 
@@ -470,11 +472,21 @@ namespace HospitalManagement.view
             };
             pnlMain.Controls.Add(new Label { Text = typeLabel, Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font(Font, FontStyle.Bold) }, 1, row++);
 
-            // Warehouse
-            pnlMain.Controls.Add(new Label { Text = "Kho *:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft }, 0, row);
+            // Warehouse (Source for TRANSFER)
+            string warehouseLabel = _movementType == StockMovementType.TRANSFER ? "Kho nguồn *:" : "Kho *:";
+            pnlMain.Controls.Add(new Label { Text = warehouseLabel, Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft }, 0, row);
             cboWarehouse = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
             LoadWarehouses();
             pnlMain.Controls.Add(cboWarehouse, 1, row++);
+
+            // Destination Warehouse (only for TRANSFER)
+            if (_movementType == StockMovementType.TRANSFER)
+            {
+                pnlMain.Controls.Add(new Label { Text = "Kho đích *:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft }, 0, row);
+                cboDestinationWarehouse = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
+                LoadDestinationWarehouses();
+                pnlMain.Controls.Add(cboDestinationWarehouse, 1, row++);
+            }
 
             // Product
             pnlMain.Controls.Add(new Label { Text = "Sản phẩm *:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft }, 0, row);
@@ -553,6 +565,24 @@ namespace HospitalManagement.view
             }
         }
 
+        private void LoadDestinationWarehouses()
+        {
+            if (cboDestinationWarehouse == null) return;
+            
+            try
+            {
+                var warehouses = _warehouseController.GetAllWarehouses();
+                cboDestinationWarehouse.DisplayMember = "Name";
+                cboDestinationWarehouse.ValueMember = "Id";
+                cboDestinationWarehouse.DataSource = warehouses;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách kho đích: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void LoadProducts()
         {
             try
@@ -609,6 +639,20 @@ namespace HospitalManagement.view
                     throw new Exception("Vui lòng chọn kho và sản phẩm");
                 }
 
+                // Validate destination warehouse for TRANSFER
+                if (_movementType == StockMovementType.TRANSFER)
+                {
+                    if (cboDestinationWarehouse == null || cboDestinationWarehouse.SelectedValue == null)
+                    {
+                        throw new Exception("Vui lòng chọn kho đích");
+                    }
+
+                    if (cboWarehouse.SelectedValue.Equals(cboDestinationWarehouse.SelectedValue))
+                    {
+                        throw new Exception("Kho nguồn và kho đích không được trùng nhau");
+                    }
+                }
+
                 if (cboBatch.SelectedValue == null)
                 {
                     throw new Exception("Vui lòng chọn lô hàng");
@@ -628,6 +672,9 @@ namespace HospitalManagement.view
                 {
                     MovementType = _movementType,
                     WarehouseId = Convert.ToInt64(cboWarehouse.SelectedValue),
+                    DestinationWarehouseId = _movementType == StockMovementType.TRANSFER && cboDestinationWarehouse != null
+                        ? Convert.ToInt64(cboDestinationWarehouse.SelectedValue) 
+                        : null,
                     ProductId   = Convert.ToInt64(cboProduct.SelectedValue),
                     BatchId     = Convert.ToInt64(cboBatch.SelectedValue),
                     Quantity = quantity,

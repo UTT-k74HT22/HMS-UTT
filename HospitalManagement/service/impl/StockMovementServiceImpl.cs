@@ -71,14 +71,64 @@ namespace HospitalManagement.service.impl
                                 quantityAfter = currentQuantityBefore + request.Quantity;
                                 break;
                             case StockMovementType.TRANSFER:
-                                // Transfer out (giảm)
-                                if (currentQuantityBefore < request.Quantity)
+                                // Validate destination warehouse
+                                if (!request.DestinationWarehouseId.HasValue || request.DestinationWarehouseId <= 0)
                                 {
-                                    throw new Exception("Không đủ hàng để chuyển kho");
+                                    throw new Exception("Phải chỉ định kho đích để chuyển kho");
                                 }
 
+                                if (request.WarehouseId == request.DestinationWarehouseId)
+                                {
+                                    throw new Exception("Kho nguồn và kho đích không được trùng nhau");
+                                }
+
+                                // Check source warehouse has enough stock
+                                if (currentQuantityBefore < request.Quantity)
+                                {
+                                    throw new Exception(
+                                        $"Kho nguồn không đủ hàng để chuyển. Tồn kho hiện tại: {currentQuantityBefore}, yêu cầu chuyển: {request.Quantity}");
+                                }
+
+                                // Step 1: Decrease from source warehouse
                                 quantityAfter = currentQuantityBefore - request.Quantity;
-                                break;
+                                _inventoryRepository.UpdateQuantity(inventoryInfo.InventoryItemId, quantityAfter);
+
+                                // Step 2: Get destination warehouse inventory
+                                var destInventoryInfo = _inventoryRepository.GetOrCreateInventoryItem(
+                                    request.ProductId,
+                                    request.BatchId ?? 0,
+                                    request.DestinationWarehouseId.Value);
+                                int destQuantityBefore = destInventoryInfo.CurrentQuantity;
+                                int destQuantityAfter = destQuantityBefore + request.Quantity;
+
+                                // Step 3: Increase in destination warehouse
+                                _inventoryRepository.UpdateQuantity(destInventoryInfo.InventoryItemId, destQuantityAfter);
+
+                                // Step 4: Record source warehouse transaction (EXPORT)
+                                request.QuantityBefore = currentQuantityBefore;
+                                request.QuantityAfter = quantityAfter;
+                                _stockMovementRepository.InsertWithQuantityTracking(request);
+
+                                // Step 5: Record destination warehouse transaction (IMPORT)
+                                var destRequest = new CreateStockMovementRequest
+                                {
+                                    MovementType = StockMovementType.IMPORT,
+                                    ProductId = request.ProductId,
+                                    BatchId = request.BatchId,
+                                    WarehouseId = request.DestinationWarehouseId.Value,
+                                    Quantity = request.Quantity,
+                                    ReferenceType = "TRANSFER",
+                                    ReferenceId = request.ReferenceId,
+                                    PerformedByUserId = request.PerformedByUserId,
+                                    Note = $"Nhận chuyển kho từ WH-{request.WarehouseId}. {request.Note}",
+                                    QuantityBefore = destQuantityBefore,
+                                    QuantityAfter = destQuantityAfter
+                                };
+                                _stockMovementRepository.InsertWithQuantityTracking(destRequest);
+
+                                // Commit and return early for TRANSFER
+                                transaction.Commit();
+                                return;
                             default:
                                 throw new Exception($"Loại giao dịch không hợp lệ: {request.MovementType}");
                         }
@@ -117,8 +167,15 @@ namespace HospitalManagement.service.impl
             if (request.PerformedByUserId <= 0)
                 throw new ArgumentException("User ID không hợp lệ");
 
-            if (request.MovementType == null)
-                throw new ArgumentException("Loại giao dịch không được để trống");
+            // Validate TRANSFER specific requirements
+            if (request.MovementType == StockMovementType.TRANSFER)
+            {
+                if (!request.DestinationWarehouseId.HasValue || request.DestinationWarehouseId <= 0)
+                    throw new ArgumentException("Chuyển kho phải chỉ định kho đích");
+
+                if (request.WarehouseId == request.DestinationWarehouseId)
+                    throw new ArgumentException("Kho nguồn và kho đích không được trùng nhau");
+            }
         }
 
         public List<StockMovementResponse> GetAll()
