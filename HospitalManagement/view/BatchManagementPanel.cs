@@ -6,10 +6,6 @@ using System.Windows.Forms;
 using HospitalManagement.controller;
 using HospitalManagement.dto.request.Batch;
 using HospitalManagement.dto.response;
-using HospitalManagement.dto.response.Product;
-using HospitalManagement.service.impl;
-using HospitalManagement.Service.Impl;
-using Microsoft.Extensions.Configuration;
 
 namespace HospitalManagement.view
 {
@@ -29,10 +25,6 @@ namespace HospitalManagement.view
             InitEvents();
             LoadData();
         }
-        private void BatchManagementPanel_Load(object sender, EventArgs e)
-        {
-            LoadData();
-        }
 
         // ================= INIT =================
 
@@ -48,7 +40,6 @@ namespace HospitalManagement.view
             dgvBatches.MultiSelect = false;
             dgvBatches.BackgroundColor = Color.White;
 
-
             dgvBatches.Columns.Clear();
             dgvBatches.Columns.Add("stt", "STT");
             dgvBatches.Columns.Add("code", "Mã lô");
@@ -62,7 +53,10 @@ namespace HospitalManagement.view
 
             dgvBatches.CellFormatting += DgvBatches_CellFormatting;
         }
-
+        private void BatchManagementPanel_Load(object sender, EventArgs e)
+        {
+            LoadData();
+        }
         private void InitEvents()
         {
             btnSearch.Click += (_, _) => ApplyFilter();
@@ -109,28 +103,19 @@ namespace HospitalManagement.view
         private void ApplyFilter()
         {
             string kw = txtKeyword.Text.Trim();
-
-            // Không nhập gì → load toàn bộ
             if (string.IsNullOrEmpty(kw))
             {
                 BindGrid(_controller.GetAll());
                 return;
             }
 
-            // Có nhập → tìm theo mã lô
-            var list = _controller.FindByBatchCode(kw);
-            BindGrid(list);
+            BindGrid(_controller.FindByBatchCode(kw));
         }
 
         private void ShowExpiringOnly()
         {
-            var today = DateTime.Today;
-            var limit = today.AddDays(WARNING_DAYS);
-
-            var list = _allBatches
-                .Where(b => b.ExpiryDate <= limit)
-                .ToList();
-
+            var limit = DateTime.Today.AddDays(WARNING_DAYS);
+            var list = _allBatches.Where(b => b.ExpiryDate <= limit).ToList();
             BindGrid(list);
             lblTotal.Text = $"Lô sắp / đã hết hạn: {list.Count}";
         }
@@ -171,18 +156,15 @@ namespace HospitalManagement.view
             var b = GetSelected();
             if (b == null) return;
 
-            if (MessageBox.Show(
-                "Ngưng sử dụng lô này?",
-                "Xác nhận",
-                MessageBoxButtons.YesNo
-            ) == DialogResult.Yes)
+            if (MessageBox.Show("Ngưng sử dụng lô này?", "Xác nhận",
+                MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                _controller.Disable(b.Id.Value);
+                _controller.Disable(b.Id!.Value);
                 LoadData();
             }
         }
 
-        // ================= ADD / EDIT INLINE =================
+        // ================= ADD / EDIT =================
 
         private void OpenAddEditDialog(BatchResponse? edit)
         {
@@ -191,7 +173,7 @@ namespace HospitalManagement.view
             var dlg = new Form
             {
                 Text = isEdit ? "Cập nhật lô hàng" : "Thêm lô hàng",
-                Size = new Size(420, 420),
+                Size = new Size(420, 400),
                 StartPosition = FormStartPosition.CenterParent,
                 FormBorderStyle = FormBorderStyle.FixedDialog,
                 MaximizeBox = false,
@@ -202,16 +184,26 @@ namespace HospitalManagement.view
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 2,
-                Padding = new Padding(12)
+                Padding = new Padding(12),
+                GrowStyle = TableLayoutPanelGrowStyle.AddRows
             };
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
 
             void AddRow(string label, Control c)
             {
-                panel.Controls.Add(new Label { Text = label, Anchor = AnchorStyles.Right });
-                panel.Controls.Add(c);
+                int row = panel.RowCount++;
+                panel.RowStyles.Add(new RowStyle(SizeType.Absolute ,42));
+
+                panel.Controls.Add(new Label
+                {
+                    Text = label,
+                    Dock = DockStyle.Fill,
+                    TextAlign = ContentAlignment.MiddleRight
+                }, 0, row);
+
                 c.Dock = DockStyle.Fill;
+                panel.Controls.Add(c, 1, row);
             }
 
             var txtCode = new TextBox();
@@ -220,18 +212,16 @@ namespace HospitalManagement.view
             var txtSupplier = new TextBox();
             var dtMfg = new DateTimePicker();
             var dtExp = new DateTimePicker();
-            var cbStatus = new ComboBox();
+            var cbStatus = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
 
             cbStatus.Items.AddRange(new[] { "ACTIVE", "EXPIRED", "BLOCKED", "DEPLETED" });
             cbStatus.SelectedIndex = 0;
 
-            var products = _controller.GetAllProducts();
-            cbProduct.DataSource = products;
+            cbProduct.DataSource = _controller.GetAllProducts();
             cbProduct.DisplayMember = "Name";
             cbProduct.ValueMember = "Id";
 
-            if (!isEdit) 
-                AddRow("Mã lô *", txtCode);
+            if (!isEdit) AddRow("Mã lô *", txtCode);
             AddRow("Sản phẩm *", cbProduct);
             AddRow("Giá nhập *", txtPrice);
             AddRow("Nhà cung cấp", txtSupplier);
@@ -241,7 +231,6 @@ namespace HospitalManagement.view
 
             if (isEdit)
             {
-                // Fill data
                 txtCode.Text = edit!.BatchCode;
                 txtCode.Enabled = false;
 
@@ -255,13 +244,8 @@ namespace HospitalManagement.view
                 txtSupplier.Enabled = false;
 
                 dtMfg.Value = edit.ManufactureDate ?? DateTime.Today;
-                dtMfg.Enabled = true;
-
                 dtExp.Value = edit.ExpiryDate ?? DateTime.Today;
-                dtExp.Enabled = true; 
-
                 cbStatus.SelectedItem = edit.Status;
-                cbStatus.Enabled = true;
             }
 
             var btnSave = new Button { Text = "Lưu", Width = 90 };
@@ -269,49 +253,36 @@ namespace HospitalManagement.view
 
             btnSave.Click += (_, _) =>
             {
-                try
+                if (!decimal.TryParse(txtPrice.Text, out var price))
                 {
-                    if (!decimal.TryParse(txtPrice.Text, out var price))
-                    {
-                        MessageBox.Show("Giá nhập không hợp lệ");
-                        return;
-                    }
-
-                    if (isEdit)
-                    {
-                        _controller.Update(edit!.Id.Value, new UpdateBatchRequest
-                        {
-                            ExpiryDate = dtExp.Value,
-                            Status = cbStatus.SelectedItem!.ToString()!
-                        });
-                    }
-
-                    else
-                    {
-                        _controller.Create(new CreateBatchRequest
-                        {
-                            BatchCode = txtCode.Text.Trim(),
-                            ProductId = (long)cbProduct.SelectedValue,
-                            ImportPrice = price,
-                            SupplierName = txtSupplier.Text.Trim(),
-                            ManufactureDate = dtMfg.Value,
-                            ExpiryDate = dtExp.Value,
-                            Status = cbStatus.SelectedItem!.ToString()!
-                        });
-                    }
-
-                    dlg.Close();
-                    LoadData();
+                    MessageBox.Show("Giá nhập không hợp lệ");
+                    return;
                 }
-                catch (Exception ex)
+
+                if (isEdit)
                 {
-                    MessageBox.Show(
-                        ex.Message,
-                        "Lỗi",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error
-                    );
+                    _controller.Update(edit!.Id!.Value, new UpdateBatchRequest
+                    {
+                        ExpiryDate = dtExp.Value,
+                        Status = cbStatus.SelectedItem!.ToString()!
+                    });
                 }
+                else
+                {
+                    _controller.Create(new CreateBatchRequest
+                    {
+                        BatchCode = txtCode.Text.Trim(),
+                        ProductId = (long)cbProduct.SelectedValue,
+                        ImportPrice = price,
+                        SupplierName = txtSupplier.Text.Trim(),
+                        ManufactureDate = dtMfg.Value,
+                        ExpiryDate = dtExp.Value,
+                        Status = cbStatus.SelectedItem!.ToString()!
+                    });
+                }
+
+                dlg.Close();
+                LoadData();
             };
 
             btnCancel.Click += (_, _) => dlg.Close();

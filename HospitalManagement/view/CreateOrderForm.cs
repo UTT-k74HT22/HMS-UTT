@@ -53,6 +53,9 @@ namespace HospitalManagement.view
             dgvProducts.MultiSelect = false;
             dgvProducts.AutoGenerateColumns = false;
             dgvProducts.Columns.Clear();
+            dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            
 
             dgvProducts.Columns.Add("Id", "ID");
             dgvProducts.Columns.Add("Name", "Tên SP");
@@ -65,6 +68,8 @@ namespace HospitalManagement.view
             dgvOrderItems.MultiSelect = false;
             dgvOrderItems.AutoGenerateColumns = false;
             dgvOrderItems.Columns.Clear();
+            dgvOrderItems.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
 
             dgvOrderItems.Columns.Add("Product", "Sản phẩm");
             dgvOrderItems.Columns.Add("Warehouse", "Kho");
@@ -165,6 +170,19 @@ namespace HospitalManagement.view
                 MessageBox.Show("Chưa chọn lô!");
                 return;
             }
+            // Check expiry date (HẠN SỬ DỤNG)
+            if (batch.ExpiryDate.HasValue 
+                && batch.ExpiryDate.Value.Date < DateTime.Now.Date)
+            {
+                MessageBox.Show(
+                    "Lô này đã hết hạn! Không thể thêm vào đơn.",
+                    "Batch hết hạn",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                return;
+            }
+
 
             int qty = (int)nudQuantity.Value;
             if (qty <= 0)

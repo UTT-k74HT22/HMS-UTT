@@ -109,6 +109,7 @@ namespace HospitalManagement.view
             dgvProducts.Columns[nameof(ProductResponse.CategoryName)].HeaderText = "Danh mục";
             dgvProducts.Columns[nameof(ProductResponse.ManufacturerName)].HeaderText = "Nhà sản xuất";
             dgvProducts.Columns[nameof(ProductResponse.StandardPrice)].HeaderText = "Giá";
+            dgvProducts.Columns[nameof(ProductResponse.StandardPrice)].DefaultCellStyle.Format = "N0";
             dgvProducts.Columns[nameof(ProductResponse.RequiresPrescription)].HeaderText = "Toa thuốc";
             dgvProducts.Columns[nameof(ProductResponse.Status)].HeaderText = "Trạng thái";
 
